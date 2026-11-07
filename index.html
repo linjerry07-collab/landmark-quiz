@@ -1,0 +1,1810 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>地標鑑定所 — 世界地標看圖辨位</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='3' y='5' width='26' height='19' rx='2' fill='%23E9DEC6'/%3E%3Crect x='7' y='9' width='18' height='11' fill='%23241d16'/%3E%3Ccircle cx='16' cy='28' r='2.6' fill='%23C6A15B'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://miaoda.feishu.cn">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+TC:wght@400;500;700&amp;display=swap">
+<style>
+:root{
+  --ink:#100e0c;
+  --table:#191512;
+  --table-2:#221c16;
+  --paper:#e9dec6;
+  --paper-2:#ded1b4;
+  --paper-deep:#cdbf9d;
+  --seal:#b23a2b;
+  --brass:#c6a15b;
+  --ok:#5f8468;
+  --mute:#9a9083;
+  --line:rgba(233,222,198,.15);
+  --serif:"Noto Serif TC","Songti TC","PMingLiU","Microsoft JhengHei",serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:
+    radial-gradient(120% 70% at 50% -10%, rgba(198,161,91,.10), transparent 62%),
+    radial-gradient(90% 60% at 50% 120%, rgba(178,58,43,.07), transparent 60%),
+    var(--ink);
+  color:var(--paper);
+  font-family:var(--serif);
+  font-size:16px;
+  line-height:1.72;
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+img{display:block;max-width:100%}
+button{font-family:inherit;color:inherit;background:none;border:0;cursor:pointer}
+h1,h2,h3,h4,p,ul{margin:0}
+ul{padding:0;list-style:none}
+
+/* ===== 版面外框 ===== */
+.topbar{
+  position:sticky;top:0;z-index:40;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:12px 20px;
+  background:var(--ink);
+  border-bottom:1px solid var(--line);
+}
+.brand{display:flex;align-items:baseline;gap:10px;font-size:14px;letter-spacing:.16em}
+.brand .brand-mark{font-size:16px;letter-spacing:.1em}
+.brand .brand-sub{font-size:12px;color:var(--mute);letter-spacing:.14em}
+.top-actions{display:flex;gap:8px;align-items:center}
+.tbtn{
+  font-size:13px;padding:7px 12px;border:1px solid var(--line);
+  color:var(--paper);letter-spacing:.06em;
+  transition:border-color .18s ease,color .18s ease;
+}
+.tbtn:hover{border-color:var(--brass);color:var(--brass)}
+
+.wrap{max-width:1180px;margin:0 auto;padding:26px 20px 64px}
+.view[hidden]{display:none}
+
+/* ===== 幻燈片載體 ===== */
+.slide{
+  background:linear-gradient(160deg,#f4ebd7,#dccfb1);
+  padding:14px 14px 30px;
+  box-shadow:0 18px 40px rgba(0,0,0,.55), inset 0 0 0 1px rgba(255,255,255,.35);
+  position:relative;
+}
+.slide .frame{position:relative;background:#0b0a09;overflow:hidden}
+.slide .frame img{width:100%;height:100%;object-fit:contain}
+.slide-no{
+  position:absolute;left:14px;bottom:6px;
+  font-size:12px;letter-spacing:.22em;color:#7a6b51;
+}
+
+/* ===== 封面 ===== */
+.cover{
+  display:grid;grid-template-rows:auto auto;gap:34px;
+  align-items:center;
+  padding-top:10px;
+}
+.cover-art{display:flex;justify-content:center;align-items:center;gap:0;min-height:230px}
+.cover-art .slide{width:min(58%,368px)}
+.cover-art .slide:nth-child(1){transform:rotate(-7deg) translateY(8px);z-index:1}
+.cover-art .slide:nth-child(2){transform:rotate(2deg) translateY(-12px);z-index:2;width:min(65%,412px)}
+.cover-art .slide:nth-child(3){transform:rotate(8deg) translateY(10px);z-index:1}
+.cover-art .slide .frame{aspect-ratio:4/3}
+.cover-art .slide .frame img{object-fit:cover}
+
+.cover-copy .kicker{font-size:13px;letter-spacing:.2em;color:var(--brass);margin-bottom:14px}
+.cover-copy h1{
+  font-size:clamp(38px,8.4vw,68px);line-height:1.16;font-weight:700;letter-spacing:.06em;
+}
+.cover-copy .lede{margin-top:14px;color:#cbc0ac;max-width:34em;font-size:15px}
+
+.steps{display:grid;gap:10px;margin:26px 0 8px;max-width:36em}
+.step{display:grid;grid-template-columns:26px 1fr;gap:10px;align-items:baseline;font-size:14px;color:#c9bda9}
+.step .num{color:var(--brass);font-size:13px;letter-spacing:.1em}
+
+.mode-switch{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:24px 0 18px;max-width:36em}
+.mode{
+  text-align:left;padding:12px 14px;border:1px solid var(--line);
+  transition:border-color .18s ease,background .18s ease;
+}
+.mode strong{display:block;font-size:15px;letter-spacing:.04em;margin-bottom:2px}
+.mode small{display:block;font-size:12.5px;color:var(--mute);line-height:1.5}
+.mode[aria-pressed="true"]{border-color:var(--brass);background:rgba(198,161,91,.08)}
+.mode[aria-pressed="true"] strong{color:var(--brass)}
+
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:10px;
+  padding:14px 26px;font-size:16px;letter-spacing:.12em;
+  background:var(--paper);color:#171310;border:1px solid var(--paper);
+  transition:transform .16s ease,background .16s ease;
+  min-height:48px;
+}
+.btn:hover{background:var(--paper-2);transform:translateY(-1px)}
+.btn:active{transform:translateY(0)}
+.btn.ghost{background:transparent;color:var(--paper);border-color:var(--line)}
+.btn.ghost:hover{color:var(--brass);border-color:var(--brass);background:transparent}
+.btn.stamp{border-color:var(--seal);color:var(--seal);background:transparent}
+.btn.stamp:hover{background:var(--seal);color:#f4e9d4}
+
+.cover-note{margin-top:16px;font-size:12.5px;color:var(--mute)}
+
+/* ===== 答題 ===== */
+.quiz-head{
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;
+  gap:10px;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:22px;
+}
+.quiz-head .count{font-size:14px;letter-spacing:.1em;color:#cfc3ae}
+.quiz-head .count b{color:var(--brass);font-size:18px}
+.dots{display:flex;gap:5px;flex-wrap:wrap;flex:1;justify-content:center;min-width:0}
+.dot{width:8px;height:8px;background:rgba(233,222,198,.13);display:block}
+.dot.now{background:var(--brass)}
+.dot.good{background:var(--ok);border-color:var(--ok)}
+.dot.bad{background:var(--seal);border-color:var(--seal)}
+.quiz-head .score{font-size:14px;letter-spacing:.1em;color:#cfc3ae}
+.quiz-head .score b{color:var(--paper);font-size:18px}
+
+.quiz-body{display:grid;gap:26px;grid-template-columns:1fr}
+
+.stage{min-width:0}
+.stage .slide{max-width:780px;margin:0 auto}
+.stage .slide .frame{aspect-ratio:3/2;background:#12100e}
+.stage-meta{
+  display:flex;justify-content:space-between;align-items:center;gap:12px;
+  max-width:760px;margin:12px auto 0;font-size:12.5px;letter-spacing:.14em;color:var(--mute);
+}
+.hint-btn{
+  font-size:12.5px;letter-spacing:.1em;color:var(--mute);border-bottom:1px solid var(--line);
+  padding-bottom:2px;
+}
+.hint-btn:hover{color:var(--brass);border-color:var(--brass)}
+.hint-text{color:var(--brass);letter-spacing:.08em}
+
+.panel{min-width:0}
+.prompt{font-size:15px;color:#cfc3ae;margin-bottom:16px;letter-spacing:.04em}
+.prompt strong{color:var(--paper);font-weight:500}
+
+.reveal-bar{display:flex;flex-direction:column;gap:14px;align-items:flex-start;padding:22px 18px;border:1px dashed var(--line)}
+.reveal-bar p{font-size:13.5px;color:var(--mute);max-width:30em;line-height:1.7}
+.reveal-bar .btn{padding:12px 22px;font-size:15px}
+
+.timerwrap{height:3px;background:rgba(233,222,198,.12);margin-bottom:18px;position:relative;overflow:hidden}
+.timerwrap span{position:absolute;inset:0 auto 0 0;width:100%;background:var(--brass);transition:width .1s linear}
+.timerwrap.warn span{background:var(--seal)}
+.timer-num{font-size:12.5px;letter-spacing:.14em;color:var(--mute);margin-bottom:10px}
+
+.options{display:grid;grid-template-columns:1fr;gap:10px}
+.opt{
+  display:grid;grid-template-columns:34px 1fr;align-items:center;gap:10px;
+  text-align:left;padding:15px 16px;min-height:52px;
+  background:var(--paper);color:#171310;border:1px solid transparent;
+  transition:background .15s ease,transform .15s ease,border-color .15s ease;
+  animation:optIn .32s ease both;
+}
+@keyframes optIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.opt:hover:not(:disabled){background:var(--paper-2);transform:translateX(2px)}
+.opt .key{font-size:13px;color:#8a7a5e;letter-spacing:.14em}
+.opt .name{font-size:16px;letter-spacing:.03em}
+.opt:disabled{cursor:default}
+.opt.correct{background:#d8e2d3;border-color:#4d6b52}
+.opt.correct .name{color:#20361f;font-weight:700}
+.opt.wrong{background:#e6cfc9;border-color:#8f3d2f}
+.opt.wrong .name{color:#5d2118;text-decoration:line-through;text-decoration-thickness:1px}
+.opt.faded{background:transparent;border-color:rgba(233,222,198,.16)}
+.opt.faded .name{color:rgba(233,222,198,.42)}
+.opt.faded .key{color:rgba(233,222,198,.26)}
+
+/* ===== 鑑定卡 ===== */
+.idcard{
+  background:
+    repeating-linear-gradient(to bottom,transparent 0 31px,rgba(23,19,16,.10) 31px 32px),
+    var(--paper);
+  color:#171310;padding:22px 20px 20px;margin-top:20px;
+  box-shadow:0 16px 34px rgba(0,0,0,.5);
+  animation:cardIn .42s cubic-bezier(.2,.9,.3,1) both;
+  position:relative;
+}
+@keyframes cardIn{from{opacity:0;transform:translateY(16px) rotate(-.6deg)}to{opacity:1;transform:none}}
+.idcard .stamp{
+  position:absolute;right:16px;top:14px;
+  font-size:13px;letter-spacing:.3em;padding:5px 8px 4px 10px;
+  border:2px solid currentColor;transform:rotate(-8deg);
+  animation:stampIn .34s ease .12s both;
+}
+@keyframes stampIn{from{opacity:0;transform:rotate(-8deg) scale(1.5)}to{opacity:1;transform:rotate(-8deg) scale(1)}}
+.idcard .stamp.hit{color:var(--ok)}
+.idcard .stamp.miss{color:var(--seal)}
+.idcard h2{font-size:26px;line-height:1.3;letter-spacing:.04em;padding-right:70px}
+.idcard .sub{font-size:13px;color:#6c6152;letter-spacing:.08em;margin-top:2px}
+.idcard .feat{margin-top:16px;display:grid;gap:8px}
+.idcard .feat li{font-size:14px;line-height:1.7;display:grid;grid-template-columns:16px 1fr;gap:8px}
+.idcard .feat li::before{content:"○";font-size:9px;color:#8a7a5e;line-height:2.4}
+.idcard .foot{margin-top:16px;padding-top:14px;border-top:1px solid rgba(23,19,16,.18);display:grid;gap:10px}
+.idcard .foot .k{
+  font-size:11.5px;letter-spacing:.16em;color:#8a7a5e;display:block;margin-bottom:2px;
+}
+.idcard .foot p{font-size:13.5px;line-height:1.72;color:#312a22}
+.idcard .next{width:100%;margin-top:18px;padding:13px 20px;font-size:15px;letter-spacing:.12em;
+  background:#171310;color:var(--paper);border:1px solid #171310}
+.idcard .next:hover{background:#2a221a}
+
+/* ===== 成績 ===== */
+.result{max-width:760px;margin:0 auto}
+.result .kicker{font-size:13px;letter-spacing:.2em;color:var(--brass);margin-bottom:10px}
+.result h1{font-size:clamp(30px,6vw,46px);line-height:1.25;font-weight:700}
+.result .scoreline{display:flex;align-items:flex-end;gap:14px;margin:20px 0 6px}
+.result .scoreline .big{font-size:clamp(54px,13vw,88px);line-height:1;letter-spacing:.02em}
+.result .scoreline .of{font-size:15px;color:var(--mute);padding-bottom:12px;letter-spacing:.1em}
+.result .stats{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);margin:22px 0 26px}
+.result .stat{background:var(--ink);padding:14px 16px}
+.result .stat .k{font-size:12px;letter-spacing:.16em;color:var(--mute)}
+.result .stat .v{font-size:20px;margin-top:2px}
+.result .misses{margin-top:8px}
+.result .misses h3{font-size:14px;letter-spacing:.14em;color:var(--mute);font-weight:400;margin-bottom:12px}
+.miss-row{display:grid;grid-template-columns:64px 1fr auto;gap:12px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)}
+.miss-row img{width:64px;height:48px;object-fit:cover;filter:saturate(.85)}
+.miss-row .nm{font-size:14px}
+.miss-row .nm small{display:block;font-size:12px;color:var(--mute)}
+.miss-row .mine{font-size:12.5px;color:var(--seal);text-align:right;white-space:nowrap}
+.result-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}
+
+/* ===== 卡冊 ===== */
+.deck-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:14px;margin-bottom:22px}
+.deck-head h1{font-size:clamp(24px,4.4vw,34px);font-weight:700;letter-spacing:.04em}
+.deck-head p{font-size:13px;color:var(--mute);margin-top:4px}
+.deck{display:grid;grid-template-columns:1fr;gap:16px}
+.deck-card{
+  display:grid;grid-template-columns:1fr;gap:0;
+  background:var(--table-2);border:1px solid var(--line);
+}
+.deck-card .pic{aspect-ratio:4/3;overflow:hidden;background:#0b0a09}
+.deck-card .pic img{width:100%;height:100%;object-fit:cover}
+.deck-card .body{padding:16px 16px 18px}
+.deck-card .no{font-size:11.5px;letter-spacing:.2em;color:var(--brass)}
+.deck-card h3{font-size:19px;letter-spacing:.04em;margin-top:4px;line-height:1.35}
+.deck-card .where{font-size:12.5px;color:var(--mute);margin-top:2px;letter-spacing:.06em}
+.deck-card ul{margin-top:12px;display:grid;gap:7px}
+.deck-card li{font-size:13px;line-height:1.66;color:#cfc3ae;display:grid;grid-template-columns:14px 1fr;gap:7px}
+.deck-card li::before{content:"—";color:var(--brass);font-size:11px;line-height:1.9}
+.deck-card .trap{font-size:12.5px;color:#b1a695;margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}
+.deck-card .trap span{color:var(--brass);letter-spacing:.1em}
+.deck-card .fact{font-size:12.5px;color:#b1a695;margin-top:8px;padding-top:8px;border-top:1px dashed var(--line)}
+.deck-card .fact span{color:var(--brass);letter-spacing:.1em}
+
+/* ===== 筆記浮層 ===== */
+.frame img{cursor:zoom-in}
+.deck-card .pic img{cursor:zoom-in}
+.deck-card .tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
+.deck-card .tags span{
+  font-size:10.5px;letter-spacing:.12em;padding:2px 7px;
+  border:1px solid var(--line);color:#b9ae9b;
+}
+
+/* ===== 卡冊：篩選工具列 ===== */
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.deck-tools{
+  position:sticky;top:var(--topbar-h,54px);z-index:30;
+  border:1px solid var(--line);background:var(--ink);
+  box-shadow:0 10px 22px rgba(0,0,0,.42);
+  padding:12px 14px;margin:0 0 20px;display:grid;gap:10px;
+}
+.tools-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.srch{display:flex;align-items:center;gap:8px;flex:1 1 240px;min-width:200px;
+  border:1px solid var(--line);padding:7px 10px;background:rgba(0,0,0,.25)}
+.srch:focus-within{border-color:var(--brass)}
+.srch-ico{color:var(--brass);font-size:15px;line-height:1}
+.srch input{
+  flex:1;min-width:0;background:none;border:0;outline:none;color:var(--paper);
+  font-family:inherit;font-size:13.5px;letter-spacing:.04em;
+}
+.srch input::placeholder{color:#7d7468}
+.tools-count{font-size:12.5px;color:var(--mute);letter-spacing:.08em}
+.tools-count b{color:var(--brass);font-weight:600}
+.tbtn.ghost{border-color:transparent;color:var(--mute)}
+.tbtn.ghost:hover{border-color:var(--line);color:var(--paper)}
+.tbtn[aria-pressed="true"]{border-color:var(--brass);color:var(--brass)}
+
+.deck-filters{display:grid;gap:13px}
+.pop-wrap{position:relative;flex:0 0 auto}
+.deck-pop{
+  position:absolute;right:0;top:calc(100% + 10px);z-index:60;
+  width:min(520px,90vw);max-height:min(66vh,520px);overflow:auto;
+  background:var(--table-2);border:1px solid rgba(198,161,91,.34);
+  padding:14px 16px 16px;box-shadow:0 22px 48px rgba(0,0,0,.62);
+}
+.pop-head{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:12px;margin-bottom:12px;padding-bottom:9px;border-bottom:1px solid var(--line);
+}
+.pop-head span{font-size:12px;letter-spacing:.22em;color:var(--brass)}
+.fgroup{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.fgroup > .flabel{
+  font-size:11px;letter-spacing:.2em;color:var(--mute);margin-right:2px;
+  padding-right:8px;border-right:1px solid var(--line);
+}
+.chip{
+  font-size:12px;padding:3px 10px;border:1px solid var(--line);
+  color:#c3b8a4;letter-spacing:.04em;transition:all .15s ease;white-space:nowrap;
+}
+.chip:hover{border-color:var(--brass);color:var(--brass)}
+.chip[aria-pressed="true"]{background:var(--brass);border-color:var(--brass);color:#191512;font-weight:600}
+.chip .n{font-size:10.5px;opacity:.62;margin-left:5px}
+
+.deck-empty{font-size:13.5px;color:var(--mute);padding:26px 0;text-align:center}
+.licrow{
+  margin:34px 0 0;padding-top:16px;border-top:1px solid var(--line);
+  font-size:12px;color:var(--mute);letter-spacing:.04em;
+}
+.licrow a{color:#c9a86a;text-decoration:none;border-bottom:1px solid rgba(201,168,106,.32)}
+.licrow a:hover{color:#fff;border-bottom-color:#fff}
+
+/* 縮圖牆：緊湊卡片 */
+.deck.grid-mode{grid-template-columns:repeat(auto-fill,minmax(232px,1fr));gap:20px}
+.deck.grid-mode .deck-card .body{padding:10px 11px 12px}
+.deck.grid-mode .deck-card h3{font-size:15px;margin-top:2px;line-height:1.3}
+.deck.grid-mode .deck-card .where{font-size:11.5px;margin-top:1px}
+.deck.grid-mode .deck-card ul,
+.deck.grid-mode .deck-card .trap,
+.deck.grid-mode .deck-card .fact{display:none}
+.deck.grid-mode .deck-card .pic{aspect-ratio:4/3}
+.deck.grid-mode .deck-card .pic img{transition:transform .35s ease}
+.deck.grid-mode .deck-card:hover .pic img{transform:scale(1.05)}
+.deck-more{
+  margin-top:6px;font-size:11px;letter-spacing:.14em;color:var(--brass);
+  opacity:0;transition:opacity .2s ease;
+}
+.deck.grid-mode .deck-card:hover .deck-more{opacity:1}
+.miss-row img{cursor:zoom-in}
+.cover-note b{color:var(--brass);font-weight:400}
+.review{
+  display:block;margin:0 0 18px;max-width:36em;text-align:left;
+  padding:12px 14px;border:1px dashed rgba(198,161,91,.45);color:#d9c9a8;font-size:13.5px;
+  transition:border-color .18s ease,color .18s ease;
+}
+.review:hover{border-color:var(--brass);color:var(--brass)}
+.review b{color:var(--brass);font-weight:400}
+
+.noteveil{
+  position:fixed;inset:0;z-index:60;display:grid;place-items:center;
+  padding:18px;overflow-y:auto;background:rgba(8,7,6,.86);
+}
+.noteveil[hidden]{display:none}
+.notebox{
+  width:100%;max-width:860px;background:var(--paper);color:#171310;
+  box-shadow:0 30px 70px rgba(0,0,0,.62);position:relative;
+  animation:cardIn .3s cubic-bezier(.2,.9,.3,1) both;
+}
+.note-close{
+  position:absolute;right:10px;top:10px;z-index:2;
+  width:40px;height:40px;display:grid;place-items:center;
+  background:rgba(23,19,16,.72);color:var(--paper);font-size:20px;line-height:1;
+}
+.note-close:hover{background:#171310}
+.noteimg{background:#0b0a09;display:grid;place-items:center;padding:0}
+.noteimg img{max-height:46vh;width:auto;max-width:100%;object-fit:contain}
+.notebody{padding:20px 20px 24px}
+.notebody .kicker2{font-size:11.5px;letter-spacing:.2em;color:#8a7a5e}
+.notebody h2{font-size:clamp(22px,4.4vw,28px);line-height:1.3;letter-spacing:.04em;margin-top:4px;padding-right:34px}
+.notebody .np{font-size:11.5px;color:#8a7a5e;margin-top:8px;word-break:break-all;letter-spacing:.04em}
+.notebody .nl{font-size:14px;line-height:1.78;color:#3b3229;margin-top:14px}
+.notebody .nmap{
+  display:flex;flex-wrap:wrap;align-items:center;gap:7px 14px;
+  margin-top:13px;padding:9px 11px;font-size:12.5px;
+  background:rgba(23,19,16,.05);border-left:2px solid #b08a45;
+}
+.notebody .nmap-lab{font-size:11px;letter-spacing:.2em;color:#8a7a5e}
+.notebody .nmap a{color:#7a4a22;text-decoration:none;border-bottom:1px solid rgba(122,74,34,.34)}
+.notebody .nmap a:hover{color:#b23a2b;border-bottom-color:#b23a2b}
+.notebody .nmap-pos{margin-left:auto;font-size:11px;color:#8a7a5e;letter-spacing:.08em}
+.notebody .nk{font-size:11.5px;letter-spacing:.18em;color:#8a7a5e;margin:18px 0 8px}
+.notebody ul{display:grid;gap:7px}
+.notebody li{font-size:13.5px;line-height:1.7;color:#312a22;display:grid;grid-template-columns:14px 1fr;gap:8px}
+.notebody li::before{content:"—";color:#8a7a5e;font-size:11px;line-height:1.8}
+.notebody .nfoot{margin-top:18px;padding-top:12px;border-top:1px solid rgba(23,19,16,.16);display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+.notebody .nbtn{
+  padding:10px 18px;min-height:44px;font-size:13.5px;letter-spacing:.08em;
+  background:#171310;color:var(--paper);border:1px solid #171310;
+}
+.notebody .nbtn:hover{background:#2a221a}
+
+/* 易混淆景點：一鍵跳去那一題 */
+.nxwrap{margin-top:16px;padding-top:12px;border-top:1px dashed rgba(23,19,16,.22)}
+.nxwrap .nxh{font-size:11.5px;letter-spacing:.18em;color:#8a7a5e;margin-bottom:9px}
+.nxlist{display:flex;flex-wrap:wrap;gap:8px}
+.nxbtn{
+  display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:8px 14px;
+  background:transparent;color:#171310;border:1px solid rgba(23,19,16,.42);
+  font-size:13px;letter-spacing:.04em;cursor:pointer;text-align:left;
+}
+.nxbtn:hover{background:#171310;color:var(--paper);border-color:#171310}
+.nxbtn .arw{font-size:12px;color:#8a7a5e}
+.nxbtn:hover .arw{color:var(--red)}
+.idcard .nxwrap{border-top:1px solid rgba(23,19,16,.22);margin-top:18px}
+
+.toast{
+  position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(8px);
+  z-index:70;padding:11px 18px;background:#171310;color:var(--paper);
+  border:1px solid rgba(198,161,91,.45);font-size:13.5px;letter-spacing:.04em;
+  opacity:0;pointer-events:none;transition:opacity .18s ease,transform .18s ease;
+  max-width:88vw;text-align:center;
+}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ===== 響應式 ===== */
+@media (max-width:719px){
+  .cover{grid-template-columns:minmax(0,1fr)}
+  .cover-copy,.panel,.stage,.deck-card{min-width:0}
+  .topbar{flex-wrap:wrap}
+  .brand .brand-sub{display:none}
+  .cover-art{position:relative;min-height:0;aspect-ratio:5/3;justify-content:flex-start}
+  .cover-art .slide{position:absolute;top:50%;left:50%;width:44%;padding:9px 9px 22px}
+  .cover-art .slide:nth-child(1){left:23%;transform:translate(-50%,-50%) rotate(-7deg)}
+  .cover-art .slide:nth-child(2){left:50%;width:50%;transform:translate(-50%,-50%) rotate(2deg);z-index:2}
+  .cover-art .slide:nth-child(3){left:77%;transform:translate(-50%,-50%) rotate(8deg)}
+  .cover-art .slide-no{font-size:10px;left:9px;bottom:5px;letter-spacing:.16em}
+  .mode-switch{grid-template-columns:1fr}
+  .quiz-head{gap:8px}
+}
+@media (min-width:720px){
+  .options{grid-template-columns:1fr 1fr}
+  .deck{grid-template-columns:1fr 1fr}
+  .result .stats{grid-template-columns:repeat(4,1fr)}
+}
+@media (min-width:1000px){
+  .cover{grid-template-columns:1.05fr .95fr;gap:48px;align-items:center;min-height:calc(100vh - 190px)}
+  .cover-art{order:2}
+  .cover-copy{order:1}
+  .quiz-body{grid-template-columns:minmax(0,1.12fr) minmax(0,.88fr);gap:40px}
+  .stage{position:sticky;top:86px;align-self:start}
+  .stage .slide{max-width:none}
+  .deck{grid-template-columns:repeat(3,1fr)}
+  .result .stats{grid-template-columns:repeat(4,1fr)}
+}
+
+/* ===== 英文影片入口：縮圖 + 點擊跳轉 ===== */
+.ytvid{margin-top:12px;max-width:280px}
+.ytvid a{display:block;position:relative;border:1px solid rgba(23,19,16,.22);border-radius:8px;overflow:hidden;line-height:0;background:#000}
+.ytvid img{width:100%;height:auto;display:block}
+.ytvid .ytcap{margin:7px 0 0;font-size:12px;line-height:1.5;color:#3b332c}
+.ytvid .ytbadge{display:inline-block;margin-right:6px;padding:1px 7px;border-radius:999px;background:#171310;color:#f6f1e8;font-size:11px;letter-spacing:.02em}
+
+/* ===== 列印：卡冊 ===== */
+@media print{
+  body{background:#fff;color:#111}
+  .topbar,.deck-head .tbtn,#deck-actions,.stage-meta,.quiz-head,
+  .deck-tools,.deck-empty,.deck-more{display:none!important}
+  .licrow{display:none!important}
+  .wrap{padding:0;max-width:none}
+  .deck,.deck.grid-mode{grid-template-columns:1fr 1fr;gap:10px}
+  /* 列印一律出全文卡片，即使畫面上是縮圖牆 */
+  .deck.grid-mode .deck-card ul,
+  .deck.grid-mode .deck-card .trap,
+  .deck.grid-mode .deck-card .fact{display:block}
+  .deck.grid-mode .deck-card .pic{aspect-ratio:3/2}
+  .deck-card{background:#fff;border:1px solid #999;break-inside:avoid}
+  .deck-card .body{padding:10px 12px}
+  .deck-card h3{font-size:15px}
+  .deck-card li{font-size:11px;color:#222}
+  .deck-card .where,.deck-card .trap,.deck-card .fact{color:#444}
+  .deck-card .no{color:#666}
+  .deck-card .pic{aspect-ratio:3/2}
+  .deck-card .tags span{color:#444;border-color:#bbb}
+  .ytvid{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark">地標鑑定所</span>
+    <span class="brand-sub">世界地標 · 看圖辨位</span>
+  </div>
+  <div class="top-actions">
+    <button class="tbtn" id="nav-deck" type="button">鑑定卡冊</button>
+    <button class="tbtn" id="nav-home" type="button">回到封面</button>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- ===== 視圖：封面 ===== -->
+  <section class="view" id="view-cover">
+    <div class="cover">
+      <div class="cover-art" aria-hidden="true">
+        <div class="slide"><div class="frame"><img src="" data-cover="03_sagrada" alt=""></div><span class="slide-no">NO. 03</span></div>
+        <div class="slide"><div class="frame"><img src="" data-cover="10_petra" alt=""></div><span class="slide-no">NO. 10</span></div>
+        <div class="slide"><div class="frame"><img src="" data-cover="17_matterhorn" alt=""></div><span class="slide-no">NO. 17</span></div>
+      </div>
+      <div class="cover-copy">
+        <p class="kicker">一百二十五張幻燈片 · 一場看圖的角逐</p>
+        <h1>看圖，<br>認地標。</h1>
+        <p class="lede">一張照片擺在桌上，四個名字擺在旁邊。先看清楚山的稜線、塔的形狀、水的顏色，再決定它是哪一個。</p>
+
+        <div class="steps">
+          <div class="step"><span class="num">一</span><span>只看照片，不作答。畫面會停在那裡，讓你先讀它的形狀與光線。</span></div>
+          <div class="step"><span class="num">二</span><span>按下「揭開選項」，四個地名出現，選一個。</span></div>
+          <div class="step"><span class="num">三</span><span>立刻給出鑑定卡：三條辨識特徵、一個易混淆的對照、一則冷知識。</span></div>
+        </div>
+
+        <div class="mode-switch" role="group" aria-label="選擇賽制">
+          <button class="mode" type="button" data-mode="timed" aria-pressed="true">
+            <strong>計時賽</strong>
+            <small>揭開選項後每題 20 秒，逾時判錯。適合搶答與分組比賽。</small>
+          </button>
+          <button class="mode" type="button" data-mode="practice" aria-pressed="false">
+            <strong>練習場</strong>
+            <small>不限時間，可以慢慢看、反覆比對。適合賽前熱身。</small>
+          </button>
+        </div>
+
+        <button class="btn" id="btn-start" type="button">開始鑑定　125 張</button>
+        <button class="review" id="btn-review" type="button" hidden>先練做錯過的　<b>0</b> 張</button>
+        <p class="cover-note">照片皆為實景；125 題每局重新隨機排列，<b>做錯的下一局優先再出</b>。答完點照片可翻對應的筆記。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 視圖：答題 ===== -->
+  <section class="view" id="view-quiz" hidden>
+    <div class="quiz-head">
+      <div class="count">第 <b id="q-idx">1</b> 張 <span style="color:var(--mute)">/ <span id="q-total">20</span></span></div>
+      <div class="dots" id="q-dots"></div>
+      <div class="score">命中 <b id="q-score">0</b></div>
+    </div>
+    <div class="quiz-body">
+      <div class="stage">
+        <div class="slide">
+          <div class="frame"><img id="q-img" src="" alt="待辨識的地標照片"></div>
+          <span class="slide-no" id="q-no">NO. 01</span>
+        </div>
+        <div class="stage-meta">
+          <span id="q-mode-label">計時賽</span>
+          <button class="hint-btn" id="btn-hint" type="button">看提示</button>
+        </div>
+        <div class="stage-meta" id="hint-slot" hidden>
+          <span class="hint-text" id="hint-text"></span>
+        </div>
+      </div>
+      <div class="panel" id="panel"></div>
+    </div>
+  </section>
+
+  <!-- ===== 視圖：成績 ===== -->
+  <section class="view" id="view-result" hidden>
+    <div class="result" id="result-body"></div>
+  </section>
+
+  <!-- ===== 視圖：卡冊 ===== -->
+  <section class="view" id="view-deck" hidden>
+    <div class="deck-head">
+      <div>
+        <h1>鑑定卡冊</h1>
+        <p>一百二十五張卡，每張三條辨識特徵、一個易混淆對照、一則冷知識。可直接列印成賽前複習卡。</p>
+      </div>
+      <div class="top-actions" id="deck-actions">
+        <button class="tbtn" id="deck-mode-cards" type="button" aria-pressed="true">全文卡片</button>
+        <button class="tbtn" id="deck-mode-grid" type="button" aria-pressed="false">縮圖牆</button>
+        <button class="tbtn" id="btn-print" type="button">列印卡冊</button>
+      </div>
+    </div>
+
+    <!-- 工具列：搜尋 + 篩選（彈出） -->
+    <div class="deck-tools">
+      <div class="tools-row">
+        <label class="srch">
+          <span class="srch-ico" aria-hidden="true">⌕</span>
+          <input id="deck-q" type="search" placeholder="搜地名、外文名，如 塔 / 泰姬 / Petra" autocomplete="off">
+        </label>
+        <p class="tools-count" id="deck-count" aria-live="polite"></p>
+        <div class="pop-wrap">
+          <button class="tbtn" id="deck-filter-btn" type="button"
+                  aria-expanded="false" aria-controls="deck-pop">篩選</button>
+          <div class="deck-pop" id="deck-pop" hidden role="dialog" aria-label="篩選條件">
+            <div class="pop-head">
+              <span>篩選</span>
+              <button class="tbtn ghost" id="deck-reset" type="button">清除</button>
+            </div>
+            <div id="deck-filters"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="deck" id="deck-grid"></div>
+    <p class="deck-empty" id="deck-empty" hidden>沒有符合條件的卡。試著放寬篩選，或按「清除篩選」。</p>
+  </section>
+
+  <p class="licrow" id="lic-row" hidden>
+    本站照片均取自 Wikimedia Commons，屬自由許可 ·
+    <a id="lic-link" href="licenses.html" target="_blank" rel="noopener noreferrer">照片授權清單（作者／許可／來源）</a>
+  </p>
+
+</div>
+
+<!-- 圖片資料（由建置腳本嵌入） -->
+<script>
+window.PHOTO_SRC = {
+  "02_taj": "images/02_taj.jpg",
+  "05_giza": "images/05_giza.jpg",
+  "10_petra": "images/10_petra.jpg",
+  "11_angkor": "images/11_angkor.jpg",
+  "13_potala": "images/13_potala.jpg",
+  "21_colosseum": "images/21_colosseum.jpg",
+  "22_colosseum_close": "images/22_colosseum_close.jpg",
+  "23_humble": "images/23_humble.jpg",
+  "24_humble_close": "images/24_humble_close.jpg",
+  "25_forbidden": "images/25_forbidden.jpg",
+  "26_forbidden_close": "images/26_forbidden_close.jpg",
+  "27_badaling": "images/27_badaling.jpg",
+  "28_badaling2": "images/28_badaling2.jpg",
+  "29_yingxian": "images/29_yingxian.jpg",
+  "30_yingxian_close": "images/30_yingxian_close.jpg",
+  "31_zhaozhou": "images/31_zhaozhou.jpg",
+  "32_zhaozhou_close": "images/32_zhaozhou_close.jpg",
+  "33_mogao": "images/33_mogao.jpg",
+  "34_mogao2": "images/34_mogao2.jpg",
+  "35_terracotta": "images/35_terracotta.jpg",
+  "36_terracotta_close": "images/36_terracotta_close.jpg",
+  "37_taj_close": "images/37_taj_close.jpg",
+  "38_giza_sphinx": "images/38_giza_sphinx.jpg",
+  "39_angkor_close": "images/39_angkor_close.jpg",
+  "40_potala_close": "images/40_potala_close.jpg",
+  "41_yungang": "images/41_yungang.jpg",
+  "42_yungang_close": "images/42_yungang_close.jpg",
+  "43_tiantan": "images/43_tiantan.jpg",
+  "44_tiantan_close": "images/44_tiantan_close.jpg",
+  "45_notredame": "images/45_notredame.jpg",
+  "46_notredame_close": "images/46_notredame_close.jpg",
+  "47_hagia": "images/47_hagia.jpg",
+  "48_hagia_close": "images/48_hagia_close.jpg",
+  "49_parthenon": "images/49_parthenon.jpg",
+  "50_parthenon_close": "images/50_parthenon_close.jpg",
+  "51_fuji": "images/51_fuji.jpg",
+  "52_fuji_close": "images/52_fuji_close.jpg",
+  "53_matterhorn": "images/53_matterhorn.jpg",
+  "54_matterhorn_close": "images/54_matterhorn_close.jpg",
+  "55_niagara": "images/55_niagara.jpg",
+  "56_niagara_close": "images/56_niagara_close.jpg",
+  "57_santorini": "images/57_santorini.jpg",
+  "58_santorini_close": "images/58_santorini_close.jpg",
+  "59_eiffel": "images/59_eiffel.jpg",
+  "60_eiffel_close": "images/60_eiffel_close.jpg",
+  "61_sydney": "images/61_sydney.jpg",
+  "62_sydney_close": "images/62_sydney_close.jpg",
+  "63_bigben": "images/63_bigben.jpg",
+  "64_bigben_close": "images/64_bigben_close.jpg",
+  "65_liberty": "images/65_liberty.jpg",
+  "66_liberty_close": "images/66_liberty_close.jpg",
+  "67_charles": "images/67_charles.jpg",
+  "68_charles_close": "images/68_charles_close.jpg",
+  "69_basil": "images/69_basil.jpg",
+  "70_basil_close": "images/70_basil_close.jpg",
+  "71_moai": "images/71_moai.jpg",
+  "72_moai_close": "images/72_moai_close.jpg",
+  "73_uyuni": "images/73_uyuni.jpg",
+  "74_uyuni_close": "images/74_uyuni_close.jpg",
+  "75_petra_siq": "images/75_petra_siq.jpg",
+  "76_angkor_tower": "images/76_angkor_tower.jpg",
+  "77_sagrada_close": "images/77_sagrada_close.jpg",
+  "78_machu": "images/78_machu.jpg",
+  "79_machu_close": "images/79_machu_close.jpg",
+  "80_greatwall_mutianyu": "images/80_greatwall_mutianyu.jpg",
+  "81_greatwall_mutianyu_close": "images/81_greatwall_mutianyu_close.jpg",
+  "82_longmen": "images/82_longmen.jpg",
+  "83_longmen_close": "images/83_longmen_close.jpg",
+  "84_summer_palace": "images/84_summer_palace.jpg",
+  "85_summer_palace_close": "images/85_summer_palace_close.jpg",
+  "86_miaoying": "images/86_miaoying.jpg",
+  "87_miaoying_close": "images/87_miaoying_close.jpg",
+  "88_versailles": "images/88_versailles.jpg",
+  "89_versailles_close": "images/89_versailles_close.jpg",
+  "90_chichen": "images/90_chichen.jpg",
+  "91_chichen_close": "images/91_chichen_close.jpg",
+  "77_p077": "images/77_p077.jpg",
+  "78_p078": "images/78_p078.jpg",
+  "79_p079": "images/79_p079.jpg",
+  "80_p080": "images/80_p080.jpg",
+  "81_p081": "images/81_p081.jpg",
+  "82_p082": "images/82_p082.jpg",
+  "83_p083": "images/83_p083.jpg",
+  "84_p084": "images/84_p084.jpg",
+  "85_p085": "images/85_p085.jpg",
+  "86_p086": "images/86_p086.jpg",
+  "87_p087": "images/87_p087.jpg",
+  "88_p088": "images/88_p088.jpg",
+  "89_p089": "images/89_p089.jpg",
+  "90_p090": "images/90_p090.jpg",
+  "91_p091": "images/91_p091.jpg",
+  "92_p092": "images/92_p092.jpg",
+  "93_p093": "images/93_p093.jpg",
+  "94_p094": "images/94_p094.jpg",
+  "95_p095": "images/95_p095.jpg",
+  "96_p096": "images/96_p096.jpg",
+  "97_p097": "images/97_p097.jpg",
+  "98_p098": "images/98_p098.jpg",
+  "99_p099": "images/99_p099.jpg",
+  "100_p100": "images/100_p100.jpg",
+  "101_p101": "images/101_p101.jpg",
+  "102_p102": "images/102_p102.jpg",
+  "103_p103": "images/103_p103.jpg",
+  "104_p104": "images/104_p104.jpg",
+  "105_p105": "images/105_p105.jpg",
+  "106_p106": "images/106_p106.jpg",
+  "107_p107": "images/107_p107.jpg",
+  "108_p108": "images/108_p108.jpg",
+  "109_p109": "images/109_p109.jpg",
+  "110_p110": "images/110_p110.jpg",
+  "111_p111": "images/111_p111.jpg",
+  "112_p112": "images/112_p112.jpg",
+  "113_p113": "images/113_p113.jpg",
+  "114_p114": "images/114_p114.jpg",
+  "115_p115": "images/115_p115.jpg",
+  "116_p116": "images/116_p116.jpg",
+  "117_p117": "images/117_p117.jpg",
+  "118_p118": "images/118_p118.jpg",
+  "119_p119": "images/119_p119.jpg",
+  "120_p120": "images/120_p120.jpg",
+  "121_p121": "images/121_p121.jpg",
+  "122_p122": "images/122_p122.jpg",
+  "123_p123": "images/123_p123.jpg",
+  "124_p124": "images/124_p124.jpg",
+  "125_p125": "images/125_p125.jpg"
+};
+</script>
+
+<!-- 筆記摘要（由建置腳本嵌入） -->
+<script>
+window.NOTE_DATA = {"泰姬陵":{"t":"泰姬陵","p":"02-笔记/世界/南亚/印度/泰姬陵.md","l":"泰姬陵位于印度阿格拉亚穆纳河畔，是莫卧儿皇帝沙贾汗为妻子慕塔芝·玛哈尔修建的白色大理石陵墓，约 1632—1653 年建成；以严格对称、洋葱形大穹顶、四角尖塔与花园水道倒影闻名，1983 年列入世界文化遗产。","k":["通体纯白大理石：主陵全部由白色大理石砌筑，在阳光下呈乳白光泽，与两侧红砂岩附属建筑形成强烈白—红对比。","中央洋葱形大穹顶：陵体正中隆起饱满的球茎（洋葱）形穹顶，顶部立金色尖饰；穹顶外有一圈细高的鼓座过渡。","四角尖塔（宣礼塔）：方形陵台四角各立一座细长尖塔，塔身分节、顶部带小穹顶；尖塔略向外倾斜，以防倒塌砸向主陵。","花园轴线与水道倒影：正面是四分花园（charbagh），中央笔直水道与喷泉把视线引向陵墓，水面倒映白色陵体，左右完全对称。","宝石镶嵌与透雕：大理石墙面镶嵌花卉与藤蔓图案的半宝石（pietra dura），墓门为大理石透雕格栅，细部精致。"],"m":["与其他白色穹顶陵墓、清真寺：清真寺以礼拜殿、庭院与朝向麦加的布局为主，通常不设四角独立尖塔环抱主陵；泰姬陵是对称陵墓，中央大穹顶 + 四角外倾尖塔 + 花园水道的组合独此一处。","与印度教神庙：印度教神庙为高耸阶梯状石塔、外壁密布神像；泰姬陵为伊斯兰对称石构、白色大理石、大穹顶与尖塔，无神像雕刻。"],"y":["第一张图先看：纯白对称陵体 + 中央洋葱穹顶 + 四角尖塔 + 前方水道倒影；四者同时出现即可锁定泰姬陵。","常见误认：把其他莫卧儿陵墓（如 Humayun's Tomb）、白色清真寺当成泰姬陵；区别在泰姬陵主陵纯白、穹顶更饱满、尖塔立于方形高台四角，且前方有完整花园轴线倒影。"]},"吉萨金字塔群":{"t":"吉萨金字塔群","p":"02-笔记/世界/非洲/埃及/吉萨金字塔群.md","l":"吉萨金字塔群位于埃及开罗西南吉萨高原，属古王国第四王朝（约公元前 26 世纪）法老陵墓群，含胡夫、哈夫拉、孟卡拉三座大金字塔及附属祭庙、小金字塔与狮身人面像；1979 年作为「孟菲斯及其墓地金字塔」列入世界文化遗产。","k":["三座方锥体石塔：高地上并列三座大小递减的方锥形金字塔，几何轮廓简洁锐利，是古埃及陵墓最核心的形状。","石块水平层叠：坡面由巨大石灰岩块水平垒砌，现存外层光滑贴面大多脱落，露出阶梯状石块层；石块接缝沿坡面呈水平线条。","沙漠高地环境：金字塔坐落在开阔沙漠高原边缘，背景为沙地与低矮荒漠，无林木与河流，与河谷、山地遗址环境明显不同。","狮身人面像（斯芬克斯）：哈夫拉金字塔前方卧着人首狮身的斯芬克斯石像，头部为法老形象、身体为卧狮，是该遗址第二识别标志。","附属小金字塔与围墙：大金字塔周围分布小型王后金字塔、祭庙基座与石砌围墙，形成完整陵墓地貌。"],"m":["与中美洲玛雅/阿兹特克金字塔：玛雅金字塔是阶梯状高台 + 顶部神庙，坡面陡直、顶端有神庙建筑；吉萨金字塔是完整光滑方锥体、顶部无神庙，内部为墓室，两者形状与功能不同。","与泰姬陵、秦始皇陵：泰姬陵是白色穹顶对称纪念陵，兵马俑是地下陶俑坑；吉萨是地上巨型方锥石塔群，外形与材料完全不同。"],"y":["第一张图先看：沙漠高地上并列的方锥体石塔；再找周围小金字塔与斯芬克斯，即可锁定吉萨金字塔群。","常见误认：把单座金字塔照片、其他埃及遗址金字塔当成吉萨群；辨识锚点是三座大小递减并列、斯芬克斯相伴与吉萨高原沙漠环境。"]},"佩特拉":{"t":"佩特拉","p":"02-笔记/世界/西亚/约旦/佩特拉.md","l":"佩特拉（Petra）位于约旦南部、死海与红海之间的峡谷地带，是纳巴泰人的都城遗址；城中最著名的卡兹尼神殿（Al-Khazneh）直接从玫瑰红砂岩崖壁凿出，柱廊、山花与门洞一应齐全，1985 年列入世界文化遗产。","k":["整面岩壁凿出的神殿立面：不是砌筑而是「减」出来的建筑——柱子、山花、檐口都与岩体连成一体，只有门洞是纯黑的阴影。","玫瑰红砂岩色调：岩石呈粉红至暗玫瑰色，随时间与光线变化，正午偏粉、清晨黄昏偏橙红。","希腊化风格的柱廊构图：中央圆形亭（tholos）+ 两侧半山墙（broken pediment）、六根柱、柱头带科林斯式叶饰，是纳巴泰人吸收希腊化语汇的典型。","入口是极窄的峡谷（Siq）：到达神殿前须穿过一条长约一公里、两壁近 80 米高的裂缝峡谷，出谷瞬间正对神殿立面，是佩特拉的经典观看序列。"],"m":["与阿布辛贝神殿：阿布辛贝也是岩凿神庙，但门前是四尊巨大坐像、位于尼罗河畔、立面朝水；佩特拉是整面崖壁上的柱廊立面，进谷后突然出现。","与杰拉什古城、以弗所遗址：这两处是地面砌筑的罗马城市，有铺石大道、列柱街道与完整石构建筑；佩特拉是「凿出来」的岩城，柱是崖壁的一部分。"],"y":["第一张图先看：整面岩壁上的柱廊立面 + 玫瑰红砂岩 + 黑色门洞；若看见柱与山花「与岩石连成一片」，基本就是佩特拉。","常见误认：把卡兹尼当成地面砌筑的希腊化神庙。判别点：柱身与崖壁无缝相连，没有独立柱础与石缝。"]},"吴哥窟":{"t":"吴哥窟","p":"02-笔记/世界/东南亚/柬埔寨/吴哥窟.md","l":"吴哥窟（Angkor Wat）位于柬埔寨暹粒，建于 12 世纪上半叶高棉帝国苏利耶跋摩二世时期，原为供奉毗湿奴的印度教寺庙，后转为佛教圣地；以石构回廊、中央莲花蓓蕾塔群与水池倒影闻名，1992 年列入世界文化遗产。","k":["前方水池中的五塔倒影：经典全景是西入口外侧水池，水面映出中央最高、两侧较低的五座莲花蓓蕾塔，倒影对称，这是吴哥窟最具辨识度的标志画面。","三层石构回廊逐级抬升：寺庙主体为金字塔式「寺山」，由外向内、由低到高环绕三层石砌回廊，台阶与回廊把殿堂一层层托高。","莲花蓓蕾形石塔：中央与四周塔为层叠收分的莲花蓓蕾（花蕾）造型，砂岩砌筑，塔尖细长向上，与印度本土高耸的 shikhara 塔身不同。","满布浅浮雕的回廊墙：回廊内壁与外侧墙长达数百米，雕刻史诗、战争场面与神祇故事，石面布满细密浮雕带。","浅色砂岩与对称布局：整体为灰米色砂岩，平面严格东西南北对称，西向为主要入口，外围有宽阔护城河与围墙。"],"m":["与印度本土印度教神庙（如卡朱拉霍、布里哈迪斯瓦拉神庙）：印度神庙以一座高耸、垂直向上的阶梯状金字形塔楼（shikhara）为主体，外壁神像密布；吴哥窟是三层水平回廊环抱中央莲花蓓蕾塔群，平面展开、对称围合，塔形为莲花蓓蕾而非垂直高塔。","与其他吴哥寺庙（巴戎寺、塔布隆寺）：巴戎寺以四面佛塔为标志；塔布隆寺被巨树缠绕；吴哥窟以五塔倒影、三层规整回廊与长浮雕为识别核心。"],"y":["第一张图先确认：水池倒影中的中央高 + 四侧低的莲花蓓蕾五塔；再看外围水平回廊，即可锁定吴哥窟。","常见误认：把其他吴哥遗址的塔林照片当成吴哥窟；辨识锚点是西水池对称倒影、规整三层回廊布局与莲花蓓蕾塔形的组合。"]},"布达拉宫":{"t":"布达拉宫","p":"02-笔记/中国/西南/西藏/布达拉宫.md","l":"布达拉宫位于西藏拉萨红山（玛布日山）上，是集宫堡与藏传佛教寺院于一体的建筑群；现存主体为清顺治年间（1645 起）在吐蕃宫堡旧址上重建，1994 年列入世界文化遗产（2000 年大昭寺、2001 年罗布林卡扩展）。","k":["依山垒砌的宫堡体量：建筑群顺山坡从山脚叠到山顶，石墙体随山势逐层升高，整体像一座长在山体上的巨型堡垒，而非平地独立院落。","白宫与红宫并置：横向立面以大片白色墙面（白宫）夹一座深红褐色墙体的高层楼体（红宫），白—红对比强烈，是最醒目的色彩标识。","藏式平顶、厚重石墙：屋顶为平屋顶与局部金顶，墙体厚实、自下而上略有收分，窗洞小而扁平，排列成整齐行列。","金顶、金幢与法轮装饰：红宫顶部与边角可见鎏金金顶、金幢、宝瓶与宗教法器装饰，在白墙之上形成金色制高点。","外部登山梯道：山坡与墙体之间有曲折宽阔的石砌梯道通向宫门，宫堡与山体道路连成一体。"],"m":["与内地宫殿（故宫）：故宫为平地木构院落、黄瓦红墙、中轴对称、坡屋顶；布达拉宫依山石砌、平顶厚重、白红分色、建筑随山叠起，无内地式大屋顶与院落纵深。","与一般藏传佛教寺院（如塔尔寺、扎什伦布寺）：普通寺院以经堂、佛殿分散布局于平地或缓坡；布达拉宫是宫堡—寺院合一的巨型高台建筑群，尺度与依山层叠方式远超普通寺院。"],"y":["第一张图先看：是否有一座沿整面山坡堆上去的白色宫堡，立面是否白墙夹红宫；再确认平顶、小金顶与厚重石墙，即可判断为布达拉宫。","常见误认：把其他藏地山巅寺院、雪山观景台上的堡楼当作布达拉宫；辨识锚点是白宫红宫的横向并置比例、整体体量与拉萨红山城市环境。"]},"罗马斗兽场":{"t":"罗马斗兽场","p":"02-笔记/世界/欧洲/意大利/罗马斗兽场.md","l":"罗马斗兽场（弗拉维圆形剧场）位于意大利罗马，建于古罗马弗拉维王朝，约公元 70—80 年由韦帕芗始建、提图斯落成，是世界规模最大的古罗马椭圆形竞技场；属「罗马历史中心」世界遗产，1980 年列入（1990 年扩展）。","k":["椭圆形（环形）立面：建筑平面为椭圆形环形看台，外墙一圈连续展开，整体轮廓不是方形殿堂，而是巨大的椭圆环状体。","四层拱券与柱式交替：外墙下部三层为连续拱券，每层拱间立一种古典柱式（多立克—爱奥尼—科林斯由下而上），第四层为壁柱与小方窗；拱券与柱式水平分层是最醒目的立面节奏。","一侧外墙残缺：现存建筑外侧仅保留约一半完整四层外墙，另一半只剩下内部环形结构与残存看台，缺口中可见层叠的拱券与通道。","石材与混凝土：外墙用浅黄褐色石灰岩（特拉维蒂纳石），拱券内部为古罗马混凝土；石块接缝与风化痕迹明显，色调统一为暖灰黄。","内部通道与看台遗迹：环墙之内可见辐射状拱廊、台阶通道与地下通道（hypogeum），是容纳观众与野兽、角斗士的结构。"],"m":["与希腊圆形剧场（露天剧场）：希腊剧场依山就势凿出扇形半圆看台，依托山坡；斗兽场是独立平地建起的完整椭圆形环形建筑，四周都有外墙与多层拱廊。","与古罗马凯旋门、水道桥：凯旋门是单个小型门洞纪念建筑；水道桥是连续高架拱廊的线状结构；斗兽场是闭合椭圆环形的多层体量，平面与尺度完全不同。"],"y":["第一张图先找：椭圆形环形 + 连续多层拱券外墙 + 明显残缺；这三点组合即可锁定罗马斗兽场，而不是其他单拱纪念建筑。","常见误认：把残存的单层拱廊遗迹、欧洲其他圆形剧场片段当作完整斗兽场；辨识锚点是椭圆环形、四层拱券叠柱式与一侧缺失的历史状态。"]},"拙政园":{"t":"拙政园","p":"02-笔记/中国/华东/江苏/拙政园.md","l":"拙政园位于江苏苏州，是江南私家园林的代表，明正德年间（1509 起）由王献臣始建，现存格局多经清代改建；1997 年作为「苏州古典园林」列入世界文化遗产（2000 年扩展）。","k":["水面为骨架：全园以一片主水池和曲折水网组织布局，建筑沿水布置、隔水相望，而不是沿一条轴线排列。","灰瓦粉墙、木构淡彩：屋顶为灰色小青瓦，墙面白粉，梁柱木构施淡雅彩绘，色调清淡素雅，与皇家宫殿的黄瓦红墙明显不同。","亭榭廊桥错落：临水散布亭、榭、廊、轩、小桥与假山，体量小巧、位置自由，没有高大封闭的院墙和大殿。","漏窗与借景：白粉墙上开各式漏窗，通透借景；远处可借园外北寺塔塔影入画（借景手法）。","不对称、移步换景：建筑左右不求对称，人在廊中行走，每一步看到的水面、树木、亭角都不同。"],"m":["与皇家园林（颐和园、北海）：皇家园林尺度宏大，有宫殿式大殿、红墙黄瓦与规则建筑群；拙政园体量小巧、粉墙灰瓦、以水和假山自由穿插，是私人宅园尺度。","与北方四合院民居：四合院是封闭方正的居住院落，建筑围合天井；拙政园开敞面向水面与假山，亭榭廊桥用于游赏而非居住。"],"y":["第一张图先看：水面是否成为构图中心，建筑是否随水自由错落而非对称排列；再看灰瓦粉墙、漏窗与小尺度亭榭，即可判断为江南私家园林。","常见误认：把其他苏州园林（留园、狮子林、网师园）混为拙政园；各园可凭主水面大小、特定厅堂与假山造型区分，本页重点是认出「江南私家园林」这一大类与基本气质。"]},"故宫":{"t":"故宫","p":"02-笔记/中国/华北/北京/故宫.md","l":"故宫（紫禁城）是明清两代皇家宫殿，位于北京中轴线中心，中国现存规模最大、保存最完整的古代木构宫殿建筑群，1987 年列入世界文化遗产。","k":["黄瓦红墙：屋顶一律覆黄色琉璃瓦，墙体为朱红色，是皇家最高等级色彩组合，民间建筑不得使用。","中轴对称：整组建筑群沿南北一条主轴线左右严格对称，主要大殿依次坐落在层层抬高的台基上，航拍最容易看出这一格局。","重檐庑殿顶：最高等级大殿（如太和殿）用两层屋檐的庑殿顶，屋顶四坡五脊，檐角排列成排脊兽。","汉白玉高台基：主殿坐落在三层白色须弥座台基上，台基边缘有栏杆与螭首，与黄瓦红墙形成鲜明的白—红—黄层次。","斗拱与彩画：屋檐下密布斗拱，梁枋施青绿色和玺彩画，是明清官式木构的典型装饰。"],"m":["与北京其他皇家建筑（天坛、颐和园）：故宫是连续成片、严格中轴对称的宫殿院落；天坛是祭祀建筑群，平面以圜丘、祈年殿为中心，无层层对称院落；颐和园是山水园林，建筑随水面与山势错落，不求对称。","与外国宫殿（凡尔赛宫等）：故宫为木构坡屋顶、黄瓦红墙、院落式纵深布局；欧洲宫殿多为石构、平顶或穹顶、横向展开的立面与规则法式园林，材质与轮廓完全不同。"],"y":["第一张图先看两点：是否有一条贯穿画面的中轴线，以及屋顶是否为成排黄色琉璃瓦配红墙；两者同时出现即可锁定明清皇家宫殿，再结合中国官式木构判断为北京故宫。","常见误认：把带黄瓦红墙的其他明清王府、坛庙当作故宫；区别在于故宫尺度宏大、台基层叠、殿宇沿主轴连续展开，等级与规模远超一般王府。"]},"长城八达岭段":{"t":"长城八达岭段","p":"02-笔记/中国/华北/北京/长城八达岭段.md","l":"八达岭长城是明长城中保存完好、最具代表性的一段，位于北京延庆，砖石包砌墙体随山脊蜿蜒，沿墙分布矩形敌楼；长城整体 1987 年列入世界文化遗产。","k":["沿山脊走的长墙：墙体不绕平地上的城市，而是顺着山脊线高低起伏延伸，城墙顶面是可通行的马道。","砖石包砌：外墙以青色条石和城砖砌筑，内部填土夯实，墙面规整；与夯土或石垒的早期长城外观不同。","矩形敌楼：沿墙每隔一段出现方形（矩形）空心敌楼，楼身开垛口与箭窗，上层为瞭望射击平台，是明代边墙的标志性构件。","垛口（女墙）：墙顶外侧有锯齿状垛口墙，内侧为低矮女墙；高处可辨认出连续的锯齿轮廓。","山脊制高点：敌楼常设在山脊转弯与制高点，便于瞭望与烽火传递。"],"m":["与内地府县城墙（如城墙、城楼）：府县城墙围成封闭方形城池，墙体平直、围绕居民区；长城沿山脊蜿蜒、不闭合，墙上间隔出现敌楼。","与早期夯土长城：西北汉长城、战国长城多为夯土或砂砾垒筑，断面低残、颜色土黄；八达岭为规整砖石包砌、墙体高耸完整，视觉上更整洁坚固。"],"y":["第一张图先判断：墙体是否爬在山脊上，墙上是否有成排矩形空心敌楼；这两点是明长城景区段落最稳定的视觉标识。","常见误认：把山地上的普通古寨墙、山道台阶当成长城；区别在于长城墙体连续延伸数里、敌楼等距分布，并有统一垛口形制。"]},"应县木塔":{"t":"应县木塔","p":"02-笔记/中国/华北/山西/应县木塔.md","l":"应县木塔全称佛宫寺释迦塔，位于山西朔州应县，建于辽清宁二年（1056），是世界现存最高、最古老的纯木结构楼阁式塔；1961 年列入第一批全国重点文物保护单位，尚未列入世界遗产。","k":["全木构高塔：整座塔为木构架，不使用砖石塔身，外观层层出檐、挺拔高耸，是纯木楼阁式塔的孤例级代表。","五层六檐、八角平面：外观五层六檐：底层出重檐，其上四层各出单檐，合计六重屋檐；平面为八角形，内部为「明五暗四」共九层，每层设门窗与回廊。","斗拱密布：每层檐下斗拱层层出挑、排列密集，近景可见粗大的木柱、梁枋与成组斗拱承托屋檐。","顶层塔刹：塔顶立金属塔刹（铁刹），收束整座塔身；各层屋檐向上逐层收分，轮廓柔和而稳定。","木色与无墙塔身：塔身以木柱木墙构成，呈现原木与灰瓦色调，区别于密檐砖塔的实体墙与层层密叠短檐。"],"m":["与密檐式砖塔（如嵩岳寺塔、千寻塔）：密檐塔下部仅一层较高塔身，上部短檐密集相叠、墙体实体化、不能登临；应县木塔每层都有门窗回廊、檐距较大、通体木构，层级清楚。","与楼阁式砖塔（如大雁塔、虎丘塔）：同为楼阁式层级，但应县为全木构、八角形、斗拱外露；砖塔以砖壁承重、表面仿木斗拱，材料与质感不同。"],"y":["第一张图先看：是否为通体木构、每层出挑屋檐并有回廊；再确认八角平面与顶部塔刹，即可判断为辽代楼阁式木塔。","常见误认：把一般佛寺的多层木阁楼、或砖仿木楼阁塔当成应县木塔；应县的识别锚点是 67 米级的超高纯木体量、五层六檐与密集斗拱并存。"]},"赵州桥":{"t":"赵州桥","p":"02-笔记/中国/华北/河北/赵州桥.md","l":"赵州桥又名安济桥，位于河北赵县洨河之上，由隋代匠师李春设计建造，约建于隋开皇后期至大业初年（595—605），是世界现存最早、保存最完整的大型单孔敞肩石拱桥；1961 年列入第一批全国重点文物保护单位，尚未列入世界遗产。","k":["单孔大跨度石拱：全桥只有一个跨越河道的大圆弧拱，河中不设桥墩，拱肩之上再铺桥面。","敞肩拱（拱上加拱）：大拱左右两肩各开两个小型拱洞，既减轻自重、又分泄洪水——这是赵州桥区别于实肩拱桥最关键的标志。","石砌并列拱券：主拱由 28 道独立拱券纵向并列拼成，拱腹内侧可见一道道竖直的石块接缝与横向拉结铁件。","平缓拱券与石栏板：桥面坡度平缓，两侧望柱与栏板雕刻蛟龙、卷叶纹样；整体为浅灰色石材，造型轻盈对称。","横跨河谷的对称轮廓：正侧面对称，大拱弧线加四个小拱洞，轮廓在河面上形成清晰的几何组合。"],"m":["与一般实肩石拱桥：普通石拱桥拱肩是填实的桥台与路堤，拱上不开小拱；赵州桥最易辨认的就是大拱肩上那四个通透小拱洞。","与现代仿赵州桥建筑、其他单孔拱桥：现代桥梁多为钢筋混凝土、栏杆简洁；赵州桥为整座古代石砌、小拱比例古朴、栏板带古雕刻，石材风化程度与构件形制更古老。"],"y":["第一张图先找：一个大拱 + 拱肩上的四个小拱；这一「敞肩」组合是赵州桥独有的第一眼特征。","常见误认：把其他地方的单孔石拱桥当作赵州桥；区别在小拱数量、拱券并列砌缝与隋代石栏板纹样，配合河北赵县地点信息确认。"]},"莫高窟":{"t":"莫高窟","p":"02-笔记/中国/西北/甘肃/莫高窟.md","l":"莫高窟位于甘肃敦煌鸣沙山东麓断崖上，前秦建元二年（366）始凿，历北朝、隋唐至元持续营建，以壁画与彩塑闻名，是中国规模最大的石窟寺群；1987 年列入世界文化遗产。","k":["断崖上层层叠叠的洞窟群：洞窟密集开凿在一道砂砾岩长崖壁上，上下多层排列，由栈道、廊道串联，远看崖壁像被「蜂窝」般布满洞口。","崖壁顶部木构檐楼：部分大窟（如第 96 窟「九层楼」）在崖前叠架多层木构楼阁，是崖壁上最醒目的竖向标志物。","砂砾岩、无露天大佛像：莫高窟开凿于松软的砂砾岩，无法就地雕造巨型露天石佛，造像多为泥塑敷彩，壁画绘于洞内；与云冈、龙门露天石雕大龛不同。","戈壁绿洲环境：崖壁立于戈壁山前，坡上干燥少树，崖下可见绿洲植被与道路，背景是干燥的山麓地形。","窄而长的崖立面：洞窟沿南北走向崖壁连续分布，横向展开、竖向分层，形成一条长而高的崖面。"],"m":["与云冈石窟、龙门石窟：云冈、龙门以坚硬岩体上露天开凿的巨型石佛、大龛为标志；莫高窟以崖壁层叠小窟群 + 泥塑壁画为主，少见露天大石雕。","与寺庙殿堂：普通佛寺是地面上独立木构殿宇；莫高窟主体是嵌入崖壁的洞窟，地面附属建筑只是连接与遮护结构。"],"y":["第一张图先看：长崖壁上是否布满成排分层的洞口与栈道，环境是否为干燥戈壁山麓；这是莫高窟外观最稳定的组合。","常见误认：把其他敦煌附近小石窟、或一般山坡窑洞当成莫高窟；区别在于洞窟规模连续成片、有标志性多层木构檐楼，并位于敦煌绿洲崖壁前。"]},"秦始皇陵兵马俑":{"t":"秦始皇陵兵马俑","p":"02-笔记/中国/西北/陕西/秦始皇陵兵马俑.md","l":"秦始皇陵兵马俑是秦始皇陵的陪葬军阵坑，位于陕西西安临潼，年代为秦代（公元前 3 世纪末）；以真人大小陶俑、陶马组成的地下军阵闻名，1987 年作为「秦始皇陵」列入世界文化遗产。","k":["成排真人大小陶俑军阵：一号坑内步兵俑沿长廊一排排整齐面向前方，密度极高、排列成方阵，是最典型的全景画面。","地下坑道布局：陶俑立于地下长方形陪葬坑内，坑内可见隔墙、木构棚架遗迹与铺地砖，四周为展陈回廊与看台。","甲片、发髻、面部各异：单个俑身着交领长襦或铠甲，铠甲由一片片甲片编缀而成，头顶梳不同发髻，面部表情各不相同。","陶土本色、原施彩绘：出土时俑表原施红、绿、黑等彩绘，接触空气后多数剥落，现存多为灰褐陶色；不要把今日陶色误认为秦代原本只有灰陶。","只有地下坑阵，无地上建筑：照片看到的是陪葬坑内部；陵墓本体是骊山封土丘，与坑内俑阵属于同一陵园的不同部分。"],"m":["与地面陵墓（金字塔、泰姬陵）：兵马俑是地下陪葬坑中的陶塑军阵，看不到封土、穹顶或石材陵体；金字塔、泰姬陵是地上独立陵墓建筑。","与后世泥塑神像、陶俑陪葬品：兵马俑是成体系、真人大小、按军阵编组的雕塑军队，规模与写实程度远超一般墓葬小型俑；区别在体量、阵列与战役编组。"],"y":["第一张图先看：地下坑道中成排面向同一方向的真人大小陶俑，配合长方形展厅回廊，即可锁定秦兵马俑坑。","常见误认：把复原场景中的单个陶俑模型、或其他博物馆小型陶俑当成秦俑；辨识锚点是军阵密度、坑道形制与秦代甲胄发髻。"]},"云冈石窟":{"t":"云冈石窟","p":"02-笔记/中国/华北/山西/云冈石窟.md","l":"云冈石窟位于山西大同城西武州山南麓，北魏和平元年（460）起由皇室主持开凿，是北魏平城时代皇家石窟的代表；现存主要洞窟 45 个、造像五万余尊，2001 年列入世界文化遗产。","k":["露天大佛敞开在崖面上：第 20 窟主佛坐像完全暴露在室外，没有窟顶遮挡，是云冈最容易被认出的单一形象——大佛结跏趺坐、面相方圆、身着袒右肩式袈裟。","崖壁上成排的方形洞窟：与莫高窟的密集小窟不同，云冈的主要大窟体量大、开口宽阔，沿崖壁横向并排，窟内以大像为主而非壁画。","窟前的木构窟檐楼阁：部分大窟前依崖叠架多层木构楼阁与登窟石阶，蓝绿琉璃瓦顶、红墙，与黄灰色砂岩崖壁形成明显色彩反差。","砂岩的暖黄色石质：岩体为黄灰色砂岩，风化后在佛像与窟壁上形成层理与蜂窝状孔洞，颜色偏暖、质地粗，与龙门石灰岩的青灰色不同。","平城期的雄健造型：佛像肩宽体壮、衣纹为阶梯状平直刻线，带有犍陀罗与中亚影响的痕迹，与龙门唐代造像的圆润柔美不同。"],"m":["与 [[莫高窟]]：两者都是中国北方石窟群，但莫高窟以砂砾岩崖壁上的密集小窟、泥塑彩塑与壁画为主，极少露天大石雕；云冈是砂岩整岩雕造的巨型石佛，第 20 窟大佛直接敞露于崖面。","与龙门石窟：龙门在洛阳伊水两岸的石灰岩崖壁上，唐代造像面相丰腴、衣纹流畅、形体比例接近真人；云冈造像更早、更雄壮，面相方圆、肩宽体阔，衣纹作阶梯状硬刻线。"],"y":["第一张图先看：崖壁上是否有敞开的大佛坐像，以及窟前是否有木构窟檐与石阶；砂岩的暖黄色石质是稳定的辅助线索。","常见误认：把龙门石窟的奉先寺大佛当成云冈露天大佛。区别在石质与造型——龙门为青灰石灰岩、唐代面相圆润；云冈为暖黄砂岩、北魏面相方圆、衣纹硬直。"]},"天坛":{"t":"天坛","p":"02-笔记/中国/华北/北京/天坛.md","l":"天坛位于北京城南，明永乐十八年（1420）建成，是明清两代皇帝祭天、祈谷的皇家坛庙；祈年殿的三层蓝色圆檐与圆形石台基是其最醒目的形象，1998 年列入世界文化遗产。","k":["三重蓝色圆檐 + 金色宝顶：祈年殿屋面为蓝色琉璃瓦（象征天），三层圆形檐口自下而上收分，顶上鎏金宝顶，整体是纯几何的同心圆轮廓。","圆形三层汉白玉台基：殿身立在三层圆形石台上（祈谷坛），每层带栏杆与台阶，从正面看形成「三台层叠 + 三檐层叠」的呼应。","红色柱身与金色彩画：檐下额枋、斗拱施青绿与金色的和玺彩画，柱身朱红，与蓝色屋面构成固定的红—蓝—金配色。","严格的中轴与圆形平面：主殿为圆形平面、圆形屋顶，与故宫的方形殿宇、黄色琉璃瓦形成直接对照。","坛墙北圆南方：整座坛区外围墙呈「北圆南方」，象征天圆地方；园内大面积古柏成行，与殿顶形成「绿海托蓝顶」的场景。"],"m":["与 [[故宫]]：故宫主体为方形殿宇、黄色琉璃瓦、庑殿或歇山顶，沿中轴排列于紫禁城城墙之内；天坛是圆形平面、蓝色琉璃瓦、三重圆檐攒尖顶的祭天建筑，位于城南非宫城之内。","与一般佛寺圆殿：佛寺的圆形殿多为单檐或重檐、覆黄瓦或灰瓦，且以佛像为中心；祈年殿无佛像，三层圆檐、蓝瓦金顶为定制，殿内为祭天牌位与供器。"],"y":["第一张图先看：圆形三重檐是否覆蓝瓦、顶上有金宝顶，下面是否三层圆形石台基；这四点同时出现基本可定为祈年殿。","常见误认：把北京其他蓝瓦圆顶建筑（如某些现代仿古亭阁）当成祈年殿。区别在体量、三层收分比例，以及必须叠加的三层汉白玉台基与皇家彩画。"]},"巴黎圣母院":{"t":"巴黎圣母院","p":"02-笔记/世界/欧洲/法国/巴黎圣母院.md","l":"巴黎圣母院位于巴黎西岱岛，1163 年奠基、1345 年大体完工，是法国哥特式教堂的典范；西立面双塔夹持玫瑰窗与三座尖拱门，1991 年随「巴黎塞纳河畔」列入世界文化遗产。","k":["对称的双塔方立面：西立面左右两座平顶方塔（各约 69 米）夹住中央，两塔之间没有尖塔，立面呈完整的矩形轮廓——与单塔或尖顶教堂最易区分。","中央大玫瑰窗：立面第二层正中是直径约 9.6 米的圆形玫瑰窗，窗下有一排细密的石柱廊（国王廊），上承尖拱，下接三座门洞。","三座尖拱门洞并排：下层并排三座深凹的尖拱门（圣母门、最后审判门、圣安娜门），门楣与拱券内布满雕像，形成「三拱并列」的底层节奏。","中央尖塔与飞扶壁：跨越屋顶的中轴尖塔（19 世纪维奥莱-勒-杜克重修）与侧面的飞扶壁、尖拱窗，是哥特式结构的外部表现。","浅米黄色石材：立面石材呈浅沙色，长期风化后局部发灰发黑，与西班牙圣家堂的暖褐石色与有机曲面明显不同。"],"m":["与 [[圣家堂]]：圣家堂是 19—20 世纪的加泰罗尼亚现代主义建筑，有机曲面、塔群如林、暖褐色石与彩色瓷砖；巴黎圣母院是 12—14 世纪法国哥特，立面严格对称、双塔平顶、结构逻辑清晰可见。","与米兰大教堂、科隆大教堂：这两座都以密集的尖塔群著称（米兰无数小尖塔、科隆双塔尖顶），轮廓布满向上的尖角；巴黎圣母院双塔为平顶方塔，立面是整齐矩形，中轴只有一个 19 世纪尖塔。"],"y":["第一张图先看：是不是两座平顶方塔夹住中央立面、中间一枚大圆窗、下面三座尖拱门；若立面轮廓带满尖塔，就往米兰、科隆方向考虑。","常见误认：把兰斯大教堂、亚眠大教堂等法国哥特教堂当成巴黎圣母院。区别在于双塔是否为平顶方塔、立面是否严格三层横向划分，以及是否坐落在西岱岛临水位置。"]},"圣索菲亚大教堂":{"t":"圣索菲亚大教堂","p":"02-笔记/世界/西亚/土耳其/圣索菲亚大教堂.md","l":"圣索菲亚大教堂位于伊斯坦布尔老城，532—537 年由拜占庭皇帝查士丁尼一世主持建造，以巨大的中央穹顶著称；1453 年后转为清真寺并加建宣礼塔，1985 年随「伊斯坦布尔历史区域」列入世界文化遗产。","k":["一座巨大的中央穹顶压住整栋建筑：主穹顶直径约 31 米，穹顶基部一圈密集的小窗，使穹顶看上去像浮在光带上；穹顶尺度远大于任何一座单体教堂的塔楼。","四座细长宣礼塔分列四角：奥斯曼时期加建的灰白色石砌宣礼塔呈细圆柱状，顶端收成尖锥，围绕方形的教堂主体，是「教堂 + 宣礼塔」这一混合形态的关键标志。","方形主体 + 半穹顶层层跌落：主穹顶东西两侧各接半穹顶，向下再以拱与廊衔接，外部看是「大圆顶居中、两侧半圆顶逐级下降」的台阶式轮廓。","粉灰色石砌外墙与扶壁：外墙以砖石交替砌筑，表面呈粉灰、赭黄的不均匀色块，附有粗壮的扶壁与拱窗，与欧洲哥特教堂的尖拱、飞扶壁完全不同。","广场与喷泉的前景：建筑前为开阔广场，常带喷泉与树阵，可拍到完整穹顶轮廓与宣礼塔群。"],"m":["与 [[圣瓦西里大教堂]]：圣瓦西里是俄罗斯东正教堂，以九座彩色洋葱形穹顶与红砖墙为标志，塔顶呈饱满的洋葱曲线；圣索菲亚是单一巨型半圆穹顶、粉灰石面，加四座细长尖锥宣礼塔，无彩色洋葱顶。","与 [[圣家堂]]：圣家堂塔群密集、立面有机曲面、暖褐石与彩色装饰；圣索菲亚是单一主导穹顶、结构对称、外立面克制，且带伊斯兰宣礼塔。"],"y":["第一张图先看：中央是否有单一超大穹顶，四角是否有细长尖锥宣礼塔，外墙是否为粉灰石砌；三者同现即为圣索菲亚的最稳组合。","常见误认：与伊斯坦布尔的蓝色清真寺、苏莱曼尼耶清真寺互混。区别方法：数宣礼塔（圣索菲亚四座、蓝色清真寺六座），看穹顶基部是否有连续小窗与半穹顶跌落关系。"]},"帕特农神庙":{"t":"帕特农神庙","p":"02-笔记/世界/欧洲/希腊/帕特农神庙.md","l":"帕特农神庙位于雅典卫城山顶，公元前 447—前 432 年建造，供奉雅典娜，是古希腊多立克柱式的最高代表；1987 年随「雅典卫城」列入世界文化遗产。","k":["八柱正面的多立克柱廊：正面八根、侧面十七根多立克柱围成周柱式，柱身带纵向凹槽、柱头为简洁的圆盘加方托（无柱础、无双螺旋），是「希腊多立克」的标准形象。","柱身微粗、比例低矮：多立克柱高约为直径的五点五倍，柱身中部略鼓（收分与隆起），看上去粗壮沉稳，与罗马科林斯柱的细长华丽不同。","山花与横梁残破不完整：东西山花的三角形轮廓残缺，横梁（额枋、三陇板、陇间壁）多处断裂，屋顶早已不存，只剩石构骨架——这种「残而不倒」的状态本身就是重要线索。","立在卫城山顶的岩台之上：神庙坐落在雅典卫城的石灰岩台地上，与山下的现代城市形成高差；全景里常见山丘轮廓 + 山顶石柱群。","白色大理石：彭特利库斯大理石，风化后呈浅灰白至淡金色，表面有细密的凹槽与侵蚀纹。"],"m":["与 [[罗马斗兽场]]：两者同属古典石构，但斗兽场是罗马混凝土与拱券体系、椭圆平面、多层拱廊；帕特农是梁柱体系、矩形平面、单一层高的柱廊。","与卫城山门（Propylaea）及伊瑞克提翁神庙：同在卫城山顶，常被混拍。山门是带五门洞的入口建筑，伊瑞克提翁以女像柱闻名；帕特农是体量最大的周柱神庙，正面八柱、体块完整。"],"y":["第一张图先看：是否是带凹槽的粗壮石柱 + 无柱础 + 残缺的石构横梁，且建筑位于山顶岩台之上；四条同时出现即可定为帕特农。","常见误认：把卫城山上其他古迹的柱列（山门、伊瑞克提翁）当作帕特农。看规模与完整性：帕特农柱列最长、体块最大，且正面为八柱一组的整齐列柱。"]},"富士山":{"t":"富士山","p":"02-笔记/世界/东亚/日本/富士山.md","l":"富士山（Mount Fuji）位于日本本州中南部静冈县与山梨县交界，海拔 3776 米，是日本最高峰，一座仍被列为活火山的层状火山；以近乎完美对称的单一锥形山体、山顶终年雪冠与「湖面倒影／五重塔前景」的经典构图著称，2013 年以「信仰的对象与艺术的源泉」列入世界文化遗产。","k":["近乎完美对称的单一锥体：山体从左右两侧以近乎相等的坡度收束到山顶，轮廓是一个平缓的等腰三角形，没有副峰干扰。","山顶白色雪冠、山腰深色林带：上部积雪成白色帽状，下部是深色森林与火山灰坡，形成清晰的两段式分层。","孤立于平原之上：周围是低平的平原与湖泊，山体单独拔起，不像阿尔卑斯那样连成山脉。","经典前景三件套：湖泊倒影（河口湖、山中湖）、樱花、或五重塔（忠灵塔）——同框时几乎不用再判断。湖面平静、山体上下完整镜像的那种照片，机位多在河口湖（逆富士主场地）；湖畔有明显度假设施或…"],"m":["与马特洪峰：马特洪峰是四面金字塔形的角峰，边稜陡直、山体被岩壁切割成四个面；富士山是柔和对称的单一锥体，坡度均匀。","与玉龙雪山、乞力马扎罗山：玉龙雪山是多峰并立的岩雪山脉；乞力马扎罗是宽阔的盾状火山、顶部平缓；两者都没有富士山这种「孤立、对称、收成一点」的轮廓。"],"y":["第一张图先看：对称锥形轮廓 + 山顶雪冠 + 孤立于平原/湖面；三者齐全即可定。","常见误认：把任何雪顶火山都当成富士山。判别点：坡度是否均匀、山顶是否收成单一尖点、周围是否是低平地形。"]},"马特洪峰":{"t":"马特洪峰","p":"02-笔记/世界/欧洲/瑞士/马特洪峰.md","l":"马特洪峰（Matterhorn / Monte Cervino）位于瑞士与意大利交界的彭尼阿尔卑斯山脉，海拔 4478 米；以近乎孤立的四面金字塔形角峰、陡直如刀的边稜与「上段积雪、下段深色岩壁」的灰白对比著称，是阿尔卑斯最具辨识度的山峰，未被列入世界遗产。","k":["四面金字塔形角峰：山体被三条主要山脊切成四个近乎三角的面，边稜笔直陡削，峰顶收成一个尖点。","灰白两段式配色：上段为积雪与冰川（白），下段为深灰绿色片岩与岩壁（暗），界线大致沿山体中部。","孤立拔起、不像山脉：周围是较低的雪原与冰川谷，马特洪峰单独凸起，不像勃朗峰那样与群峰连成一片。","经典机位有倒影或观景台：利菲尔湖（Riffelsee）可拍到完整倒影；戈尔内格拉特（Gornergrat）观景台可拍摄横向全景。"],"m":["与富士山：富士山是柔和对称的单一锥体、坡度均匀；马特洪峰是四面分明的角峰，边稜陡直、山面被切出明显的折面。","与勃朗峰、少女峰：勃朗峰是浑圆平缓的雪原穹丘、与群峰连成山块；少女峰一带是宽阔的雪山与冰川；两者都没有马特洪峰这种孤立、尖锐、四棱分明的形态。"],"y":["第一张图先看：四面金字塔轮廓 + 陡直边稜 + 灰白上下两段；若山峰是「尖而孤立、有四个面」，基本就是马特洪峰。","常见误认：与阿尔卑斯其他尖峰（如 Weisshorn、Dent Blanche）混。判别点：马特洪峰几乎完全孤立、四个面近乎对称，峰形在照片中呈现明确的三角形剪影。"]},"尼亚加拉瀑布":{"t":"尼亚加拉瀑布","p":"02-笔记/世界/美洲/加拿大/尼亚加拉瀑布.md","l":"尼亚加拉瀑布（Niagara Falls）位于加拿大安大略省与美国纽约州交界，由尼亚加拉河在伊利湖与安大略湖之间跌落形成，由马蹄瀑布、美国瀑布与新娘面纱瀑布三部分组成；以巨大的马蹄形水幕、青绿松石色水色与终年不散的白色水雾著称，未被列入世界遗产。","k":["巨大的马蹄形水幕：主瀑（马蹄瀑布）平面呈 U 形或马蹄形，水墙连成一条完整的弧线，而不是被岩石切成多股细流。","青绿松石色水色：水体呈罕见的绿松石绿，落水区因大量气泡而泛白。","终年升腾的白色水雾：水幕底部常年升起高数十米的浓雾，几乎遮住落水点；照片里常是一片白蒙蒙。","下方的观景船：经典机位从加拿大地一侧或「雾中少女号」船上拍，船与人成为水幕的比例尺。"],"m":["与伊瓜苏瀑布：伊瓜苏是数十条细长瀑布沿断层线横亘热带丛林，呈「一排水帘」的马蹄形瀑布群；尼亚加拉是单一大水幕收成一个马蹄形凹口，周围是城市与公路。","与维多利亚瀑布：维多利亚瀑布宽约 1700 米、落差约 108 米，水雾更高、位于非洲赞比西河；尼亚加拉落差约 51 米、水色偏绿松石。"],"y":["第一张图先看：完整马蹄形水幕 + 绿松石水色 + 大水雾；若水幕被岩石切成多条细流，多半是伊瓜苏。","常见误认：把中文里「尼加拉瓜瀑布」的误译当成中美洲尼加拉瓜的景点；实际它在美加边界，与尼加拉瓜国无关。"]},"圣托里尼":{"t":"圣托里尼","p":"02-笔记/世界/欧洲/希腊/圣托里尼.md","l":"圣托里尼（Santorini / Thira）是希腊爱琴海基克拉泽斯群岛中的火山岛，公元前 1600 年左右的米诺斯式大喷发留下巨大的破火山口；岛西侧的伊亚（Oia）村落贴着火山口崖壁层层叠起，以纯白立方体房屋、蓝顶教堂与火山口海景成为爱琴海最标志性的画面，未被列入世界遗产。","k":["崖顶上层层叠叠的纯白立方体房屋：房屋是无规则堆叠的白色平顶立方体，顺着崖壁等高线上下错落，几乎没有整齐街巷。","鲜蓝色圆顶 + 白十字钟塔：蓝顶教堂是画面里的视觉焦点，圆顶为饱和的钴蓝，配白色十字架与钟塔。","背景是深蓝火山口海湾与暗红崖壁：海水是极深的蓝，崖壁为暗红、灰黑的火山层理，与白墙形成强烈对比。","日落时白墙转粉橙：黄昏光线把白墙染成粉橙、蓝图更深，是伊亚最常被拍摄的时刻。"],"m":["与米克诺斯岛：米克诺斯同样是蓝白配色，但以低矮迷宫般的白巷、风车与平坦地形著名，没有高崖与火山口海湾；伊亚是垂直贴在崖壁上的村落。","与阿玛菲海岸、五渔村：意大利这两处也是崖壁村落，但房屋为彩色的意大利式石砌建筑、有教堂尖顶与梯田葡萄园；圣托里尼是白色立方体 + 钴蓝圆顶的基克拉泽斯风格。"],"y":["第一张图先看：白立方体房屋成片 + 钴蓝圆顶 + 深色火山口崖壁；同时出现「白、蓝、深红崖」三色即基本可定。","常见误认：与米克诺斯、西班牙白色小镇（如弗里希利亚纳）混。判别点：是否有破火山口海湾与高崖，以及屋顶是否为钴蓝圆顶。"]},"埃菲尔铁塔":{"t":"埃菲尔铁塔","p":"02-笔记/世界/欧洲/法国/埃菲尔铁塔.md","l":"埃菲尔铁塔（Tour Eiffel）位于法国巴黎战神广场，为 1889 年世界博览会而建的镂空熟铁桁架塔，高约 330 米（含天线）；以四腿拱门底座、越往上越细的曲线塔身与深褐古铜色涂装著称，1991 年作为「巴黎塞纳河畔」的一部分列入世界文化遗产。","k":["全镂空桁架、塔身越往上越细：从任何角度都能透视塔身背后的天空，格构线条细密；轮廓是平滑内收的曲线，最后收成尖顶。","底部四腿张开的拱门：四条巨型塔腿向外张开、在底部形成大拱，是最不会认错的底座形状。","深褐古铜色涂装：不是银灰也不是橙红，而是偏暖的深褐（每七年重刷一次，颜色随批次略有差异）。","夜间整点闪灯：整点前后塔身有数千枚灯泡闪烁，塔顶探照灯扫过巴黎夜空。"],"m":["与东京铁塔：东京铁塔同为格构塔，但为橘红与白相间的钢管塔、塔身线条较直、底座无明显四腿拱门；埃菲尔是深褐色熟铁、四腿张成拱门。","与西雅图太空针塔、迪拜帆船酒店（现代塔形建筑）：太空针是细杆上顶一个圆盘；帆船酒店是弧形帆状实体建筑；两者都没有埃菲尔这种整体镂空、分层平台的格构塔身。"],"y":["第一张图先看：四腿拱门底座 + 镂空格构 + 深褐色调；三者合一即锁定。","常见误认：与东京铁塔互混。最快区分看颜色与底座——深褐 + 拱门式四腿是埃菲尔；橘白相间 + 直筒钢管是东京塔。"]},"悉尼歌剧院":{"t":"悉尼歌剧院","p":"02-笔记/世界/大洋洲/澳大利亚/悉尼歌剧院.md","l":"悉尼歌剧院（Sydney Opera House）位于澳大利亚悉尼港便利朗角（Bennelong Point），丹麦建筑师约恩·乌松（Jørn Utzon）设计，1959 年动工、1973 年启用；以一组向天空张开的白色壳片屋顶与厚重花岗岩平台著称，2007 年列入世界文化遗产。","k":["白色贝壳／风帆形壳片：一组高低错落的壳片从同一基座升起，像鼓满风的帆或层叠的贝壳，边缘呈弧线收束。","壳面细密白瓷砖：壳片表面铺贴白色与米色瓷砖（瑞典产），在日光下呈哑光白，并随日照角度变化明暗。","厚重粉褐花岗岩平台：壳片坐落在巨大而低平的粉褐色石基座上，与轻盈壳面形成「重基座 + 轻屋顶」的对比。","港湾机位常与钢拱桥同框：经典视角从水面拍，画面左侧是深灰钢拱的悉尼港湾大桥，与歌剧院壳片形成「拱 vs 壳」的对照。"],"m":["与悉尼港湾大桥：大桥是横跨水面的钢拱结构、有明显拱肋与吊杆，属桥梁；歌剧院是一组落地的壳片建筑。两者常同框，看「是否横跨水面」即可分开。","与毕尔包古根汉美术馆、迪拜帆船酒店（当代曲面建筑）：古根汉是金属曲面片叠合、体量贴地；帆船酒店是单一帆形高层；两者都不具备歌剧院这种「多片独立壳 + 低平台」的组合。"],"y":["第一张图先看：多片白色壳顶 + 低平石平台 + 港湾水面；三点齐全即锁定。","常见误认：把同框的港湾大桥当成主体。记住歌剧院壳片是「向上的帆」，大桥是「横跨的拱」。"]},"大笨钟":{"t":"大笨钟","p":"02-笔记/世界/欧洲/英国/大笨钟.md","l":"大笨钟（Big Ben）实指英国伦敦西敏宫（Palace of Westminster）北端的伊丽莎白塔（Elizabeth Tower），1859 年建成，为哥德复兴式方形钟楼；四面各一个巨大钟面，塔顶为深色尖锥，1987 年随「西敏宫、西敏寺与圣玛格丽特教堂」列入世界文化遗产。","k":["方形哥德复兴式钟楼：塔身是方形砌体，细部为尖拱窗、垂直线条与石雕，不是圆柱塔也不是独立钟塔，而是宫殿的一角。","四面各一个大钟面：钟面白底黑字、指针金黑描边，塔身四面同一高度各嵌一面，几乎无死角可看。","塔顶深色尖锥 + 金色顶饰：塔顶收成陡峭的四角锥，锥尖立金饰，与塔身浅砂岩色形成深浅对比。","贴着泰晤士河与西敏桥：经典机位从对岸或桥上拍，画面常带红色双层巴士、电话亭或河面倒影。"],"m":["与布拉格天文钟：布拉格天文钟是嵌在旧市政厅塔楼上的蓝金圆盘，塔身偏深色、带天文刻度盘；大笨钟是整座方形钟楼本身即为地标，钟面为白底黑字圆形。","与伦敦塔（Tower of London）：伦敦塔是诺曼时期石砌城堡群、白色塔楼（White Tower）为主，无巨型钟面；大笨钟是 19 世纪哥德复兴式钟楼。"],"y":["第一张图先看：方形哥德塔身 + 四面白底大钟面 + 深色尖锥；三点齐全即锁定。","常见误认：与英国其他市政厅钟楼、教堂钟塔混。判别点：大笨钟与西敏宫连为一体，塔身方形、钟面巨大且四面均有。"]},"自由女神像":{"t":"自由女神像","p":"02-笔记/世界/美洲/美国/自由女神像.md","l":"自由女神像（Statue of Liberty）位于美国纽约港自由岛，1886 年由法国赠予美国落成，Bartholdi 设计、内部钢架出自埃菲尔事务所；以铜绿色古典女性巨像、高举火炬的右臂与七道光芒冠冕著称，1984 年列入世界文化遗产。","k":["铜绿色（氧化铜）女性巨像：表面因铜皮氧化呈均匀的蓝绿锈色，不是青铜原色，也不是油漆涂装。","右手高举火炬、左手抱法典：姿态固定——右臂垂直上举火炬，左臂夹一块带铭文的书板（tabula ansata）。","七道光芒冠冕：头顶冠冕射出七道尖芒，象征七洲七洋；冠下可见卷发与面部轮廓。","立于星形堡垒上的方形石基座：雕像站在星形要塞（Fort Wood）上的多层花岗岩基座，比例上基座接近雕像高度的一半。"],"m":["与里约救世基督像：里约像是张开双臂、立于山顶的混凝土/皂石雕像，双臂平展成十字；自由女神是单臂高举火炬、立于海岛的铜像。","与东京台场自由女神像（复制品）：台场像体量小得多、立于海滨公园，背景是彩虹大桥；纽约像立于独立海岛、有星形堡垒基座与港口天际线。"],"y":["第一张图先看：铜绿色 + 单臂举炬 + 七芒冠冕；姿势与颜色同时对上即锁定。","常见误认：各地「自由女神复制品」。判别点：看基座（星形堡垒）与背景（纽约港）；复制品多为简化基座、缺少城堡层。"]},"查理大桥":{"t":"查理大桥","p":"02-笔记/世界/欧洲/捷克/查理大桥.md","l":"查理大桥（Karlův most）是捷克布拉格跨越伏尔塔瓦河的石拱桥，1357 年由查理四世下令动工、15 世纪初建成；以十六孔石拱、桥面两侧三十尊巴洛克圣像与两端桥塔著称，1992 年随布拉格历史中心列入世界文化遗产。","k":["连续石拱 + 厚实桥墩：桥身是一串半圆石拱，拱圈外露、桥墩粗壮，拱与拱之间几乎等距。","两侧排满深灰圣像：桥栏上立着三十尊巴洛克圣像，多为深灰风化石色，形成「雕像长廊」，人像与桥体同高比例。","一端旧城桥塔、一端望向城堡山：桥的旧城端接黑色哥德式桥塔（Powder Tower 方向），小城端可远望布拉格城堡与圣维特大教堂的尖顶。","桥面为石板步行道：无车道，铺石板，常有街头艺人与游客；桥头有摊贩与灯柱。"],"m":["与伦敦塔桥：伦敦塔桥是可开合的钢结构桥、带两座哥德式塔楼与蓝白涂装，有升降桁架；查理大桥是纯石拱桥，无开合结构、无高塔（只有桥端塔）。","与佛罗伦萨老桥（Ponte Vecchio）：老桥桥面上建有成排商铺房屋，几乎看不见桥身拱；查理大桥桥面开阔、两侧是雕像而非建筑。"],"y":["第一张图先看：连续石拱 + 桥栏雕像成列 + 背景城堡山/哥德桥塔；三点对上即基本可定。","常见误认：与其他欧洲雕像桥（如巴黎亚历山大三世桥）混。差别在于亚历山大三世桥是钢结构 + 金色雕像 + 单跨大拱；查理大桥是低平的连续石拱。"]},"圣瓦西里大教堂":{"t":"圣瓦西里大教堂","p":"02-笔记/世界/欧洲/俄罗斯/圣瓦西里大教堂.md","l":"圣瓦西里大教堂（Собор Василия Блаженного）位于俄罗斯莫斯科红场南端，1555—1561 年由伊凡四世（伊凡雷帝）下令建造，纪念征服喀山汗国；以九座各自独立的彩色洋葱穹顶、中央帐篷式红砖高塔与红砖白饰带墙面著称，1990 年随「克里姆林宫与红场」列入世界文化遗产。","k":["多座色彩各异的洋葱穹顶：红白螺旋、蓝白条纹、绿黄菱格、金点等各不相同的穹顶聚在一起，每座纹样都不一样，是全世界独一份的「彩釉洋葱头」。","中央帐篷式高塔：正中一座红砖八角锥形（帐篷式）塔高耸，比周围穹顶都高，塔尖顶十字。","红砖墙 + 白色装饰带：塔身与墙体为红砖砌筑，腰线与檐口有白色石带与连拱装饰，红白对比鲜明。","立在红场铺石广场的尽端：前方是开阔的红场石板地，两侧可见克里姆林宫红墙或古姆百货立面。"],"m":["与滴血救世主教堂（圣彼得堡）：两者同为俄罗斯洋葱顶教堂，但滴血救世主是灰蓝与彩色马赛克拼贴、单一巨型穹顶 + 一座主塔；圣瓦西里是九座各自独立、色彩纹样互不相同的穹顶聚成一群。","与克里姆林宫内的教堂群：克里姆林宫内教堂多为金顶 + 白色墙体（如圣母升天大教堂），立面端正；圣瓦西里是红砖墙体 + 彩釉穹顶，且位于红场而非宫内。"],"y":["第一张图先看：多座不同花纹的彩色洋葱顶 + 中央红砖帐篷塔；只要穹顶「各不相同地挤在一起」，就是圣瓦西里。","常见误认：与滴血救世主教堂混。判别点：滴血救世主整体是一个大穹顶 + 马赛克外墙；圣瓦西里是一群小穹顶。"]},"复活节岛摩艾石像":{"t":"复活节岛摩艾石像","p":"02-笔记/世界/大洋洲/智利/复活节岛摩艾石像.md","l":"摩艾（Moai）是智利复活节岛（拉帕努伊岛）上的巨型人像石雕，约 13—16 世纪由岛上波利尼西亚居民以火山凝灰岩雕成；以超大头身比例、长耳垂肩的方正面孔与成排立于石台（Ahu）上的阵列著称，1995 年随「拉帕努伊国家公园」列入世界文化遗产。","k":["头部比例极大的方正面孔：摩艾的头身比例严重偏头，长脸、宽额、深眼窝、厚唇、下颌突出，多呈仰视天空的姿态。","长耳垂肩 + 头顶红石：耳廓特别长、垂至肩部；部分石像头顶戴红色石质「发髻」（pukao）。","成排立在石台（Ahu）上：多尊石像并列站在用石块砌成的长条形祭台上，多半只露出头与肩，下半身埋在地下。","背景是草原与南太平洋：无树木的火山草原、火山口坡地与海岸线，与丛林中的玛雅、东南亚遗址完全不同。"],"m":["与纳斯卡线（秘鲁）：纳斯卡线是沙漠地表的大型线条图案，靠俯视才成形；摩艾是立体的巨石人像，立于地面即可正面观看。","与马丘比丘：马丘比丘是整片石砌城址与梯田，无独立人像雕塑；摩艾是单体石雕群，环境为开阔草原海岸。"],"y":["第一张图先看：超大头脸 + 长耳 + 成排立石台；只要出现「大头人像站成一列」，几乎可定为摩艾。","常见误认：与波利尼西亚其他 tiki 石像混。区别在摩艾的耳特别长、头身比例极端、石台为长条砌石平台。"]},"乌尤尼盐沼":{"t":"乌尤尼盐沼","p":"02-笔记/世界/美洲/玻利维亚/乌尤尼盐沼.md","l":"乌尤尼盐沼（Salar de Uyuni）位于玻利维亚西南部阿尔蒂普拉诺高原，海拔约 3656 米，面积约 10582 平方公里，是世界最大的盐沼；雨季薄水覆在盐壳上时形成近乎完整的镜面，天空与地面上下对称，被称为「天空之镜」，未被列入世界遗产。","k":["一望无际的平坦白色盐滩：地表是六边形裂纹拼接的盐壳，几乎完全没有起伏，地平线在被水覆盖时消失。","上下对称的镜面倒影：雨季（约 12 月至次年 3 月）覆上数厘米薄水后，地面成为镜面，云与人的倒影与实物几乎等大、无变形。","画面靠「点景」定比例：盐堆、越野车、人影、雨靴是唯一能看出尺度与地面的参照物。","高海拔强光：天空极蓝、紫外线强，白盐反光刺眼，照片里常呈高对比的蓝白两色。"],"m":["与青海茶卡盐湖：茶卡同样有镜面与盐壳，但规模小得多，周围有山体背景与栈道、盐雕等人工设施，游客密度高；乌尤尼是真正的「没有地平线」的大平原。","与死海、纳米布盐沼：死海是封闭水体、含盐度高但仍是「水面」，人能浮起；乌尤尼多数时候是固体盐壳上的薄水，视觉核心是镜面倒影而非漂浮。"],"y":["第一张图先看：极平白盐面 + 天地对称镜面 + 无山体背景；若画面四周完全没有地形起伏，几乎就是乌尤尼。","常见误认：与茶卡盐湖、盐田晒场混。判别点：看是否有山、栈道、盐雕等人工物，以及镜面是否延伸到地平线。"]},"圣家堂":{"t":"圣家堂","p":"02-笔记/世界/欧洲/西班牙/圣家堂.md","l":"圣家堂（Basílica de la Sagrada Família）位于西班牙巴塞罗那，1882 年动工、至今仍在施工的天主教宗座圣殿；由高迪（Antoni Gaudí）自 1883 年起主持设计，以有机曲线的尖塔林、雕塑密布的立面与树状柱大厅著称，2005 年诞生立面与地下礼拜堂列入世界文化遗产（属「高迪作品」）。","k":["尖塔成林、向上收束：一组细长尖塔直插天空，塔身越往上越细，塔尖带十字与球状顶饰，与一般哥特教堂的对称双塔结构不同。","立面像风化的珊瑚：石材表面不是平整墙面，而是满布有机状雕刻——叶脉、骨骼、蜂巢般的镂空与人物群像，像沙堡或珊瑚被风化后的质感。","暖砂岩色 + 夜间金橙打光：白天是暖灰黄的砂岩色；夜間投灯后整组塔身呈金橙色，前方水景常映出一整排塔影，是最常见的夜景机位。","塔身带螺旋与叶脉纹理：塔柱不是光面圆柱，而是沿高度旋转上升的螺旋纹，这是与米兰大教堂、科隆大教堂最容易分辨的一处。"],"m":["与米兰大教堂（同类尖塔教堂）：米兰大教堂是白色大理石、立面平整、塔尖为密集小尖柱；圣家堂塔身是暖砂岩色、带螺旋叶脉状纹理，立面雕刻深度极大，呈有机骨骼感。","与科隆大教堂：科隆是标准哥特双塔 + 飞扶壁 + 大面积彩色玻璃窗，轮廓方正；圣家堂是十几座塔的群簇结构，整体轮廓像一座石造森林。"],"y":["第一张图先看：尖塔成林 + 有机雕刻立面 + 暖砂岩/金橙灯色；三点同时出现即锁定圣家堂。","常见误认：与米兰、科隆等哥特教堂混。区别在圣家堂没有传统飞扶壁，塔是多座独立尖塔而非两座巨塔，且立面无平整墙面。"]},"马丘比丘":{"t":"马丘比丘","p":"02-笔记/世界/美洲/秘鲁/马丘比丘.md","l":"马丘比丘（Machu Picchu）位于秘鲁库斯科大区乌鲁班巴河谷的山脊之上，海拔约 2430 米，是 15 世纪印加帝国留下的石砌山城遗址；以无缝拼接的灰白花岗岩石墙、层层梯田与背后陡峭的华纳比丘峰构成「遗址 + 高山」的独有构图，1983 年列入世界文化遗产。","k":["遗址盘踞山脊、背后一座尖峰：石砌屋群与梯田沿狭窄山脊铺开，正后方是陡峭独立的华纳比丘峰（Huayna Picchu），这个「废墟 + 后山尖峰」的组合几乎只此一处。","大片绿色台地草坪：印加人把陡坡切成一级级平整梯田，中央是大片草地广场，与灰白干砌石墙形成绿—灰的强烈对比。","石块严丝合缝的干砌墙：墙体的多边形石块不用灰浆，边角互相咬合（印加「栓石」工艺），转角处石块表面磨光。","常有羊驼在梯田上低头觅食：几乎成了马丘比丘的标配前景，与吴哥窟、奇琴伊察的丛林环境完全不同。"],"m":["与 [[吴哥窟]]：吴哥窟是砂岩塔庙 + 护城河 + 热带丛林，塔身浮雕密布；马丘比丘没有高塔、没有护城河，是石墙遗址 + 高山梯田草原。","与奇琴伊察、蒂卡尔（玛雅遗址）：玛雅遗址是阶梯金字塔 + 石灰岩神庙，多隐在丛林树冠中；马丘比丘是线性山脊聚落，无金字塔式台庙，背景是安第斯尖峰。"],"y":["第一张图先看：山脊上的石墙遗址 + 背后华纳比丘尖峰 + 大片梯田草坪；三者同框即锁定。","常见误认：与秘鲁其他印加遗址（如欧兰泰坦博）混。区别在马丘比丘有那座标志性后山尖峰与开阔草坪，遗址沿山脊呈长条形铺开。"]},"慕田峪长城":{"t":"慕田峪长城","p":"02-笔记/中国/华北/北京/慕田峪长城.md","l":"慕田峪长城位于北京市怀柔区，是明长城的一段，明初由大将徐达督修旧边墙，永乐二年（1404）设慕田峪关，隆庆至万历年间由戚继光整修并增筑空心敌台；以沿陡峭山脊起伏的灰砖墙体、密集的方形敌台与两侧山林著称，1987 年作为「长城」的一部分列入世界文化遗产。","k":["墙体贴山脊、呈锯齿状起伏：不是平地上的直墙，而是随山脊线一路爬升、翻过每个稜线，远处看像一道灰白锯齿。","密集的方形敌台：每隔一段就有方形砖台（空心敌台，可驻兵），台顶带垛口与箭窗，是明长城最典型的节点。","灰砖墙体 + 垛口：墙体外侧为垛口（锯齿状凹口），内侧为女墙，墙面以灰砖错缝砌筑。","两侧是密林山坡：秋冬呈红黄绿层次，与八达岭的裸岩山体、金山岭的碎石山脊相比，慕田峪的林相更密。"],"m":["与 [[长城八达岭段]]（同属明长城）：八达岭段更靠近关城、墙体以花岗岩条石与砖混筑，视野开阔、山体较裸；慕田峪段林相更密、敌台间距更小、山脊起伏更剧烈。","与哈德良长城：哈德良长城是低矮的石砌直墙、横越英格兰平缓草原，塔楼稀疏；明长城贴陡峭山脊、随地形大起大落、墙面有砖砌垛口。"],"y":["第一张图先看：灰砖墙贴山脊呈锯齿形 + 密集方形敌台 + 密林山坡；若是山脊连续陡起并有空心敌台，即属明长城段落。","常见误认：与八达岭、金山岭、箭扣混。仅凭一张照片判断具体段落风险高，可在本库内用「山林密度 + 敌台间距 + 山体形态」三项对照；若无从判断，只答「明长城」更稳妥。"]},"龙门石窟":{"t":"龙门石窟","p":"02-笔记/中国/华中/河南/龙门石窟.md","l":"龙门石窟位于河南洛阳城南伊河两岸的龙门山（西山）与香山（东山）崖壁上，始凿于北魏孝文帝迁都洛阳（493）前后，历北魏至北宋断续营造四百余年；现存窟龛两千余座、造像十万余尊，以唐代奉先寺卢舍那大佛最为著名，2000 年列入世界文化遗产。","k":["伊河两岸的青灰色石灰岩崖面：洞窟沿河水两侧崖壁延绵约一公里，岩面平整、色调青灰，与云冈石窟的暖黄砂岩截然不同——看崖壁颜色即可先分石窟阵营。","奉先寺卢舍那大佛：体量巨大（主尊约 17 米），整窟像露天大龛敞开于崖壁，主佛面相丰腴圆润、额宽颐满、螺髻低垂、双目微含笑意，是唐代造像「丰颐硕体」的典型。","大佛与胁侍、天王、力士并列：奉先寺是九尊像的群像布局，主尊两侧依次为弟子、菩萨、天王、力士，是龙门规模最大的露天造像群。","宾阳三洞的北魏「秀骨清像」：与唐代丰腴不同，北魏窟龛造像面型清瘦、褒衣博带，衣纹流畅，体现迁都洛阳后汉化的风格。"],"m":["与 [[云冈石窟]]：两者都是中国北方大型皇家石窟，但云冈在山西大同、砂岩暖黄、北魏早期造像雄健（面相方圆、肩宽体阔、衣纹阶梯状硬刻线），且第 20 窟大佛敞露天外；龙门在洛阳伊水、石灰岩青灰、以唐代丰腴圆润造像为主，奉先寺大佛是唐代典型。","与 [[莫高窟]]：莫高窟是敦煌砂砾岩崖壁上的密集洞窟，以泥塑彩塑与大量壁画为主，极少露天大石雕；龙门是石灰岩整岩雕造的露天与半露天石像，没有同规模的壁画系统。"],"y":["第一张图先看：伊水两岸的青灰石灰岩崖壁 + 层层窟龛；再找面容丰腴含笑、体量巨大的唐代大佛，即可锁定龙门。","常见误认：把云冈第 20 窟露天大佛当成龙门奉先寺大佛。判别点：云冈为暖黄砂岩、北魏面相方圆、衣纹硬直；龙门为青灰石灰岩、唐代面相丰腴、衣纹圆转。"]},"颐和园":{"t":"颐和园","p":"02-笔记/中国/华北/北京/颐和园.md","l":"颐和园位于北京西北郊，前身是清乾隆年间建成的清漪园，光绪年间重建后更名颐和园；以万寿山与昆明湖为骨架，湖中有南湖岛与十七孔桥，山前中央立佛香阁，是现存规模最大、保存最完整的清代皇家园林，1998 年列入世界文化遗产。","k":["万寿山 + 昆明湖的组合：北为万寿山、南为浩大昆明湖，山湖并置，湖面开阔——与以水面为主的拙政园、以叠山为主的南方园林格局完全不同。","前山中央的佛香阁：万寿山前山正中立一座八角形、多层重檐攒尖顶的大阁，坐落在高大的石台之上，红墙黄琉璃瓦，是颐和园的制高点与视觉中心。","湖西的石舫（清晏舫）：昆明湖西岸停着一艘由汉白玉与大理石砌成的石船，船身雕作西洋式舱楼，是颐和园特有的标志物。","十七孔桥与南湖岛：湖中偏南的南湖岛由一座十七孔石拱桥与东岸相连，桥身修长、桥洞成排，是昆明湖上的经典画面。","东段的长廊：邀月门至石丈亭间有 728 米彩绘长廊，枋梁满绘山水花鸟人物，是世界上最长的人工彩绘走廊。"],"m":["与 [[拙政园]]：拙政园是苏州明代私家园林，以曲折水面、亭榭假山与「借景」取胜，建筑体量小、色调素雅；颐和园是北方皇家园林，山湖开阔、佛香阁等建筑体量宏大、用色浓烈，尺度与气象完全不同。","与承德避暑山庄：避暑山庄以朴素淡雅、自然山林见长，建筑多为青砖灰瓦、少雕饰；颐和园以金碧辉煌的殿阁楼台与开阔湖面为标志，是「园林中的宫殿」。"],"y":["第一张图先看：万寿山前山的佛香阁是否居中凌驾 + 前方是否是大片昆明湖；再看十七孔桥、石舫、长廊等标志，即可锁定颐和园。","常见误认：把北海白塔当成颐和园佛香阁。判别点：白塔是白色覆钵式喇嘛塔、在湖心岛上；佛香阁是红色八角重檐木阁、在万寿山前山。"]},"妙应寺白塔":{"t":"妙应寺白塔","p":"02-笔记/中国/华北/北京/妙应寺白塔.md","l":"妙应寺白塔位于北京西城区阜成门内，建于元至元八年（1271），由尼泊尔匠师阿尼哥设计，是北京现存最早、体量最大的覆钵式喇嘛塔，也是中国内地现存最完整的元代藏传佛教建筑；通体白色覆钵，塔顶以相轮、华盖与宝顶收束。","k":["覆钵式的白色塔身：塔身是一个巨大的白色覆钵（倒扣的钵形）圆体，没有层层的塔檐，与应县木塔、大雁塔等楼阁式塔的每一层分檐完全不同。","塔下方形石砌须弥座：塔坐落在多层的方形须弥座与亚字形台基之上，基座以栏杆与束腰分层，线条横平竖直，托起圆浑的覆钵。","塔顶的相轮与华盖：覆钵之上是十三层相轮（俗称「十三天」）组成的细长塔刹，顶端冠以圆形华盖与宝珠顶，是全塔最纤细、最易辨认的顶部。","元代喇嘛塔身份：白色、覆钵、十三天相轮是藏传佛教（喇嘛教）覆钵式塔的标志，与中原楼阁式、密檐式塔形制迥异。"],"m":["与北海白塔：两者都是北京著名的覆钵式白塔。区别：北海白塔建于琼华岛山顶、塔身下有藏式须弥座与折角台、规模较小、为清代顺治年间修建；妙应寺白塔立于平地寺院中央、体量更大、为元代建、无湖泊山岛背景。","与真觉寺（五塔寺）金刚宝座塔：金刚宝座塔是下方一方形高台宝座、台上并立五座密檐小塔，属金刚宝座式；妙应寺白塔是单一覆钵式大塔，没有宝座上的五塔并列。"],"y":["第一张图先看：塔身是否为白色覆钵圆体 + 塔顶是否有细长的十三天相轮与华盖；再留意塔是立在平地寺院中央，即可锁定妙应寺白塔。","常见误认：把北海白塔（在湖心山顶）当成妙应寺白塔。判别点：看背景是湖水山岛还是平地红墙寺院；两者同为覆钵白塔，但环境与体量不同。"]},"凡尔赛宫":{"t":"凡尔赛宫","p":"02-笔记/世界/欧洲/法国/凡尔赛宫.md","l":"凡尔赛宫位于巴黎西南郊的凡尔赛镇，原为路易十三的狩猎行宫，路易十四于 1661 年起扩建为法国王权中心的巴洛克—古典主义宫殿，以超长的对称立面、镜厅与勒诺特尔式园林闻名；宫殿与园林 1979 年列入世界文化遗产。","k":["超长的水平对称立面：正立面由中部与两翼向东西延伸极长，横向展开的柱式与窗户层层重复，是典型的巴洛克—古典主义宫殿构图，一眼望不到头。","金色铁艺栅栏门：入口与庭园间的铁栅栏门遍饰金色，门楣上有太阳神阿波罗与王室纹章（太阳王路易十四的徽记），金门是凡尔赛的醒目标志。","勒诺特尔式放射状园林：宫殿后方是几何规整的法国园林——对称的花坛、笔直林荫道、十字形大运河与成排喷泉，园林轴线自宫殿向远方无限延伸。","镜厅（室内）：内部最著名的镜厅一面是十七扇拱形落地窗、对面是十七面巨镜，天花板绘有太阳王征战的巴洛克壁画（室内识别线索）。"],"m":["与 [[故宫]]：故宫是东方木构宫殿，以中轴线对称、黄琉璃瓦顶与红墙、院落式布局为特征；凡尔赛是西方石构巴洛克宫殿，以超长横向立面、镜厅、法式几何园林为特征，两者形制、材料与空间逻辑完全不同。","与巴黎卢浮宫：卢浮宫在巴黎市中心、是文艺复兴到古典主义的多翼宫殿，今以玻璃金字塔入口著称；凡尔赛在郊外、是王权象征的巴洛克宫殿，以金色铁艺门、镜厅与勒诺特尔园林为标志。"],"y":["第一张图先看：是否有超长对称的横向宫殿立面 + 前方是否规整几何的法式园林/林荫道；再看金色铁艺门、喷泉与大运河，即可锁定凡尔赛宫。","常见误认：把其他欧洲巴洛克宫殿（美泉宫、冬宫）当成凡尔赛。判别点：凡尔赛的立面横向展开最长、园林为放射状几何布局、金门与太阳王纹章是其独有标志。"]},"奇琴伊察":{"t":"奇琴伊察","p":"02-笔记/世界/美洲/墨西哥/奇琴伊察.md","l":"奇琴伊察（Chichén Itzá）位于墨西哥尤卡坦半岛北部，是玛雅—托尔特克文明鼎盛期的宗教与政治中心，以库库尔坎金字塔（El Castillo）闻名；方形阶梯金字塔四面各 91 级台阶加顶部平台恰合 365 天，1988 年列入世界文化遗产。","k":["方形阶梯金字塔（库库尔坎）：一座四面对称的阶梯金字塔，塔身逐级收分、每面中间一条宽大阶梯直通塔顶小神庙，整体呈棱台状，是奇琴伊察的绝对标志。","阶梯与平台的「蛇影」设计：春分、秋分日落时，阶梯棱边在塔身投下光影，与塔底蛇头石雕相接成蛇形，象征羽蛇神库库尔坎（这是著名的天象建筑，照片中常能看到塔底蛇头）。","塔顶方形小神庙：金字塔顶是单层方形庙殿，开有门洞，与埃及金字塔光滑斜面、顶端尖锐的形制完全不同。","石灰岩平台与圣井：城中地面为灰白石灰岩，广场一侧有天然塌陷的石灰岩溶井（cenote，圣井），深不见底，是祭祀用天坑。"],"m":["与 [[吉萨金字塔群]]：埃及金字塔是法老陵墓、四边光滑斜面、塔顶尖锐收成一点，位于沙漠；玛雅金字塔（奇琴伊察）是祭祀神庙、四面逐级阶梯、塔顶是方形神庙平台，位于热带雨林边缘的石灰岩台地——两者形制、功能、环境都不同。","与玛雅其他遗址（蒂卡尔、乌斯马尔、帕伦克）：蒂卡尔的高金字塔藏于危地马拉雨林、帕伦克金字塔顶有华丽的帕卡尔王墓、乌斯马尔以装饰几何立面著称；奇琴伊察以库库尔坎金字塔的对称阶梯、蛇影与千柱广场为主要标志。"],"y":["第一张图先看：是否为方形棱台状的阶梯金字塔 + 塔顶是否有小神庙；再看塔底蛇头、灰白石灰岩广场与热带环境，即可锁定奇琴伊察。","常见误认：把任何玛雅/阿兹特克金字塔都当奇琴伊察。判别点：奇琴伊察库库尔坎金字塔四面有宽大中央阶梯、塔顶方形庙殿、四周有千柱广场与圣井，是后古典期尤卡坦祭祀中心的代表。"]},"少林寺塔林":{"t":"少林寺塔林","p":"02-笔记/中国/华中/河南/少林寺塔林.md","l":"一句话定位：少林寺西约三百米、由二百四十余座历代墓塔连成一片的中国最大塔林，看的是「一群塔」，不是「一座塔」。","k":["标志 1：塔的数量与密集度。同一片林间空地上挤着两百多座墓塔，前后重叠，像一片塔的聚落。","标志 2：高低错落的锥状塔顶。层数一至七层不等，攒尖、尖锥、瓶形塔刹参差起伏。","标志 3：砖石本色、仿木构砖雕。灰砖灰石不施彩，檐下用砖雕出斗拱、假门、假窗。","标志 4：林中空地上的塔群。背后是柏树林与山影，塔前有矮石栏、石供台和草地。","标志 5：平面形状多样。方形、六角形、八角形、圆形塔同场并置。"],"m":["与 [[嵩岳寺塔]]：同在登封、同为塔，但嵩岳寺塔是一座孤立的十二边形密檐砖塔，看单塔轮廓与密檐；塔林是二百四十余座墓塔组成的群，看数量、密度与时代序列。一个是一座，一个是一群。","与 [[应县木塔]]：应县木塔是山西应县佛宫寺内的单座楼阁式木塔，通体木构、体量高大；塔林是砖石墓塔群，材料、功能、尺度都不同。"],"y":["第一眼先看数量：画面里是不是成片、成排的塔？多座塔挤在一片林间空地，优先想到塔林。","再看天际线：塔顶不在一条水平线上，尖锥、攒尖、瓶形塔刹参差起伏，这是「群」的特征。","然后看材质：灰砖灰石、不施彩绘，檐下有砖雕斗拱和假门假窗，可排除木塔与覆钵式白塔。"]},"嵩岳寺塔":{"t":"嵩岳寺塔","p":"02-笔记/中国/华中/河南/嵩岳寺塔.md","l":"一句话定位：北魏正光四年（523）建，中国现存最早的砖塔之一，也是唯一一座十二边形密檐砖塔。","k":["看平面轮廓：塔身呈十二边形，不是常见的四边形或八边形，转角多而匀，远看近似圆形。","看整体外形：塔身自下而上明显收分，上部十五层密檐越往上越密、越窄，整体呈锥状，顶端收于砖砌塔刹。","看檐口做法：每一层檐都由砖层层叠涩挑出，没有木构斗拱，檐下阴影一层压一层。","看檐间墙面：第一层檐以上各层檐之间的矮壁上砌出砖制门窗（多为假门假窗，全塔约 492 处），只有底层四面各开一道真券门。","看颜色与质感：通体土黄色砖面，砖缝与风化痕迹清晰，是青砖久经风雨后的颜色，不是白塔，也不是彩画木塔。"],"m":["与 [[应县木塔]]：应县木塔是楼阁式木塔，每层有真窗、有平坐与斗拱，可以登临，外观分层清楚；嵩岳寺塔是密檐砖塔，檐间只做假门窗、不能登临，轮廓是十二边形锥体。口诀：能数出楼层、能上去的是楼阁式；只能数檐、上不去的是密檐式。","与 [[妙应寺白塔]]：白塔是元代覆钵式塔，塔身如瓶，上承相轮，通体白色；嵩岳寺塔是北魏密檐塔，土黄砖色、层层出檐，年代、形制、颜色都不同。"],"y":["第一眼先看轮廓：十二边形、明显收分、上端锥状——中国现存古塔里，这个轮廓只此一座。","第二眼数檐：从下往上数，密檐十五层，越往上间距越小；檐与檐之间的矮壁上有成排砖砌假门窗。","第三眼定色：土黄砖面，无彩画、无白灰罩面，与白色的喇嘛塔、木色的楼阁塔一眼可分。"]},"白马寺":{"t":"白马寺","p":"02-笔记/中国/华中/河南/白马寺.md","l":"一句话定位：东汉永平十一年（68）建立的佛教传入中国后第一座官办寺院，被尊为「释源」「祖庭」；寺东侧的金代齐云塔是其标志古塔。","k":["看寺院中轴：山门、天王殿、大佛殿、大雄殿、接引殿、毗卢阁自南而北沿中轴线排列，是中国汉地佛寺「山门—殿—塔」布局的典型。","看标志古塔：寺东侧一座方形十三层密檐砖塔（齐云塔），下大上小、层层收分，灰砖砌筑，是白马寺最醒目的塔类建筑。","看建筑风格：现存殿宇多为明清重建，青砖灰瓦、彩绘木构，中轴对称，庄重规整。","看石雕与造像：寺内多有历代石雕、碑刻与彩塑造像，体现「祖庭」深厚的历史积淀。"],"m":["与一般汉地佛寺：白马寺的独特在「祖庭」地位与悠久始建年代，但外观殿宇多为明清重建，与各地传统汉传佛寺形制相近；区分它主要靠地望（洛阳）与寺东齐云塔，而非殿宇本身。","与少林寺：少林寺在嵩山、以禅宗祖庭与武术著称，寺内有塔林（[[少林寺塔林]]）；白马寺在洛阳、以佛教东传起点著称，标志是齐云塔，二者同属河南佛寺但各有明确标识。"],"y":["第一眼认塔：方形十三层密檐砖塔、塔身收分明显，独立于寺东——这是白马寺的齐云塔。","第二眼认院：中轴对称的山门、天王殿、大佛殿等殿宇，青砖灰瓦，规制规整。","第三眼结合地望：河南洛阳白马寺镇，若有「释源」「祖庭」匾额或碑刻，可直接确认。"]},"真觉寺金刚宝座塔":{"t":"真觉寺金刚宝座塔","p":"02-笔记/中国/华北/北京/真觉寺金刚宝座塔.md","l":"一句话定位：明成化九年（1473）建成、仿印度佛陀伽耶大觉塔的金刚宝座式塔，白石须弥座宝座上立五座密檐小塔，为现存最早的同类塔之一。","k":["看成组关系：塔由「下大上小」两部分组成——下面是巨大的方形石座（金刚宝座），座上并排立着五座小塔，中间一座最高、四角四座较矮。","看平面与轮廓：整个塔是一座「塔上塔」：石座内辟券门可入，座身四周遍刻佛龛与佛像浮雕；五座小塔均为密檐式方塔。","看材质与颜色：通体白石（汉白玉）砌成，历经岁月呈灰白色，与青砖、彩画木塔一眼可分。","看塔座装饰：宝座四壁布满石雕——成排的佛龛佛像、金刚杵、狮子等纹样，雕刻密而不乱，是金刚宝座塔最显著的视觉特征。"],"m":["与一般密檐塔（如[[嵩岳寺塔]]、[[大理千寻塔]]）：普通密檐塔是「一座塔」，塔身直接落地、层层出檐；金刚宝座塔是「一座大宝座 + 五座小塔」的组合，先有一座方形石台，再在台上立塔，形制完全不同。","与楼阁式塔（如[[应县木塔]]）：楼阁式塔有木构楼层、可登临；金刚宝座塔为石构、塔身不可登，视觉重心在宝座与成组小塔上。"],"y":["第一眼看结构：先见一座巨大方形石台，台上再立五座小塔——「台上有塔、五塔并立」，就是金刚宝座式。","第二眼看材质：通体白石、遍刻佛龛佛像，与砖木塔的材质一眼可分。","第三眼看数量：台上塔的数目是五，正中一座最高，四角四座较矮，对称布列。"]},"山海关":{"t":"山海关","p":"02-笔记/中国/华北/河北/山海关.md","l":"一句话定位：明洪武十四年（1381）筑城、扼守明长城东端的雄关，因「依山襟海」得名，城楼悬「天下第一关」巨匾，是长城东端的标志性关隘。","k":["看城楼样式：一座高大的两层城楼骑墙而立，面阔数间、重檐歇山顶，城楼正中悬「天下第一关」巨匾，这是山海关最核心的视觉标识。","看成组城防：关城以城楼为中心，城墙高厚，设有瓮城、城门洞，城下有关前广场与牌坊，体现「关」的防御格局。","看城门与牌坊：关前常立石质牌坊（如「天下第一关」石坊），城楼、牌坊、门洞构成山海关「雄关」的成组画面。","看地望：关城北倚燕山、南临渤海，背景有山峦，体现「山海关」依山襟海的地势。"],"m":["与嘉峪关：嘉峪关在甘肃、为明长城西端起点，是「西出阳关」的戈壁雄关，规模宏大、关城独立于荒漠；山海关在河北、为明长城东端，「依山襟海」，城楼下有现代城镇环境。口诀：东看海、西看沙，山海关靠海、嘉峪关在戈壁。","与其他长城关隘（如居庸关、雁门关）：居庸关在燕山峡谷、以「天下九塞」著称，雁门关在山西以险峻称；山海关的独特在「东端 + 天下第一关 + 依山襟海」，城楼与巨匾最易辨认。"],"y":["第一眼看城楼：两层重檐歇山顶、骑墙而立的城楼，配「天下第一关」巨匾——这是山海关的核心标识。","第二眼看格局：门洞、瓮城、城墙与关前牌坊广场成组，是「关」而非普通城门。","第三眼结合地望：河北秦皇岛、临近渤海，北有燕山，若见海与关城并存，可确认是山海关。"]},"承德外八庙":{"t":"承德外八庙","p":"02-笔记/中国/华北/河北/承德外八庙.md","l":"一句话定位：河北承德避暑山庄东北山麓的清代皇家寺庙群，为团结蒙藏而建，汉式殿堂与藏式白台、红台并置，1994 年随避暑山庄列入世界文化遗产。","k":["藏式台体墙面：白墙或红墙，墙体下宽上窄（收分），墙面几乎没有真正的窗洞，只有一排排上窄下宽的梯形黑框盲窗，这是藏式建筑最好认的一处。","平顶女儿墙上的金饰：台顶是平顶加女儿墙，墙头立鎏金宝幢、法轮、宝瓶，晴天一片金光，与汉式坡顶的琉璃瓦完全不同。","汉式琉璃屋顶：红墙身、黄绿琉璃瓦、歇山或庑殿顶、檐下层层斗拱，是标准的清官式做法。","汉藏同框：一张照片里同时出现汉式坡顶琉璃瓦和藏式平顶大红台，基本可以锁定承德外八庙。","前汉后藏的轴线：寺依山而建，前段是汉式院落（山门、钟鼓楼、天王殿、大雄宝殿），后段是藏式台城，靠石阶、石桥、石狮串联。"],"m":["与 [[布达拉宫]]：普陀宗乘之庙就是仿拉萨布达拉宫而建，故有「小布达拉宫」之称，两者都有收分的白台、红台，梯形盲窗与金顶。区别在规模与组合：布达拉宫是宫堡合一，沿红山拔起、体量巨大，几乎不见汉式琉璃坡顶与清式斗拱；外八庙是寺院群，台体小得多，中轴线清楚，前面还有汉式殿堂、琉璃门楼、石狮石桥。照片里若出现黄绿琉璃歇山顶与斗拱同框…","与 [[大昭寺]]：大昭寺在拉萨老城，以觉康主殿、金顶、转经道与唐蕃会盟碑为标志，风格混合藏、唐与尼泊尔，没有清官式的琉璃门楼与斗拱；外八庙的汉式部分则是标准的清代官式做法。"],"y":["第一眼先看屋顶：坡顶琉璃瓦与平顶大红台是否同框；再看墙面有没有成排的梯形盲窗、台顶有没有鎏金宝幢。","第二眼看台体：收分明显、墙面粉白或刷红、真窗很少，台前有石阶、石狮、石桥，多为清代皇家寺庙的做派。","常见误认：把大红台当成布达拉宫（体量与宫堡感不对）；把整组当成藏区寺院（少了汉式琉璃门楼与斗拱）；只看到汉式殿堂就当成普通清式庙宇（忽略了后部的藏式台城）。外八庙各寺之间也容易互混，仅凭局部照…"]},"承德避暑山庄":{"t":"承德避暑山庄","p":"02-笔记/中国/华北/河北/承德避暑山庄.md","l":"一句话定位：清代康熙至乾隆年间营建的皇家离宫与园林，中国现存最大的古典皇家园林，1994 年与周围寺庙同列入《世界遗产名录》。","k":["看成组山水：山庄以「山中有园、园中有山」著称，湖、洲、岛、桥与建筑穿插，水面开阔处亭台楼阁临水而建，远山为背景。","看建筑风格：园内建筑多为青砖灰瓦、朴素素雅，以江南园林手法移步换景（湖区多仿江南景致），不以金碧辉煌取胜，与宫殿式皇家园林不同。","看标志建筑：湖区标志性的亭台楼阁（如烟雨楼、金山亭）常独立于水际或小岛之上，山影、树影、屋影倒映水中。","看整体尺度：山庄占地极广，画面往往以大片水面、林木与远处山峦为背景，建筑只占其中一部分，体现「大园」而非紧凑小园的气象。"],"m":["与 [[颐和园]]：颐和园（清漪园）同为清代皇家园林，但以万寿山与昆明湖为中心、气势雄阔，园中有大量金碧彩画建筑（如长廊、佛香阁）；避暑山庄占地更大、更强调山野自然，建筑朴素素雅。口诀：颐和园有佛香阁贴山临湖，避暑山庄以大片水面与远山为界、建筑更素。","与江南园林（如拙政园）：江南园林紧凑精致、以叠山理水在小空间中求变化；避暑山庄是以数百公顷山水营建的「大园林」，尺度与气象完全不同。"],"y":["第一眼看尺度：画面中水面、山林远大于建筑，建筑朴素散落——这是「大园」避暑山庄与紧凑园林的第一区别。","第二眼看湖区：临水独立亭台、长廊拱桥、青山倒影，青瓦素墙而非金顶彩画。","第三眼结合地望：位于河北承德，若见金顶寺庙群毗邻（外八庙），可进一步确认。"]},"麦积山石窟":{"t":"麦积山石窟","p":"02-笔记/中国/西北/甘肃/麦积山石窟.md","l":"一句话定位：把一座赭红色孤峰凿成蜂巢，再用凌空栈道把上下数层窟龛串起来、以泥塑彩塑为主体的石窟群。","k":["标志 1｜孤立陡壁：看画面主体 → 一座赭红色砂砾岩孤峰单独拔起，崖面近乎垂直，不像连绵山体的一道坡。","标志 2｜蜂巢状分层窟龛：看崖面中段 → 窟龛与木构窟檐上下叠成数层，洞口密密麻麻，整面崖壁像被蜂蛀过。","标志 3｜贴壁凌空栈道：看崖壁上的红色木栏杆 → 栈道贴着岩面曲折盘绕，分层把各窟连起来，外侧直接临空。","标志 4｜泥塑而非石雕：看造像表面 → 细腻泥层加彩绘、轮廓圆润，与粗糙带砂砾颗粒的崖体形成明显质感对比。","标志 5｜峰顶植被与浅色天空：看山体上缘 → 峰体独立、顶部圆缓长满绿色植被，周围没有同高度山脊相接。"],"m":["与 [[云冈石窟]]：两者都是崖壁窟群，但云冈是黄灰色砂岩，石质可雕，第 20 窟露天大佛直接从岩体里凿出，窟前接地面楼阁；麦积山是赭红色砂砾岩，颗粒粗不能细雕，造像靠泥塑彩塑成形，崖面上是红色木栈道分层盘旋，没有面对大像的地面楼阁。关键差别是石材能否直接雕刻。","与 [[莫高窟]]：两者都属砂砾岩崖壁加泥塑彩塑，最易混。差别在崖形与动线：莫高窟的崖面是一条横向绵延千余米的断崖，窟龛沿崖面横向铺开、可凿面积宽裕，看点是壁画；麦积山是一座孤立陡峰，能凿的崖面局促，窟龛只能向上叠成数层，靠悬空栈道盘绕上下。崖色上莫高窟偏土黄，麦积山偏赭红。"],"y":["第一眼先看山形与崖色：孤立拔起的赭红色陡峰、窟龛上下多层叠成蜂巢，基本就是麦积山。","第二眼看有没有红色木栈道贴着崖面盘绕；有栈道、且造像是泥塑彩绘，可以定案。","常见误认：把麦积山认成莫高窟。判别点：莫高窟的崖面横向延展上千米、窟龛以横向铺开为主，山体不是一座孤峰；麦积山可凿崖面局促，窟龛向上叠成数层，靠悬空栈道才上得去。"]},"大理千寻塔":{"t":"大理千寻塔","p":"02-笔记/中国/西南/云南/大理千寻塔.md","l":"一句话定位：崇圣寺三塔中最高的一座主塔，南诏晚期建成的密檐式空心砖塔，与西安小雁塔同为中国唐代密檐塔的代表。","k":["看成组关系：千寻塔并不是孤塔，而是居中的主塔，左右各伴一座略矮的副塔，三塔并立即「崇圣寺三塔」。居中那座最高大，就是千寻塔。","看平面与轮廓：塔身平面为正方形，自下而上层层收分，轮廓成挺拔的方锥；上部密檐一层压一层，越往上间距越小。","看檐口做法：十六层密檐全部用砖叠涩挑出，不用木构斗拱，檐下阴影层层加深，是典型的密檐式而非楼阁式。","看颜色与质感：通体砖石原色（灰白带风化痕迹），无彩画、无白灰罩面，与白色的覆钵式喇嘛塔、木色的楼阁塔一眼可分。"],"m":["与西安小雁塔：小雁塔也是唐代密檐式砖塔、也呈方锥收分，但只此单塔、层数十五层，体量小于千寻塔；千寻塔的特色在「三塔并立、居中最高」，小雁塔是关中平原上一座孤塔。口诀：看是否成组——两座同形塔伴在左右的是崇圣寺三塔。","与 [[嵩岳寺塔]]：嵩岳寺塔是北魏十二边形密檐塔，轮廓近似圆形；千寻塔是唐代方形密檐塔，轮廓方正。平面一边数塔角即可区分。"],"y":["第一眼看是否「三塔成组」：居中最高那座，就是千寻塔；只拍一座主塔时，凭方锥轮廓与砖砌密檐定位。","第二眼数檐：从下往上数密檐十六层，越往上越密；檐间是砖砌叠涩，无木斗拱、无真窗。","第三眼定色与背景：灰白砖面、苍山洱海背景，与中原密檐塔的土黄砖色、平原背景可区分。"]},"大昭寺":{"t":"大昭寺","p":"02-笔记/中国/西南/西藏/大昭寺.md","l":"一句话定位：大昭寺是拉萨老城八廓街中心的藏传佛教寺院，7 世纪中叶由松赞干布主持兴建，主殿为藏式石木碉房、屋顶覆汉式鎏金铜瓦金顶，供奉释迦牟尼十二岁等身像，寺前即八廓街转经道。","k":["标志 1：金顶群：屋顶不是一整片，而是数座独立的鎏金铜瓦歇山顶前后错落，在高原阳光下呈饱和的金黄色；正脊与垂脊两端起翘，脊上立金色宝瓶、火焰宝与幢幡。","标志 2：法轮与双鹿：金顶正脊中央立一轮带辐条的金色法轮，两侧各一只前腿跪伏、头朝法轮的金鹿，全部贴金，在纯蓝天空前轮廓极清楚，是辨认藏传寺院屋顶最快的一眼。","标志 3：边玛墙：檐下横着一条深红褐色宽带，表面有细密竖纹，是柽柳枝捆扎染色后砌成的边玛草檐带；它把下方石墙与上方金顶分成「红—金」两段，是藏式高等级建筑的标志。","标志 4：藏式石木碉房：主殿外墙为收分明显的石砌厚墙，墙面刷白或露石色，开窗小而深，窗框涂黑并做梯形窗套；内部以木柱托梁、密肋平顶，是典型的碉房式做法。","标志 5：高原光线：天空纯蓝无云，阴影硬、对比强，金顶反光刺眼，色调本身就带着拉萨的印记。"],"m":["与 [[布达拉宫]]：布达拉宫是宫堡，白宫、红宫沿玛布日山体层叠而上，画面主体是「山体＋大片白墙与红墙」，金顶只集中在红宫顶部；大昭寺在平地老城之内，是寺院，主体为石木碉房加多座金顶，寺前紧接八廓街与磕长头的信徒。","与 [[承德外八庙]]：外八庙是清代皇家敕建的寺庙群，汉藏手法混合、多轴线布局，琉璃瓦与汉式殿身的比例更重，且分散在避暑山庄周围；大昭寺是 7 世纪吐蕃时期的都市寺院，单体紧凑，以边玛墙与鎏金铜瓦金顶为核心语汇，周边是拉萨老城而非皇家园林。"],"y":["第一眼先看屋顶：多座鎏金铜瓦金顶并排 ＋ 正脊上的法轮双鹿 ＋ 檐下一道深红褐色边玛墙，三者同框基本可定为大昭寺；再看墙体是否为收分石墙、窗套是否涂黑成梯形，可排除后期仿建。","常见误认：藏传寺院的金顶彼此相似，易与布达拉宫红宫金顶、扎什伦布寺及承德外八庙的鎏金顶混淆。区别看环境：大昭寺金顶下方紧接老城低层民居与八廓街转经道；布达拉宫金顶下方是垂直山体与宫堡高墙；外八…","若只有法轮双鹿特写，只能判断「藏传佛教寺院」，不能直接定名，须回到全景确认金顶数量、边玛墙与周边环境。"]},"洛阳桥":{"t":"洛阳桥","p":"02-笔记/中国/华东/福建/洛阳桥.md","l":"一句话定位：福建泉州洛阳江上的北宋梁式海港大石桥，中国第一座跨海梁式桥，以「筏形基础」与「牡蛎固基」闻名，2021 年作为「泉州：宋元中国的世界海洋商贸中心」列入世界遗产。","k":["看桥型：桥面平直、无拱洞，是一长条石板铺在一排桥墩上的「梁桥」——不是拱桥。","看桥墩：桥墩迎水面尖削成船形（筏形基础），半浸在潮间滩涂中，块石砌成，退潮时露出大片泥滩。","看环境：桥架在入海口的滩涂之上，两岸是红树林与低缓丘陵，不是城里河街。","看桥面附属：桥上有望柱栏杆，桥中有石将军、石亭（中亭），是宋代海港桥的规制。"],"m":["与 [[卢沟桥]]：卢沟桥是 11 孔联拱石桥、以石狮闻名；洛阳桥是无拱梁式长桥、以船形桥墩和牡蛎固基闻名。一看「桥面有没有拱」即可分。","与[[赵州桥]]：赵州桥是单孔敞肩拱；洛阳桥是平梁多孔，桥基在潮间滩涂。"],"y":["第一眼：平直无拱的长条石桥，架在海边滩涂上。","第二眼：桥墩是否一端尖削成船形、半浸在泥滩里。","常见误认：把洛阳桥当作一般内河石桥；其关键是「海桥、梁式、船形墩、滩涂环境」四要素。"]},"福建土楼":{"t":"福建土楼","p":"02-笔记/中国/华东/福建/福建土楼.md","l":"一句话定位：福建西南山区客家人与闽南人聚族而居的夯土巨型围楼，圆形或方形外环墙内包一圈木构楼房，2008 年列入《世界遗产名录》。","k":["看外墙：一圈厚达 1—2 米的夯土外墙，黄泥色，下厚上薄微微收分，墙上只开小窗——远远就是一整圈「黄色甜甜圈」。","看屋顶：外圈屋顶是环形出檐的青瓦坡顶，沿圆周（或方周）走一圈，像给土楼戴了一圈宽边帽。","看内院：外墙之内是一圈三至五层木构楼房，中心一个内院、院中立祖堂——「外土内木」、一樓住一族人。","看成群分布：田螺坑等典型土楼群沿山坡散落四五座圆楼方楼，俯视如「四菜一汤」，不是单座孤楼。"],"m":["与开平碉楼：碉楼是广东侨乡多层石/混凝土方楼，开窗多而大、带西洋柱廊与拱窗，单栋矗立；土楼是厚夯土圆/方环楼、内圈木构、聚族而居。一看外墙是厚黄土还是砖石混凝土即可分。","与一般围屋/大院：普通北方大院是四合院群、不围合外圈厚墙；土楼是单栋巨型环楼，外圈即墙、墙即楼。"],"y":["第一眼：圆形或方形的巨型黄泥厚环墙——土楼。","第二眼：屋顶是否沿圆周走一圈宽檐；内院是否一圈木楼。","常见误认：把土楼当成碉堡或现代圆楼；土楼外墙素黄土色、小窗少而高、内圈木结构，是其识别关键。"]},"卢沟桥":{"t":"卢沟桥","p":"02-笔记/中国/华北/北京/卢沟桥.md","l":"一句话定位：北京西南永定河上的金代联拱大石桥，望柱上雕有数百尊姿态各异的石狮子，因马可·波罗记述与 1937 年七七事变而闻名世界。","k":["看桥型：11 孔联拱石桥，桥身平直横卧河面，浅灰色条石砌成，桥长 266 米——不是单拱，也不是梁桥。","看石狮：桥两侧望柱头上一排圆雕石狮，大狮身上攀附小狮，姿态、方向、表情各不相同，是卢沟桥最招牌的细节。","看栏板与望柱：望柱为方形石柱、柱头莲座之上蹲狮；栏板为浅浮雕石板，沿桥身一路排开。","看桥东碑亭：桥东有清乾隆题「卢沟晓月」碑与碑亭，是燕京八景之一的标志。"],"m":["与 [[赵州桥]]：赵州桥是河北赵县的单孔敞肩石拱桥，一大拱两侧附小拱；卢沟桥是北京的 11 孔联拱长桥，且以石狮闻名。看孔数与有无石狮即可分。","与五亭桥等南方石桥：南方桥多带廊亭、桥身短；卢沟桥是北方长联拱、无亭。"],"y":["第一眼：多孔联拱长石桥＋一排望柱石狮。","第二眼：石狮是否大狮身附小狮、姿态各异——这是卢沟桥独有的密度。","常见误认：把卢沟桥与一般清代石拱桥混淆；关键在联拱数量长、石狮数量多且历代风格不一。"]},"平遥古城":{"t":"平遥古城","p":"02-笔记/中国/华北/山西/平遥古城.md","l":"一句话定位：山西晋中平遙县城的明清完整城墙古城，中国现存最完整的县级汉民族城池，1997 年列入《世界遗产名录》，曾是晋商票号的总部所在。","k":["看方形城墙：完整一圈青砖城墙围合成方形，墙高约 10 米、周长约 6.4 公里，墙上有垛口和敌楼，城外有护城河——一眼看出是「整座城活着」而非残段。","看城门楼：城墙上开 6 座城门，每座带瓮城，城门上建三重檐歇山顶木城楼，灰瓦红柱，是城墙上最醒目的竖向轮廓。","看市楼：城内十字街中心立一座三重檐歇山顶「市楼」（金井楼），黄琉璃瓦点缀，是城内天际线的制高点。","看街面：街道两旁是青砖灰瓦、两层木构铺面，前店后宅，匾额、旗杆、拴马桩俱全，明清商业街原貌。"],"m":["与丽江古城：丽江是高原纳西族聚落，无完整方城墙、以水系和木构民居为特征；平遥是完整方形砖城、汉地商业城市格局，两者一看「有没有一圈城墙」即可分。","与一般仿古商业街：平遥城墙是真砖真墙、明代原物，城周 6 公里完整围合；一般仿古街只有翻新铺面、没有城墙围合。"],"y":["第一眼先看外围：是否有一圈连续完整的高砖墙围合老城——有，才是平遥。","第二眼看城内制高点：十字街心的三重檐市楼。","常见误认：把平遥与其他山西古城（如祁县、太谷）混淆；平遥的标志是完整砖墙＋市楼，单看铺面则与一般北方县城难分。"]},"嘉峪关":{"t":"嘉峪关","p":"02-笔记/中国/西北/甘肃/嘉峪关.md","l":"一句话定位：明长城最西端的巨型关城，坐落于甘肃河西走廊西缘祁连山与马鬃山之间，因「天下第一雄关」之称成为长城起点终点的标志。","k":["看关城形制：方形土城坐落在戈壁滩上，黄土夯筑墙身、外包青砖，墙高而厚，四角建角楼——是「城套城」的罗城＋瓮城格局。","看中轴城楼：东门到西门轴线上，光化楼、柔远楼、嘉峪关楼三座三层三檐歇山顶木城楼前后叠立，灰瓦红柱、斗拱彩画，是关城的竖向标志。","看环境：关城立于开阔戈壁绿洲边缘，远处可见祁连山雪顶，不是在群山夹峙的隘口。","看城门：城门为砖砌拱券，门外套方形瓮城，门上嵌「光化门」「柔远门」匾额。"],"m":["与[[山海关]]：山海关是明长城东端、临渤海，城楼题「天下第一关」；嘉峪关是西端、临戈壁绿洲，城楼题「光化门/柔远门」。一看周边是海还是戈壁即可分。","与居庸关等内长城关隘：居庸关在八达岭山间、城墙随山势；嘉峪关在戈壁平野上、是独立方形大城。"],"y":["第一眼：戈壁上一座独立方形大土城，中轴线上三座城楼前后叠立。","第二眼：墙身是黄土夯筑包砖，远处有雪山。","常见误认：把嘉峪关当成普通城池；其标志是「长城西端＋戈壁＋三重城楼一线」。"]},"滴血救世主教堂":{"t":"滴血救世主教堂","p":"02-笔记/世界/欧洲/俄罗斯/滴血救世主教堂.md","l":"滴血救世主教堂（Church of the Savior on Blood）位于俄罗斯圣彼得堡格里博耶多夫运河畔，1883—1907 年建于亚历山大二世遇刺之地以纪念这位「解放者」沙皇；教堂以五彩洋葱头穹顶与大面积外墙马赛克壁画著称，属东正教复古俄罗斯风格，1990 年随「圣彼得堡历史中心」列入世界遗产。","k":["五彩洋葱头穹顶：屋顶密布洋葱头形穹顶，其中 5 个主穹顶为金绿相间、其余为彩绘釉面（蓝、绿、金、红等色），中心金穹顶最高——这是它最抢眼的第一眼标志。","外墙马赛克壁画：外立面（尤其西立面钟楼）镶满巨幅马赛克镶嵌画（圣像、基督生平），基座红砖与蓝绿釉彩相间，整座教堂像一座彩色镶嵌的圣像盒子。","运河畔的位置：教堂紧邻格里博耶多夫运河，河道、石岸铁栏与教堂穹顶常同框，夜景倒影是其标志性画面。","复古俄罗斯样式：整体模仿莫斯科古罗斯教堂的洋葱顶与檐下装饰，但 19 世纪末才建，是「复古式」而非真正的古建筑。"],"m":["与 [[圣瓦西里大教堂]]：圣瓦西里在莫斯科红场，16 世纪伊凡雷帝所建，为「洋葱头成簇」的古罗斯原真建筑，色彩以糖果条纹洋葱顶著称；滴血在圣彼得堡运河畔，19 世纪末复古式，以大面积马赛克壁画（而非条纹）为特征，且临水。地点（莫斯科 vs 圣彼得堡）、装饰（条纹 vs 马赛克）是分水岭。","与其他俄罗斯洋葱顶教堂（喀山大教堂等）：喀山大教堂是新古典主义柱廊式、无洋葱顶；滴血以五色洋葱顶 + 马赛克墙独树一帜。"],"y":["第一张图先看：五彩洋葱头穹顶 + 整面墙的马赛克圣像画 + 临河位置；三点同时出现基本即滴血救世主。","第二眼看：中央是否为金穹顶、外墙是否红砖配蓝绿釉彩。","常见误认：与莫斯科圣瓦西里大教堂混。判别关键在装饰（滴血满墙马赛克 vs 圣瓦西里条纹洋葱顶）与所在城市/是否临运河。"]},"科隆大教堂":{"t":"科隆大教堂","p":"02-笔记/世界/欧洲/德国/科隆大教堂.md","l":"科隆大教堂（Kölner Dom）位于德国科隆市中心、紧邻莱茵河，1248 年始建、1880 年方竣工，是一座以两座高耸尖塔著称的哥特式主教座堂；主体用深灰色砂岩砌筑，南塔高 157 米，是德国最大、世界最高的双塔教堂之一，1996 年列入世界遗产。","k":["两座高耸尖塔：西端两座几乎等高的尖塔（北塔、南塔各约 157 米）拔地而起，是科隆天际线的绝对主角——双子尖塔是它最稳定的第一眼特征。","深灰色砂岩：整座教堂用当地深灰/黑色砂岩砌筑，长期风化后呈暗色，与米兰的白大理石、巴黎的浅黄石形成强烈反差。","莱茵河畔的位置：教堂距莱茵河岸很近，常与霍亨索伦桥、游船同框，河西的教堂与河东的老城构成科隆标志性滨水画面。","高窗与细长轮廓：中殿高 43 米，尖拱窗细长，立面尖拱、飞扶壁与塔楼层层上收，哥特式「高而窄」的体量感极强。"],"m":["与 [[巴黎圣母院]]：巴黎圣母院双塔为平顶方塔、轮廓矩形整齐、中轴只一尖塔、浅黄石；科隆双塔为尖顶高耸（157 米）、深灰砂岩、体量远大于巴黎。看「平顶 vs 尖顶」「浅黄 vs 深灰」。","与 [[米兰大教堂]]：米兰是白色大理石、屋顶布满成百小尖塔；科隆是深色砂岩、只在两端立两座巨塔。颜色与尖塔数量是分水岭。"],"y":["第一张图先看：深灰/黑色砂岩 + 西端两座几乎等高的高尖塔，再佐以莱茵河位置——同时满足即基本可定科隆。","第二眼看：是否与莱茵河、大桥同框（科隆滨水地标）。","常见误认：与亚眠、米兰等哥特教堂混。判别关键在双尖塔的高度（157 米级）与石材深色。"]},"米兰大教堂":{"t":"米兰大教堂","p":"02-笔记/世界/欧洲/意大利/米兰大教堂.md","l":"米兰大教堂（Duomo di Milano）位于意大利米兰市中心主座教堂广场，1386 年始建、1965 年方整体完工，是一座通体白色大理石砌筑的晚期哥特式大教堂；立面与屋顶密布数百座尖塔与数千尊雕像，是世界最大的哥特式教堂之一，1980 年列入世界遗产。","k":["密集的尖塔森林：立面与屋顶布满向上的小尖塔（约 135 座），每座塔顶立圣徒雕像，轮廓呈无数竖直尖角向天空升腾——这是它与其他哥特教堂最不同的第一眼特征。","白色大理石通体：整座教堂用坎多利亚白色大理石砌筑，阳光下呈亮白/浅灰色调，与科隆的深色砂岩、巴黎的浅黄石形成鲜明对照。","五扇大门：立面底层五扇青铜门并排（中门最大），门上浮雕圣经与米兰史；门廊上方是连续的人物雕像龛与玫瑰窗。","顶层大穹顶与金圣母像：屋顶中央的八角塔与尖塔群中，最高塔顶立着镀金圣母像（Madonnina），是老城天际线的最高点。"],"m":["与 [[巴黎圣母院]]：巴黎圣母院西立面为两座平顶方塔、轮廓整齐矩形、中轴仅一尖塔；米兰立面是无数小尖塔升腾成锯齿状天际线，且通体白大理石。看「平顶双塔还是满尖塔」即可分。","与 [[科隆大教堂]]：科隆是深灰/黑色砂岩、只有东西两端两座高尖塔（双塔单点高耸）；米兰是白色大理石、满屋顶小尖塔（塔群密集但单塔不高）。「白色+塔群」vs「深色+双高塔」是判别核心。"],"y":["第一张图先看：通体白色大理石 + 屋顶无数小尖塔；只要同时满足这两点，基本就是米兰大教堂。","第二眼看：底层是否五扇大门、屋顶是否有金圣母像尖塔。","常见误认：与科隆、巴黎等哥特教堂混。判别关键在石材颜色（白）与尖塔数量（成百上千而非两三座）。"]},"阿布辛贝神殿":{"t":"阿布辛贝神殿","p":"02-笔记/世界/非洲/埃及/阿布辛贝神殿.md","l":"阿布辛贝神殿（Abu Simbel）位于埃及南部努比亚地区、阿斯旺以南约 280 公里的尼罗河西岸，约公元前 13 世纪由拉美西斯二世凿岩而建，由大神庙（拉美西斯二世）与小神庙（纳菲尔塔莉）组成；正面崖壁凿出四尊约 20 米高的拉美西斯二世坐像，1960 年代因阿斯旺大坝蓄水整体切割迁移，1979 年随「阿布辛贝至菲莱的努比亚遗址」列入世界遗产。","k":["崖壁凿出的四尊巨像：大神庙正面直接开凿于砂岩山体，入口两侧并列四尊约 20 米高的拉美西斯二世坐像（法老形象、戴双王冠、双手置膝），左数第一尊胸部早年破损——这是它最无争议的招牌画面。","凿岩入山的神庙本体：神庙整体向内凿入山体，洞口之上是一排科林斯柱式神龛与太阳神/鹰首浮雕（上方小龛列 22 尊狒狒像）；大门正对东方，春秋分时晨光直射内殿圣像（「太阳节」）。","入口上方太阳神龛：巨像之间与正上方刻有象形文字与神祇小像，洞口最高处中央为鹰首神（拉-哈拉赫提）与太阳圆盘。","内殿圣像：最深处圣坛并列普塔、阿蒙-拉、拉-哈拉赫提、拉美西斯二世四尊坐像，春秋分阳光依次照亮，唯冥神普塔常年处于阴影。","小神庙（纳菲尔塔莉）：大神庙以南约百米另有一座小神庙，正面凿出纳菲尔塔莉王后与拉美西斯二世的立像，规模较小。"],"m":["与 [[佩特拉]]：佩特拉在约旦，纳巴泰人在玫瑰色岩壁上凿出建筑立面（如卡兹尼），是前 1 世纪—公元 1 世纪的商贸城邦；阿布辛贝在埃及，古埃及神庙，正面是四尊坐像而非柱廊式立面。二者同为「凿岩建筑」，但时代、文明与洞口形态迥异。","与埃及其他神庙（卡纳克、卢克索）：卡纳克、卢克索是地面石柱式神庙（石砌多柱厅），非凿岩；阿布辛贝是整座凿入山体、以巨型雕像为立面，一眼可辨。"],"y":["第一张图先看：砂岩崖壁正面并立四尊法老坐像——这是阿布辛贝独有、无可替代的第一眼特征。","第二眼看：是否有人工堆筑的山体外观（迁移后）、尼罗河环境与太阳节内殿设计。","常见误认：把阿布辛贝与佩特拉、或与其他埃及多柱神庙混。判别关键在「四尊坐像的凿岩立面」是否为画面主体。"]},"少林寺常住院":{"t":"少林寺常住院","p":"02-笔记/中国/华中/河南/少林寺常住院.md","l":"嵩山少林寺的主寺建筑群（常住院），河南登封嵩山五乳峰下，北魏太和十九年（495）为印度僧人跋陀建寺而始、唐初因助李世民而声名大振，是禅宗祖庭与少林武术的发源地；现存主体多为明清重建，2010 年随「登封『天地之中』历史建筑群」列入世界遗产。","k":["中轴对称的七进院：沿山门—天王殿—大雄宝殿—法堂—方丈室—立雪亭—千佛殿的中轴线纵深七进，两侧对称分布钟楼、鼓楼与东西配殿，是典型的汉地寺院「伽蓝七堂」格局。","大雄宝殿：寺院正殿，面阔七间、单檐歇山顶、绿色琉璃瓦覆顶，红墙斗拱彩绘，是全寺建筑群中体量最大、最醒目的殿堂。","山门「少林寺」匾：山门上方悬挂康熙御书「少林寺」金字横匾，门前有石狮，是中轴线的起点。","钟楼与古银杏：山门内东西两侧的钟楼、鼓楼为高台式楼阁，寺内多株千年古银杏，秋日金黄，与红墙绿瓦形成对比。","千佛殿壁画：殿内后壁绘有明代《五百罗汉朝毗卢》大型壁画，地面有僧人练功踩出的「站桩坑」。"],"m":["与 [[少林寺塔林]]：塔林在常住院西侧约 300 米的丛林内，是历代高僧的墓塔群（唐至清砖石塔数十座）；常住院是香火殿堂、僧人起居的中轴建筑群。看到「一排排石塔」认塔林，看到「山门+大殿+钟鼓楼」认常住院。","与 [[白马寺]]：白马寺在洛阳，东汉永平年间建，为中国佛教「释源祖庭」；少林寺在登封嵩山，北魏建、以禅宗与武术著称。二者同为著名古刹，但时代、地点、主打看点（祖庭始建 vs 禅武）不同。"],"y":["第一眼先看：有没有中轴对称的山门—大雄宝殿纵深布局与大雄宝殿的绿瓦歇山顶——有，才往少林常住院考虑。","第二眼看细节：山门「少林寺」匾与钟鼓楼、院内古银杏。","常见误认：把少林寺常住院与少林寺塔林混为同一处；二者一个是殿堂建筑群、一个是院外墓塔群，照片上区别明显。"]}};
+</script>
+
+<!-- 英文影片縮圖（由建置腳本嵌入，同景點共用一支） -->
+<script>
+window.YT_THUMB = {
+  "xVmD8eKRTDQ": "images/yt-xVmD8eKRTDQ.jpg",
+  "BR2ZMj3o5EU": "images/yt-BR2ZMj3o5EU.jpg",
+  "6xQaEZbVras": "images/yt-6xQaEZbVras.jpg",
+  "x7GQC66Jtqs": "images/yt-x7GQC66Jtqs.jpg",
+  "Erx4_odp11U": "images/yt-Erx4_odp11U.jpg",
+  "xiAY4UJfplI": "images/yt-xiAY4UJfplI.jpg",
+  "1frbBbRtoSM": "images/yt-1frbBbRtoSM.jpg",
+  "xujo0RakWuc": "images/yt-xujo0RakWuc.jpg",
+  "IMSx2ADrefM": "images/yt-IMSx2ADrefM.jpg",
+  "RPuWypZ4SrA": "images/yt-RPuWypZ4SrA.jpg",
+  "mED0ZNMdFSs": "images/yt-mED0ZNMdFSs.jpg",
+  "UObK-A28RV8": "images/yt-UObK-A28RV8.jpg",
+  "-6Ia-SEidBA": "images/yt--6Ia-SEidBA.jpg",
+  "H1RxiD0JJY4": "images/yt-H1RxiD0JJY4.jpg",
+  "QI5G7pwb8vA": "images/yt-QI5G7pwb8vA.jpg",
+  "ljBaVIp2pJQ": "images/yt-ljBaVIp2pJQ.jpg",
+  "v6BAPskdJXc": "images/yt-v6BAPskdJXc.jpg",
+  "YpXDB1P0TgU": "images/yt-YpXDB1P0TgU.jpg",
+  "3mlH3qEYrEk": "images/yt-3mlH3qEYrEk.jpg",
+  "yBijstIT1SI": "images/yt-yBijstIT1SI.jpg",
+  "AWDtUFn6cno": "images/yt-AWDtUFn6cno.jpg",
+  "6iaVmWmqpx4": "images/yt-6iaVmWmqpx4.jpg",
+  "yXSHfV2OXBM": "images/yt-yXSHfV2OXBM.jpg",
+  "b0oKW_NDFuk": "images/yt-b0oKW_NDFuk.jpg",
+  "REaSXb5Jcx4": "images/yt-REaSXb5Jcx4.jpg",
+  "bQMlx-rjAIU": "images/yt-bQMlx-rjAIU.jpg",
+  "zMQVPr8GLV0": "images/yt-zMQVPr8GLV0.jpg",
+  "jkpxc9Z4EoM": "images/yt-jkpxc9Z4EoM.jpg",
+  "rBNDBBgX-C4": "images/yt-rBNDBBgX-C4.jpg",
+  "UO6vTsS89_E": "images/yt-UO6vTsS89_E.jpg",
+  "h1VYm1d1O_U": "images/yt-h1VYm1d1O_U.jpg",
+  "HJ4v6Ear4N8": "images/yt-HJ4v6Ear4N8.jpg",
+  "VjlydnRqcmw": "images/yt-VjlydnRqcmw.jpg",
+  "iNxxEjacp1c": "images/yt-iNxxEjacp1c.jpg",
+  "EGnJeW1zJCM": "images/yt-EGnJeW1zJCM.jpg",
+  "m8fF7nlUZWI": "images/yt-m8fF7nlUZWI.jpg",
+  "mGrU5sXMFCE": "images/yt-mGrU5sXMFCE.jpg"
+};
+</script>
+
+<!-- 卡冊篩選元數據（形制 / 朝代 / 地區，由建置腳本從筆記 frontmatter 抽出） -->
+<script>
+window.CASE_META = {"02_taj":{"r":"世界","s":"南亚","t":"陵墓","d":"莫卧儿帝国","c":[27.175,78.04194]},"05_giza":{"r":"世界","s":"非洲","t":"陵墓","d":"古埃及","c":[29.97611,31.13278]},"10_petra":{"r":"世界","s":"西亚","t":"古城古镇","d":"纳巴泰","c":[30.32889,35.44028]},"11_angkor":{"r":"世界","s":"东南亚","t":"印度教寺庙","d":"高棉帝国","c":[13.4125,103.86667]},"13_potala":{"r":"中国","s":"西南","t":"宫堡要塞","d":"清","c":[29.65778,91.11694]},"21_colosseum":{"r":"世界","s":"欧洲","t":"纪念建筑","d":"古罗马","c":[41.89028,12.49222]},"22_colosseum_close":{"r":"世界","s":"欧洲","t":"纪念建筑","d":"古罗马","c":[41.89028,12.49222]},"23_humble":{"r":"中国","s":"华东","t":"园林","d":"明清","c":[31.32583,120.62444]},"24_humble_close":{"r":"中国","s":"华东","t":"园林","d":"明清","c":[31.32583,120.62444]},"25_forbidden":{"r":"中国","s":"华北","t":"宫殿","d":"明清","c":[39.91583,116.39083]},"26_forbidden_close":{"r":"中国","s":"华北","t":"宫殿","d":"明清","c":[39.91583,116.39083]},"27_badaling":{"r":"中国","s":"华北","t":"城垣与长城","d":"明","c":[40.35428,116.00649]},"28_badaling2":{"r":"中国","s":"华北","t":"城垣与长城","d":"明","c":[40.35428,116.00649]},"29_yingxian":{"r":"中国","s":"华北","t":"塔","d":"宋辽金西夏","c":[39.56528,113.18194]},"30_yingxian_close":{"r":"中国","s":"华北","t":"塔","d":"宋辽金西夏","c":[39.56528,113.18194]},"31_zhaozhou":{"r":"中国","s":"华北","t":"桥梁","d":"隋唐","c":[37.72017,114.76325]},"32_zhaozhou_close":{"r":"中国","s":"华北","t":"桥梁","d":"隋唐","c":[37.72017,114.76325]},"33_mogao":{"r":"中国","s":"西北","t":"石窟与造像","d":"隋唐","c":[40.03722,94.80417]},"34_mogao2":{"r":"中国","s":"西北","t":"石窟与造像","d":"隋唐","c":[40.03722,94.80417]},"35_terracotta":{"r":"中国","s":"西北","t":"陵墓","d":"秦","c":[34.385,109.27306]},"36_terracotta_close":{"r":"中国","s":"西北","t":"陵墓","d":"秦","c":[34.385,109.27306]},"37_taj_close":{"r":"世界","s":"南亚","t":"陵墓","d":"莫卧儿帝国","c":[27.175,78.04194]},"38_giza_sphinx":{"r":"世界","s":"非洲","t":"陵墓","d":"古埃及","c":[29.97611,31.13278]},"39_angkor_close":{"r":"世界","s":"东南亚","t":"印度教寺庙","d":"高棉帝国","c":[13.4125,103.86667]},"40_potala_close":{"r":"中国","s":"西南","t":"宫堡要塞","d":"清","c":[29.65778,91.11694]},"41_yungang":{"r":"中国","s":"华北","t":"石窟与造像","d":"魏晋南北朝","c":[40.10972,113.12222]},"42_yungang_close":{"r":"中国","s":"华北","t":"石窟与造像","d":"魏晋南北朝","c":[40.10972,113.12222]},"43_tiantan":{"r":"中国","s":"华北","t":"坛庙祭祀","d":"明清","c":[39.8822,116.4066]},"44_tiantan_close":{"r":"中国","s":"华北","t":"坛庙祭祀","d":"明清","c":[39.8822,116.4066]},"45_notredame":{"r":"世界","s":"欧洲","t":"教堂","d":"中世纪欧洲","c":[48.853,2.3498]},"46_notredame_close":{"r":"世界","s":"欧洲","t":"教堂","d":"中世纪欧洲","c":[48.853,2.3498]},"47_hagia":{"r":"世界","s":"西亚","t":"教堂","d":"拜占庭","c":[50.45278,30.51444]},"48_hagia_close":{"r":"世界","s":"西亚","t":"教堂","d":"拜占庭","c":[50.45278,30.51444]},"49_parthenon":{"r":"世界","s":"欧洲","t":"神庙","d":"古希腊","c":[37.97153,23.7266]},"50_parthenon_close":{"r":"世界","s":"欧洲","t":"神庙","d":"古希腊","c":[37.97153,23.7266]},"51_fuji":{"r":"世界","s":"东亚","t":"火山与山岳","c":[35.36056,138.7275]},"52_fuji_close":{"r":"世界","s":"东亚","t":"火山与山岳","c":[35.36056,138.7275]},"53_matterhorn":{"r":"世界","s":"欧洲","t":"冰川与雪山","c":[45.97639,7.65861]},"54_matterhorn_close":{"r":"世界","s":"欧洲","t":"冰川与雪山","c":[45.97639,7.65861]},"55_niagara":{"r":"世界","s":"美洲","t":"瀑布","c":[43.08,-79.071]},"56_niagara_close":{"r":"世界","s":"美洲","t":"瀑布","c":[43.08,-79.071]},"57_santorini":{"r":"世界","s":"欧洲","t":"火山岛海岸","c":[36.415,25.4325]},"58_santorini_close":{"r":"世界","s":"欧洲","t":"火山岛海岸","c":[36.415,25.4325]},"59_eiffel":{"r":"世界","s":"欧洲","t":"纪念建筑","d":"近现代","c":[48.8583,2.29448]},"60_eiffel_close":{"r":"世界","s":"欧洲","t":"纪念建筑","d":"近现代","c":[48.8583,2.29448]},"61_sydney":{"r":"世界","s":"大洋洲","t":"纪念建筑","d":"近现代","c":[-33.85706,151.2149]},"62_sydney_close":{"r":"世界","s":"大洋洲","t":"纪念建筑","d":"近现代","c":[-33.85706,151.2149]},"63_bigben":{"r":"世界","s":"欧洲","t":"塔","d":"近现代","c":[51.50067,-0.12457]},"64_bigben_close":{"r":"世界","s":"欧洲","t":"塔","d":"近现代","c":[51.50067,-0.12457]},"65_liberty":{"r":"世界","s":"美洲","t":"石刻与雕塑群","d":"近现代","c":[40.68921,-74.04443]},"66_liberty_close":{"r":"世界","s":"美洲","t":"石刻与雕塑群","d":"近现代","c":[40.68921,-74.04443]},"67_charles":{"r":"世界","s":"欧洲","t":"桥梁","d":"中世纪欧洲","c":[50.08639,14.41194]},"68_charles_close":{"r":"世界","s":"欧洲","t":"桥梁","d":"中世纪欧洲","c":[50.08639,14.41194]},"69_basil":{"r":"世界","s":"欧洲","t":"教堂","d":"沙皇俄国","c":[55.7525,37.62306]},"70_basil_close":{"r":"世界","s":"欧洲","t":"教堂","d":"沙皇俄国","c":[55.7525,37.62306]},"71_moai":{"r":"世界","s":"大洋洲","t":"石刻与雕塑群","d":"拉帕努伊文化","c":[-27.11423,-109.36399]},"72_moai_close":{"r":"世界","s":"大洋洲","t":"石刻与雕塑群","d":"拉帕努伊文化","c":[-27.11423,-109.36399]},"73_uyuni":{"r":"世界","s":"美洲","t":"盐沼与湖泊","c":[-20.33333,-67.7]},"74_uyuni_close":{"r":"世界","s":"美洲","t":"盐沼与湖泊","c":[-20.33333,-67.7]},"75_petra_siq":{"r":"世界","s":"西亚","t":"古城古镇","d":"纳巴泰","c":[30.32889,35.44028]},"76_angkor_tower":{"r":"世界","s":"东南亚","t":"印度教寺庙","d":"高棉帝国","c":[13.4125,103.86667]},"77_sagrada_close":{"r":"世界","s":"欧洲","t":"教堂","d":"近现代","c":[41.40369,2.17433]},"78_machu":{"r":"世界","s":"美洲","t":"都城遗址","d":"印加","c":[-13.2581,-72.2633]},"79_machu_close":{"r":"世界","s":"美洲","t":"都城遗址","d":"印加","c":[-13.2581,-72.2633]},"80_greatwall_mutianyu":{"r":"中国","s":"华北","t":"城垣与长城","d":"明","c":[40.43802,116.5619]},"81_greatwall_mutianyu_close":{"r":"中国","s":"华北","t":"城垣与长城","d":"明","c":[40.43802,116.5619]},"82_longmen":{"r":"中国","s":"华中","t":"石窟与造像","d":"北魏至唐","c":[34.55556,112.46972]},"83_longmen_close":{"r":"中国","s":"华中","t":"石窟与造像","d":"北魏至唐","c":[34.55556,112.46972]},"84_summer_palace":{"r":"中国","s":"华北","t":"园林","d":"清","c":[39.9975,116.2689]},"85_summer_palace_close":{"r":"中国","s":"华北","t":"园林","d":"清","c":[39.9975,116.2689]},"86_miaoying":{"r":"中国","s":"华北","t":"塔","d":"元","c":[39.92424,116.35706]},"87_miaoying_close":{"r":"中国","s":"华北","t":"塔","d":"元","c":[39.92424,116.35706]},"88_versailles":{"r":"世界","s":"欧洲","t":"宫殿","d":"近代欧洲","c":[48.80472,2.12028]},"89_versailles_close":{"r":"世界","s":"欧洲","t":"宫殿","d":"近代欧洲","c":[48.80472,2.12028]},"90_chichen":{"r":"世界","s":"美洲","t":"神庙","d":"玛雅","c":[20.68306,-88.56861]},"91_chichen_close":{"r":"世界","s":"美洲","t":"神庙","d":"玛雅","c":[20.68306,-88.56861]},"77_p077":{"r":"世界","s":"南亚","t":"陵墓","d":"莫卧儿帝国","c":[27.175,78.04194]},"78_p078":{"r":"世界","s":"欧洲","t":"教堂","d":"近现代","c":[41.40369,2.17433]},"79_p079":{"r":"世界","s":"西亚","t":"教堂","d":"拜占庭","c":[50.45278,30.51444]},"80_p080":{"r":"世界","s":"西亚","t":"教堂","d":"拜占庭","c":[50.45278,30.51444]},"81_p081":{"r":"中国","s":"华中","t":"塔","d":"唐至清","c":[34.50528,112.93861]},"82_p082":{"r":"中国","s":"华中","t":"塔","d":"唐至清","c":[34.50528,112.93861]},"83_p083":{"r":"中国","s":"华中","t":"塔","d":"北魏","c":[34.50161,113.01592]},"84_p084":{"r":"中国","s":"华中","t":"塔","d":"北魏","c":[34.50161,113.01592]},"85_p085":{"r":"中国","s":"华中","t":"佛教寺院","d":"东汉","c":[34.72389,112.59972]},"86_p086":{"r":"中国","s":"华中","t":"佛教寺院","d":"东汉","c":[34.72389,112.59972]},"87_p087":{"r":"中国","s":"华北","t":"塔","d":"明","c":[39.94362,116.32423]},"88_p088":{"r":"中国","s":"华北","t":"塔","d":"明","c":[39.94362,116.32423]},"89_p089":{"r":"中国","s":"华北","t":"城垣与长城","d":"明","c":[40.00916,119.75357]},"90_p090":{"r":"中国","s":"华北","t":"城垣与长城","d":"明","c":[40.00916,119.75357]},"91_p091":{"r":"中国","s":"华北","t":"佛教寺院","d":"清","c":[40.9875,117.9375]},"92_p092":{"r":"中国","s":"华北","t":"佛教寺院","d":"清","c":[40.9875,117.9375]},"93_p093":{"r":"中国","s":"华北","t":"园林","d":"清","c":[40.9875,117.9375]},"94_p094":{"r":"中国","s":"华北","t":"园林","d":"清","c":[40.9875,117.9375]},"95_p095":{"r":"中国","s":"西北","t":"石窟与造像","d":"隋唐","c":[40.03722,94.80417]},"96_p096":{"r":"中国","s":"西北","t":"石窟与造像","d":"后秦至明","c":[34.35014,106.00597]},"97_p097":{"r":"中国","s":"西北","t":"石窟与造像","d":"后秦至明","c":[34.35014,106.00597]},"98_p098":{"r":"中国","s":"西南","t":"塔","d":"唐（南诏）","c":[25.70849,100.14594]},"99_p099":{"r":"中国","s":"西南","t":"塔","d":"唐（南诏）","c":[25.70849,100.14594]},"100_p100":{"r":"中国","s":"西南","t":"佛教寺院","d":"唐（吐蕃）","c":[29.65306,91.13222]},"101_p101":{"r":"中国","s":"西南","t":"佛教寺院","d":"唐（吐蕃）","c":[29.65306,91.13222]},"102_p102":{"r":"中国","s":"华东","t":"桥梁","d":"宋","c":[24.95324,118.67524]},"103_p103":{"r":"中国","s":"华东","t":"桥梁","d":"宋","c":[24.95324,118.67524]},"104_p104":{"r":"中国","s":"华东","t":"民居院落","d":"明清","c":[24.6587,116.975]},"105_p105":{"r":"中国","s":"华东","t":"民居院落","d":"明清","c":[24.6587,116.975]},"106_p106":{"r":"中国","s":"华中","t":"佛教寺院","d":"东汉","c":[34.72389,112.59972]},"107_p107":{"r":"中国","s":"华北","t":"桥梁","d":"金","c":[39.84904,116.21289]},"108_p108":{"r":"中国","s":"华北","t":"桥梁","d":"金","c":[39.84904,116.21289]},"109_p109":{"r":"中国","s":"华北","t":"古城古镇","d":"明清","c":[37.19889,112.17667]},"110_p110":{"r":"中国","s":"华北","t":"古城古镇","d":"明清","c":[37.19889,112.17667]},"111_p111":{"r":"中国","s":"西北","t":"城垣与长城","d":"明","c":[39.80146,98.21618]},"112_p112":{"r":"中国","s":"西北","t":"城垣与长城","d":"明","c":[39.80146,98.21618]},"113_p113":{"r":"中国","s":"西南","t":"佛教寺院","d":"唐（吐蕃）","c":[29.65306,91.13222]},"114_p114":{"r":"世界","s":"欧洲","t":"教堂","d":"沙皇俄国","c":[59.94,30.32861]},"115_p115":{"r":"世界","s":"欧洲","t":"教堂","d":"沙皇俄国","c":[59.94,30.32861]},"116_p116":{"r":"世界","s":"欧洲","t":"火山岛海岸","c":[36.415,25.4325]},"117_p117":{"r":"世界","s":"欧洲","t":"教堂","d":"中世纪欧洲","c":[50.94139,6.95833]},"118_p118":{"r":"世界","s":"欧洲","t":"教堂","d":"中世纪欧洲","c":[50.94139,6.95833]},"119_p119":{"r":"世界","s":"欧洲","t":"教堂","d":"中世纪欧洲","c":[45.46397,9.19058]},"120_p120":{"r":"世界","s":"欧洲","t":"教堂","d":"中世纪欧洲","c":[45.46397,9.19058]},"121_p121":{"r":"世界","s":"美洲","t":"盐沼与湖泊","c":[-20.33333,-67.7]},"122_p122":{"r":"世界","s":"非洲","t":"神庙","d":"古埃及","c":[22.33694,31.62556]},"123_p123":{"r":"世界","s":"非洲","t":"神庙","d":"古埃及","c":[22.33694,31.62556]},"124_p124":{"r":"中国","s":"华中","t":"佛教寺院","d":"北魏始建·明清现存","c":[34.50709,112.93569]},"125_p125":{"r":"中国","s":"华中","t":"佛教寺院","d":"北魏始建·明清现存","c":[34.50709,112.93569]}};
+window.LIC_URL = "licenses.html";
+</script>
+
+<!-- 筆記浮層 -->
+<div class="noteveil" id="noteveil" hidden role="dialog" aria-modal="true" aria-labelledby="note-title">
+  <div class="notebox" id="notebox"></div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+"use strict";
+
+var CASES = [{"key":"02_taj","name":"泰姬陵","en":"Taj Mahal","place":"印度 阿格拉","region":"亞洲","features":["純白大理石主體＋巨大洋蔥形中央穹頂","四角各立一根細長小塔，令中央穹頂更顯高聳","正前方是狹長水池與左右完全對稱的波斯式花園"],"trap":"胡馬雍陵同屬蒙兀兒陵墓，但它是紅砂岩牆＋白色穹頂的雙色搭配，也沒有四根細塔。","fact":"1632 年由沙賈汗為亡妻慕塔芝·瑪哈所建，白色大理石上鑲嵌 28 種寶石拼花。","wrong":["胡馬雍陵","布達拉宮","阿格拉堡"],"source":"03-照片/世界/南亚/印度/泰姬陵/泰姬陵-01-全景.jpg","photo":"泰姬陵-01-全景","nf":"泰姬陵","yt":{"id":"xVmD8eKRTDQ","t":"Taj Mahal: The Untold History of India's Eternal Monument | Full Historical Documentary","ch":"Histouris","u":"https://www.youtube.com/watch?v=xVmD8eKRTDQ"},"conf":[],"twin":["37_taj_close","77_p077"]},{"key":"05_giza","name":"吉薩金字塔群","en":"Pyramids of Giza","place":"埃及 吉薩","region":"非洲","features":["三座巨大正方錐體立在平坦沙地上，稜線筆直","表面是風化成階梯狀的石塊，側光時層次分明","遠景常帶駱駝或遊客作比例尺，旁邊有獅身人面像"],"trap":"薩卡拉那座是層層退台的階梯金字塔；吉薩這三座是平滑四稜錐的「真金字塔」。","fact":"古夫大金字塔約建於公元前 2560 年，此後 3800 多年一直是世界最高的人造建築。","wrong":["薩卡拉階梯金字塔","婆羅浮屠","奇琴伊察"],"source":"03-照片/世界/非洲/埃及/吉萨金字塔群/吉萨金字塔群-01-全景.jpg","photo":"吉萨金字塔群-01-全景","confuse_keys":["35_terracotta"],"nf":"吉萨金字塔群","yt":{"id":"BR2ZMj3o5EU","t":"Pyramids and King Tut (Full Episode) | Lost Treasures of Egypt | National Geographic","ch":"National Geographic","u":"https://www.youtube.com/watch?v=BR2ZMj3o5EU"},"conf":["35_terracotta"],"twin":["38_giza_sphinx"]},{"key":"10_petra","name":"佩特拉 · 卡茲尼神殿","en":"Al-Khazneh, Petra","place":"約旦 佩特拉","region":"亞洲","features":["玫瑰紅砂岩崖壁上直接鑿出的神殿立面","中央圓頂亭＋兩側半山牆，柱是希臘化風格","整面牆與岩壁同色，只有門洞是深黑陰影"],"trap":"阿布辛貝同樣是鑿岩神廟，但門前是四尊巨大坐像、位於尼羅河畔；佩特拉是整面岩壁上的柱廊。","fact":"「卡茲尼」意為寶庫，相傳藏有寶藏，實際上很可能是一位納巴泰國王的陵墓。","wrong":["阿布辛貝神殿","傑拉什古城","以弗所遺址"],"source":"03-照片/世界/西亚/约旦/佩特拉/佩特拉-02-卡兹尼立面特写.jpg","photo":"佩特拉-02-卡兹尼立面特写","nf":"佩特拉","yt":{"id":"6xQaEZbVras","t":"Petra Documentary: Lost City Of Stone - Documentary HD","ch":"Documentary HD","u":"https://www.youtube.com/watch?v=6xQaEZbVras"},"conf":[],"twin":[]},{"key":"11_angkor","name":"吳哥窟","en":"Angkor Wat","place":"柬埔寨 暹粒","region":"亞洲","features":["五座蓮花苞形石塔，中央最高、四角各一","前方是長長砂岩引道與護城河，倒影池是經典機位","石色灰褐，塔身與迴廊佈滿細密浮雕"],"trap":"婆羅浮屠同為東南亞佛教遺跡，但它是階梯式曼陀羅金字塔、沒有高塔；吳哥窟是五塔須彌山式。","fact":"佔地約 162 公頃，是世界最大的宗教建築群，12 世紀由蘇耶跋摩二世興建。","wrong":["婆羅浮屠","巴戎寺","大城府遺址"],"source":"03-照片/世界/东南亚/柬埔寨/吴哥窟/吴哥窟-01-全景.jpg","photo":"吴哥窟-01-全景","nf":"吴哥窟","yt":{"id":"x7GQC66Jtqs","t":"Building Angkor | Cambodian History | Extra History Complete","ch":"Extra History","u":"https://www.youtube.com/watch?v=x7GQC66Jtqs"},"conf":[],"twin":["39_angkor_close","76_angkor_tower"]},{"key":"13_potala","name":"布達拉宮","en":"Potala Palace","place":"中國 西藏 拉薩","region":"亞洲","features":["依紅山山勢層層疊起的巨大宮堡","白宮（白牆）與紅宮（深紅牆）明顯分區","牆面大量梯形黑色窗框，遠看像棋盤；山腳有「之」字階梯"],"trap":"扎什倫布寺同為西藏大寺院，但位於平緩山谷、寺院群橫向鋪開，沒有這種高山堡壘感。","fact":"海拔約 3700 公尺，1994 年列入世界遺產，現每日限額參觀。","wrong":["扎什倫布寺","大昭寺","薩迦寺"],"source":"03-照片/中国/西南/西藏/布达拉宫/布达拉宫-01-全景.jpg","photo":"布达拉宫-01-全景","nf":"布达拉宫","yt":{"id":"Erx4_odp11U","t":"Potala Palace「UNESCO World Heritage Sites in China」 | China Documentary","ch":"China Documentary","u":"https://www.youtube.com/watch?v=Erx4_odp11U"},"conf":[],"twin":["40_potala_close"]},{"key":"21_colosseum","name":"羅馬鬥獸場","en":"Colosseum","place":"義大利 羅馬","region":"歐洲","features":["巨大的橢圓環形立面沿弧線連續展開，不是方形殿堂的四面牆","外牆下部三層連續拱券，拱與拱之間立半露柱，柱式由下而上越往上越華麗，第四層為壁柱與小方窗","外牆只剩一半，另一側缺口露出內部環形看台與輻射狀通道，殘缺狀態本身就是它的樣子"],"trap":"希臘圓形劇場是依山坡鑿出的扇形半圓看台、只有一面觀眾席；這裡是平地獨立建起、四周都有多層拱廊外牆的完整橢圓環形。","fact":"長軸約 189 公尺、短軸約 156 公尺，80 餘個拱形入口能在短時間內疏散全場觀眾，是現代體育場疏散佈局的源頭。","wrong":["雅典衛城劇場","古羅馬廣場遺址","龐貝圓形劇場"],"source":"03-照片/世界/欧洲/意大利/罗马斗兽场/罗马斗兽场-01-全景.jpg","photo":"罗马斗兽场-01-全景","nf":"罗马斗兽场","yt":{"id":"xiAY4UJfplI","t":"COLOSSEUM: The Rise and Fall of the Roman Empire | History","ch":"HISTORY","u":"https://www.youtube.com/watch?v=xiAY4UJfplI"},"conf":[],"twin":["22_colosseum_close"]},{"key":"22_colosseum_close","name":"羅馬鬥獸場","en":"Colosseum","place":"義大利 羅馬","region":"歐洲","features":["三層拱券上下疊置，每個拱洞之間立一根半露柱，柱頭樣式逐層由簡入繁","拱券以淺黃褐色石灰岩砌築，拱內填古羅馬混凝土，石塊接縫與風化痕跡清楚","整片立面只有石材本色與水平檐線分層，沒有琉璃瓦、沒有彩畫"],"trap":"凱旋門只有一個獨立的大門洞、體量小；這裡是連續拱券帶加疊層柱式的整片多層立面，一眼就能看出是環形外牆的一段。","fact":"立面上的柱式只負責裝飾，真正承重的是拱券與混凝土牆體——「結構用拱、裝飾用柱」是古羅馬成熟的做法。","wrong":["君士坦丁凱旋門","加爾橋水道橋","萬神殿"],"source":"03-照片/世界/欧洲/意大利/罗马斗兽场/罗马斗兽场-02-拱券立面特写.jpg","photo":"罗马斗兽场-02-拱券立面特写","nf":"罗马斗兽场","yt":{"id":"xiAY4UJfplI","t":"COLOSSEUM: The Rise and Fall of the Roman Empire | History","ch":"HISTORY","u":"https://www.youtube.com/watch?v=xiAY4UJfplI"},"conf":[],"twin":["21_colosseum"]},{"key":"23_humble","name":"拙政園","en":"Humble Administrator's Garden","place":"中國 江蘇 蘇州","region":"亞洲","features":["一片主水面居於構圖中心，建築沿水岸錯落佈置，不排成一條中軸線","屋頂是灰色小青瓦、牆面白粉，色調清淡，與黃瓦紅牆的皇家建築完全不同","亭、榭、廊、曲橋與假山散點分佈，體量小巧，沒有高大封閉的院牆和大殿"],"trap":"頤和園、北海這類皇家園林有宮殿式大殿、紅牆黃瓦與規則建築群；這裡是粉牆灰瓦的私人宅園尺度，靠水與假山自由穿插取景。","fact":"明正德年間王獻臣在唐代陸龜蒙宅舊址上建園，取潘岳《閒居賦》「拙者之為政」之意命名。","wrong":["頤和園","避暑山莊","留園"],"source":"03-照片/中国/华东/江苏/拙政园/拙政园-01-全景.jpg","photo":"拙政园-01-全景","nf":"拙政园","yt":{"id":"1frbBbRtoSM","t":"Classical Gardens of Suzhou「UNESCO World Heritage Sites in China」 | China Documentary","ch":"China Documentary","u":"https://www.youtube.com/watch?v=1frbBbRtoSM"},"conf":[],"twin":["24_humble_close"]},{"key":"24_humble_close","name":"拙政園","en":"Humble Administrator's Garden","place":"中國 江蘇 蘇州","region":"亞洲","features":["臨水堂榭：木柱、欄杆與灰瓦飛簷，屋身輕巧、貼近水面而建","前景荷葉與水面倒影相襯，建築與花木一起構景","樑枋施淡雅彩繪，門窗隔扇雕工精細卻不繁縟"],"trap":"北方四合院是封閉方正、建築圍合天井的居住院落；這裡的亭榭敞開臨水、供人遊賞，不圍合天井。","fact":"中部水池是全園骨架，遠香堂、荷風四面亭、香洲等建築環湖錯落；東園疏朗、西園緊湊，並借園外北寺塔塔影入景。","wrong":["恭王府花園","豫園","可園"],"source":"03-照片/中国/华东/江苏/拙政园/拙政园-02-亭榭特写.jpg","photo":"拙政园-02-亭榭特写","nf":"拙政园","yt":{"id":"1frbBbRtoSM","t":"Classical Gardens of Suzhou「UNESCO World Heritage Sites in China」 | China Documentary","ch":"China Documentary","u":"https://www.youtube.com/watch?v=1frbBbRtoSM"},"conf":[],"twin":["23_humble"]},{"key":"25_forbidden","name":"故宮","en":"Forbidden City","place":"中國 北京","region":"亞洲","features":["一條貫穿畫面的南北中軸線，殿宇沿軸線層層遞進、左右嚴格對稱","屋頂一律覆黃色琉璃瓦、牆體朱紅，是皇家專用的黃—紅配色","主要大殿坐在層層抬高的白色漢白玉台基上，白、紅、黃三段色彩分明"],"trap":"天壇是祭祀建築群，以圜丘、祈年殿為中心，沒有連續對稱的宮殿院落；頤和園隨山勢水面錯落，不講對稱。","fact":"明永樂十八年（1420）落成，明清兩代共 24 位皇帝在此理政居住約 491 年。","wrong":["天壇","頤和園","承德避暑山莊"],"source":"03-照片/中国/华北/北京/故宫/故宫-01-全景.jpg","photo":"故宫-01-全景","confuse_keys":["43_tiantan"],"nf":"故宫","yt":{"id":"xujo0RakWuc","t":"The Forbidden City I「UNESCO World Heritage Sites in China」 | China Documentary","ch":"China Documentary","u":"https://www.youtube.com/watch?v=xujo0RakWuc"},"conf":["43_tiantan"],"twin":["26_forbidden_close"]},{"key":"26_forbidden_close","name":"故宮","en":"Forbidden City","place":"中國 北京","region":"亞洲","features":["黃色琉璃瓦成排瓦壟，屋脊與垂脊上排列脊獸，數量隨建築等級遞減","最高等級大殿用重簷廡殿頂：四坡五脊、兩層屋檐","簷下斗拱密集出挑，樑枋施青綠和璽彩畫"],"trap":"一般王府、壇廟也用黃瓦紅牆，但重簷廡殿、脊獸數量與斗拱層級都低得多；太和殿的脊獸數量是現存古建之最，光看這一處就能分出等級。","fact":"太和殿簷角脊獸為現存古建築中數量最多的一處，脊獸多寡直接標示建築等級。","wrong":["天壇祈年殿","瀋陽故宮大政殿","雍和宮"],"source":"03-照片/中国/华北/北京/故宫/故宫-02-屋顶特写.jpg","photo":"故宫-02-屋顶特写","confuse_keys":["44_tiantan_close"],"nf":"故宫","yt":{"id":"xujo0RakWuc","t":"The Forbidden City I「UNESCO World Heritage Sites in China」 | China Documentary","ch":"China Documentary","u":"https://www.youtube.com/watch?v=xujo0RakWuc"},"conf":["44_tiantan_close"],"twin":["25_forbidden"]},{"key":"27_badaling","name":"長城八達嶺段","en":"Badaling Great Wall","place":"中國 北京 延慶","region":"亞洲","features":["磚石牆體順著山脊線高低起伏延伸，不圍成封閉的城池","牆上每隔一段出現方形空心敵樓，樓身開垛口與箭窗","牆頂外側為鋸齒狀垛口、內側低矮女牆，中間是可通行的馬道"],"trap":"內地府縣城牆圍成封閉方形、牆體平直、環繞居民區；這裡沿山脊蜿蜒、不閉合，牆上等距分佈敵樓。","fact":"八達嶺屬明長城薊鎮邊牆體系，現存磚石包砌牆體與空心敵樓主要為明代營建；長城整體 1987 年列入世界文化遺產。","wrong":["山海關城樓","嘉峪關關城","哈德良長城"],"source":"03-照片/中国/华北/北京/长城八达岭段/长城八达岭段-01-全景.jpg","photo":"长城八达岭段-01-全景","nf":"长城八达岭段","yt":{"id":"IMSx2ADrefM","t":"How to Visit the Great Wall of China: Best Section, Best Time, What to Know","ch":"Simply China","u":"https://www.youtube.com/watch?v=IMSx2ADrefM"},"conf":[],"twin":["28_badaling2"]},{"key":"28_badaling2","name":"長城八達嶺段","en":"Badaling Great Wall","place":"中國 北京 延慶","region":"亞洲","features":["牆體與敵樓沿陡峭山脊呈階梯狀抬升，向遠方層層疊起直到山頂","敵樓多位於山脊轉折處與制高點，與牆體連成一條線","兩側是灌木與碎石的北方山地，沒有城鎮街區"],"trap":"山地上的古寨牆、山道台階也是連續石砌，但沒有等距敵樓、沒有統一垛口，也不會連續延伸數里。","fact":"敵樓分上下兩層，可駐兵、儲糧，兼具射擊與烽火瞭望功能，是明代邊牆最具標誌性的構件。","wrong":["山海關城樓","平遙城牆","哈德良長城"],"source":"03-照片/中国/华北/北京/长城八达岭段/长城八达岭段-02-山脊全景.jpg","photo":"长城八达岭段-02-山脊全景","nf":"长城八达岭段","yt":{"id":"IMSx2ADrefM","t":"How to Visit the Great Wall of China: Best Section, Best Time, What to Know","ch":"Simply China","u":"https://www.youtube.com/watch?v=IMSx2ADrefM"},"conf":[],"twin":["27_badaling"]},{"key":"29_yingxian","name":"應縣木塔","en":"Yingxian Wooden Pagoda","place":"中國 山西 應縣","region":"亞洲","features":["通體木構、層層出簷，外觀五層、連同塔基共見六重屋檐","平面為八角形，塔身向上逐層收分，輪廓柔和而穩定","頂部立金屬塔剎收束整座塔身，塔下是寺院殿宇與院落"],"trap":"密簷式磚塔（嵩岳寺塔、千尋塔）下部只有一層高塔身、上部短簷密集相疊、牆體實心且不能登臨；這座每層都有門窗回廊、簷距明顯更大。","fact":"遼清寧二年（1056）建成，高 67 米級，是世界現存最高、最古老的純木結構樓閣式塔；外觀五層、內含四個暗層，實際結構為九層。","wrong":["嵩岳寺塔","大雁塔","虎丘塔"],"source":"03-照片/中国/华北/山西/应县木塔/应县木塔-01-全景.jpg","photo":"应县木塔-01-全景","nf":"应县木塔","yt":{"id":"RPuWypZ4SrA","t":"Yingxian Wooden Pagoda | Timeless Ancient Structures | CGTN Documentary","ch":"CGTN Documentary","u":"https://www.youtube.com/watch?v=RPuWypZ4SrA"},"conf":[],"twin":["30_yingxian_close"]},{"key":"30_yingxian_close","name":"應縣木塔","en":"Yingxian Wooden Pagoda","place":"中國 山西 應縣","region":"亞洲","features":["簷下斗拱層層出挑、排列密集，形制多樣，能看清每一組的受力層次","粗大木柱與額枋承托屋檐，柱上還掛著匾額","木構本色配灰瓦，牆面沒有磚石貼面"],"trap":"樓閣式磚塔（大雁塔、虎丘塔）表面用磚仿作斗拱、以磚壁承重；這裡的斗拱是真木構件出挑，近景能看到木料層層疊壓。","fact":"全塔以榫卯咬合，不用一根鐵釘；暗層內以斜向木撐形成剛性圈梁，是它歷經近千年地震而不倒的結構關鍵。","wrong":["大雁塔","虎丘塔","晉祠聖母殿"],"source":"03-照片/中国/华北/山西/应县木塔/应县木塔-02-塔身特写.jpg","photo":"应县木塔-02-塔身特写","nf":"应县木塔","yt":{"id":"RPuWypZ4SrA","t":"Yingxian Wooden Pagoda | Timeless Ancient Structures | CGTN Documentary","ch":"CGTN Documentary","u":"https://www.youtube.com/watch?v=RPuWypZ4SrA"},"conf":[],"twin":["29_yingxian"]},{"key":"31_zhaozhou","name":"趙州橋","en":"Zhaozhou Bridge","place":"中國 河北 趙縣","region":"亞洲","features":["單一大跨度圓弧石拱橫跨河道，河中不設橋墩","大拱兩肩各開兩個小拱洞——「敞肩拱」是它最關鍵的標誌","橋面平緩、兩側望柱欄板完整，淺灰石材、正側面對稱"],"trap":"一般實肩石拱橋的拱肩填實、拱上不開小拱；這裡大拱肩上那四個通透的小拱洞，是同類橋裡獨一份的形制。","fact":"隋代匠師李春設計建造，約 595—605 年建成；單孔淨跨約 37 米，是世界現存最早、保存最完整的大型單孔敞肩石拱橋。","wrong":["盧溝橋","十七孔橋","泉州洛陽橋"],"source":"03-照片/中国/华北/河北/赵州桥/赵州桥-01-全景.jpg","photo":"赵州桥-01-全景","nf":"赵州桥","yt":{"id":"mED0ZNMdFSs","t":"Legacy – 1,400-yr-old bridge links history to new era","ch":"New China TV","u":"https://www.youtube.com/watch?v=mED0ZNMdFSs"},"conf":[],"twin":["32_zhaozhou_close"]},{"key":"32_zhaozhou_close","name":"趙州橋","en":"Zhaozhou Bridge","place":"中國 河北 趙縣","region":"亞洲","features":["拱腹內側一道道縱向並列的石砌接縫，一券一券獨立受力","拱石之間有橫向鐵拉杆與腰鐵拉結，防止各券向外閃開","石面淺灰、風化痕跡明顯，看不到現代混凝土"],"trap":"現代鋼筋混凝土橋樑拱腹平整、接縫整齊劃一；這裡是整石砌築、再用鐵件把各道拱券絞在一起的古代做法。","fact":"主拱由 28 道拱券縱向並列拼成，每道可獨立更換——這正是它能沿用到今天、還能局部修繕的原因。","wrong":["盧溝橋","十七孔橋","寶帶橋"],"source":"03-照片/中国/华北/河北/赵州桥/赵州桥-02-拱券特写.jpg","photo":"赵州桥-02-拱券特写","nf":"赵州桥","yt":{"id":"mED0ZNMdFSs","t":"Legacy – 1,400-yr-old bridge links history to new era","ch":"New China TV","u":"https://www.youtube.com/watch?v=mED0ZNMdFSs"},"conf":[],"twin":["31_zhaozhou"]},{"key":"33_mogao","name":"莫高窟","en":"Mogao Caves","place":"中國 甘肅 敦煌","region":"亞洲","features":["一道長崖壁上佈滿成排分層的洞口，上下多層、南北連續展開","崖前架設棧道與多層木構簷樓，第 96 窟「九層樓」是最醒目的豎向標誌","崖下是戈壁山麓與綠洲植被，環境乾燥少樹"],"trap":"雲岡、龍門以堅硬岩體上露天開鑿的巨型石佛與大龕為標誌；這裡是砂礫岩崖面上的層疊小窟群，造像是泥塑敷彩，看不到露天大石雕。","fact":"前秦建元二年（366）僧樂僔鑿下第一窟，此後歷北朝、隋唐至元持續營建，現存洞窟 700 餘座。","wrong":["雲岡石窟","龍門石窟","麥積山石窟"],"source":"03-照片/中国/西北/甘肃/莫高窟/莫高窟-01-全景.jpg","photo":"莫高窟-01-全景","confuse_keys":["41_yungang","42_yungang_close"],"nf":"莫高窟","yt":{"id":"UObK-A28RV8","t":"Mogao Caves「UNESCO World Heritage Sites in China」 | China Documentary","ch":"China Documentary","u":"https://www.youtube.com/watch?v=UObK-A28RV8"},"conf":["41_yungang","42_yungang_close"],"twin":["34_mogao2","95_p095"]},{"key":"34_mogao2","name":"莫高窟","en":"Mogao Caves","place":"中國 甘肅 敦煌","region":"亞洲","features":["洞窟在崖面上豎向分層，一排排洞口大小不一、密集成片","棧道與木構簷樓貼著崖壁搭建，把分散的洞窟連通起來","崖體是鬆散砂礫岩，坡面紋理粗疏，沒有任何整岩雕刻"],"trap":"一般山坡窯洞只是一排排土洞，沒有窟前木構簷樓與棧道系統；這裡的棧道與簷樓本身就是建築，是它區別於土窯洞的關鍵。","fact":"砂礫岩鬆軟、無法整岩雕造大佛，所以莫高窟改用木骨泥塑敷彩、壁畫繪於泥層牆面——材料決定了它的藝術形式。","wrong":["雲岡石窟","麥積山石窟","龍門石窟"],"source":"03-照片/中国/西北/甘肃/莫高窟/莫高窟-02-崖壁全景.jpg","photo":"莫高窟-02-崖壁全景","nf":"莫高窟","yt":{"id":"UObK-A28RV8","t":"Mogao Caves「UNESCO World Heritage Sites in China」 | China Documentary","ch":"China Documentary","u":"https://www.youtube.com/watch?v=UObK-A28RV8"},"conf":[],"twin":["33_mogao","95_p095"]},{"key":"35_terracotta","name":"秦始皇陵兵馬俑","en":"Terracotta Army","place":"中國 陝西 西安 臨潼","region":"亞洲","features":["地下長方形坑道內，真人大小陶俑成排面向前方，密度極高、排成方陣","坑內以夯土隔牆分隔成長廊，陶俑沿長廊列隊","四周與上方可見現代展陳回廊、棚架與看台"],"trap":"地上陵墓（金字塔、泰姬陵）有封土、穹頂或石砌陵體；兵馬俑是地下陪葬坑裡的陶塑軍陣，畫面裡看不到任何地上的陵體建築。","fact":"1974 年當地打井發現一號坑，此後陸續發掘二、三號坑；陶俑以碎片拼對修復後在原址展出。","wrong":["漢陽陵兵馬俑","昭陵陪葬墓","明十三陵"],"source":"03-照片/中国/西北/陕西/秦始皇陵兵马俑/秦始皇陵兵马俑-01-全景.jpg","photo":"秦始皇陵兵马俑-01-全景","nf":"秦始皇陵兵马俑","yt":{"id":"-6Ia-SEidBA","t":"The First Emperor's Mega Tomb: Uncovering a Lost World | SPECIAL | National Geographic","ch":"National Geographic","u":"https://www.youtube.com/watch?v=-6Ia-SEidBA"},"conf":["05_giza"],"twin":["36_terracotta_close"]},{"key":"36_terracotta_close","name":"秦始皇陵兵馬俑","en":"Terracotta Army","place":"中國 陝西 西安 臨潼","region":"亞洲","features":["單個武士俑：交領長襦外披鎧甲，甲片一片片編綴而成","頭頂梳髮髻，面部五官與表情各不相同","陶土灰褐色質感，表面已看不到當年的彩繪"],"trap":"後世小型陶俑、泥塑神像體量遠小、也沒有軍陣編組；秦俑接近真人真馬、按實戰甲胄與髮髻塑造，是成體系的雕塑軍隊。","fact":"陶俑原本通體施紅、綠、黑等彩繪，出土接觸空氣後多數剝落，今天看到的灰褐只是脫彩之後的陶胎本色。","wrong":["漢陽陵陶俑","唐三彩武士俑","敦煌彩塑"],"source":"03-照片/中国/西北/陕西/秦始皇陵兵马俑/秦始皇陵兵马俑-02-武士俑特写.jpg","photo":"秦始皇陵兵马俑-02-武士俑特写","nf":"秦始皇陵兵马俑","yt":{"id":"-6Ia-SEidBA","t":"The First Emperor's Mega Tomb: Uncovering a Lost World | SPECIAL | National Geographic","ch":"National Geographic","u":"https://www.youtube.com/watch?v=-6Ia-SEidBA"},"conf":[],"twin":["35_terracotta"]},{"key":"37_taj_close","name":"泰姬陵","en":"Taj Mahal","place":"印度 阿格拉","region":"亞洲","features":["飽滿的洋蔥形大穹頂，頂端立金色尖飾，下方一圈細高的鼓座過渡","四角細長尖塔分節而上、塔頂各帶小穹頂，塔身略向外傾","純白大理石牆面鑲嵌彩色半寶石花卉，門洞為大理石透雕格柵"],"trap":"胡馬雍陵同屬蒙兀兒陵墓，但主體是紅砂岩配白色穹頂，沒有四根通體白色的大理石尖塔；清真寺則以禮拜殿與庭院為主，不設尖塔環抱主陵。","fact":"四角尖塔故意略向外傾，地震時會朝外倒而不砸向主陵——是莫臥兒工匠的抗震設計。","wrong":["胡馬雍陵","賈瑪清真寺","阿格拉堡"],"source":"03-照片/世界/南亚/印度/泰姬陵/泰姬陵-02-穹顶尖塔特写.jpg","photo":"泰姬陵-02-穹顶尖塔特写","nf":"泰姬陵","yt":{"id":"xVmD8eKRTDQ","t":"Taj Mahal: The Untold History of India's Eternal Monument | Full Historical Documentary","ch":"Histouris","u":"https://www.youtube.com/watch?v=xVmD8eKRTDQ"},"conf":[],"twin":["02_taj","77_p077"]},{"key":"38_giza_sphinx","name":"吉薩金字塔群","en":"Pyramids of Giza","place":"埃及 吉薩","region":"非洲","features":["前景是人首獅身的臥姿石像，頭部為法老形象、身體為臥獅","石像與金字塔之間有石砌圍牆與台地，兩者同在一片沙漠高原上","遠景金字塔的幾何輪廓與前景雕像形成明顯的大小對比"],"trap":"金字塔坡面沒有任何神像雕刻、是純幾何方錐體；斯芬克斯是獨立鑿出的雕像，兩者同框時很容易被當成陵體的一部分。","fact":"獅身人面像長期被沙土掩埋，近代才發掘修復；它鎮守在哈夫拉金字塔東側的台地前。","wrong":["卡納克神廟","阿布辛貝神廟","帝王谷"],"source":"03-照片/世界/非洲/埃及/吉萨金字塔群/吉萨金字塔群-02-狮身人面像与金字塔.jpg","photo":"吉萨金字塔群-02-狮身人面像与金字塔","nf":"吉萨金字塔群","yt":{"id":"BR2ZMj3o5EU","t":"Pyramids and King Tut (Full Episode) | Lost Treasures of Egypt | National Geographic","ch":"National Geographic","u":"https://www.youtube.com/watch?v=BR2ZMj3o5EU"},"conf":[],"twin":["05_giza"]},{"key":"39_angkor_close","name":"吳哥窟","en":"Angkor Wat","place":"柬埔寨 暹粒","region":"亞洲","features":["砂岩砌築的回廊立面：石柱成排、石牆承重，石縫之間不用灰漿","窗洞內立石雕窗欞，豎向成排，是吳哥石構特有的窗飾","外壁與內壁滿佈淺浮雕帶，人物與紋樣細密繁複"],"trap":"印度本土神廟以垂直向上的階梯狀高塔（shikhara）為主體、外壁神像密布；吳哥窟是水平展開的三層回廊環抱中央蓮花蓓蕾塔群，塔形完全不同。","fact":"全部砂岩疊砌、靠榫卯與重力咬合，不用灰漿；回廊浮雕刻《羅摩衍那》《摩訶婆羅多》與宮廷戰象場面。","wrong":["卡朱拉霍神廟","婆羅浮屠","蒲甘佛塔"],"source":"03-照片/世界/东南亚/柬埔寨/吴哥窟/吴哥窟-02-回廊立面特写.jpg","photo":"吴哥窟-02-回廊立面特写","nf":"吴哥窟","yt":{"id":"x7GQC66Jtqs","t":"Building Angkor | Cambodian History | Extra History Complete","ch":"Extra History","u":"https://www.youtube.com/watch?v=x7GQC66Jtqs"},"conf":[],"twin":["11_angkor","76_angkor_tower"]},{"key":"40_potala_close","name":"布達拉宮","en":"Potala Palace","place":"中國 西藏 拉薩","region":"亞洲","features":["深紅褐色厚牆，牆體自下而上略有收分，表面粗獷","成排小窗扁而平、窗框黑色梯形，白牆與紅牆分色清楚","頂部可見鎏金金頂、金幢與宗教旗幟"],"trap":"內地宮殿是坡屋頂、琉璃瓦，外牆朱紅配黃瓦；這裡是平頂、石砌厚牆、白紅分色，靠金頂與金幢收束輪廓。","fact":"紅宮牆體中夾有花崗岩加固層，以適應高原地震與風載；白宮在東、紅宮居中，順紅山山勢層層疊起。","wrong":["扎什倫布寺","桑耶寺","塔爾寺"],"source":"03-照片/中国/西南/西藏/布达拉宫/布达拉宫-02-宫墙特写.jpg","photo":"布达拉宫-02-宫墙特写","nf":"布达拉宫","yt":{"id":"Erx4_odp11U","t":"Potala Palace「UNESCO World Heritage Sites in China」 | China Documentary","ch":"China Documentary","u":"https://www.youtube.com/watch?v=Erx4_odp11U"},"conf":[],"twin":["13_potala"]},{"key":"41_yungang","name":"雲岡石窟","en":"Yungang Grottoes","place":"中國 山西 大同","region":"亞洲","features":["崖壁前疊架多層木構窟檐樓閣，藍綠琉璃瓦頂配紅牆，下有石階與分列石獅","黃灰色砂岩崖面上成排方形大窟開口橫向並列，體量寬大、以石雕大像為主而非壁畫","地面木構樓閣＋崖體洞窟的雙層結構同框，是雲岡最穩定的畫面組合"],"trap":"與莫高窟：莫高窟是砂礫岩崖壁上的密集小窟，以泥塑彩塑與壁畫為主，窟前少見成組木構樓閣；雲岡是大體量砂岩洞窟，前有疊架窟檐樓閣。","fact":"北魏和平元年（460）由文成帝命沙門統曇曜主持開鑿；2001 年列入世界文化遺產。","wrong":["莫高窟","龍門石窟","麥積山石窟"],"source":"03-照片/中国/华北/山西/云冈石窟/云冈石窟-01-崖壁窟檐全景.jpg","photo":"云冈石窟-01-崖壁窟檐全景","nf":"云冈石窟","yt":{"id":"H1RxiD0JJY4","t":"Yungang Grottoes「UNESCO World Heritage Sites in China」 | China Documentary","ch":"China Documentary","u":"https://www.youtube.com/watch?v=H1RxiD0JJY4"},"conf":["33_mogao"],"twin":["42_yungang_close"]},{"key":"42_yungang_close","name":"雲岡石窟","en":"Yungang Grottoes","place":"中國 山西 大同","region":"亞洲","features":["主尊結跏趺坐、完全敞露在崖面之外，頭頂高肉髻、面相方圓、雙肩寬闊","袈裟為袒右肩式，衣紋作階梯狀平直硬刻線，不是流暢的圓弧褶皺","石質為暖黃砂岩，表面風化成層理與蜂窩狀孔洞，色調偏暖、質地粗"],"trap":"與龍門石窟奉先寺大佛：龍門是唐代青灰石灰岩、面相豐腴圓潤、衣紋流暢；雲岡是北魏暖黃砂岩、面相方圓、衣紋階梯狀硬直。","fact":"曇曜五窟（第 16—20 窟）一般認為對應北魏五位皇帝，第 20 窟是其中主尊保存最完整的一窟。","wrong":["龍門石窟","麥積山石窟","莫高窟"],"source":"03-照片/中国/华北/山西/云冈石窟/云冈石窟-02-露天大佛特写.jpg","photo":"云冈石窟-02-露天大佛特写","nf":"云冈石窟","yt":{"id":"H1RxiD0JJY4","t":"Yungang Grottoes「UNESCO World Heritage Sites in China」 | China Documentary","ch":"China Documentary","u":"https://www.youtube.com/watch?v=H1RxiD0JJY4"},"conf":["33_mogao"],"twin":["41_yungang"]},{"key":"43_tiantan","name":"天壇","en":"Temple of Heaven","place":"中國 北京","region":"亞洲","features":["三重圓形藍色琉璃瓦檐由下而上逐層收分，頂上為鎏金寶頂","殿身立在三層圓形漢白玉台基上，每層帶欄杆與台階，形成三檐對三台","朱紅柱身配青綠貼金和璽彩畫，與藍瓦構成固定的紅—藍—金配色"],"trap":"與故宮：故宮主體是方形殿宇、黃色琉璃瓦、廡殿或歇山頂，圍在紫禁城城牆內；天壇是圓形平面、藍瓦三重圓檐攢尖頂的祭天建築。","fact":"明永樂十八年（1420）建成，初名天地壇合祭天地；1998 年列入世界文化遺產。","wrong":["故宮","頤和園","雍和宮"],"source":"03-照片/中国/华北/北京/天坛/天坛-01-祈年殿全景.jpg","photo":"天坛-01-祈年殿全景","nf":"天坛","yt":{"id":"QI5G7pwb8vA","t":"The Temple of Heaven「UNESCO World Heritage Sites in China」 | China Documentary","ch":"China Documentary","u":"https://www.youtube.com/watch?v=QI5G7pwb8vA"},"conf":["25_forbidden"],"twin":["44_tiantan_close"]},{"key":"44_tiantan_close","name":"天壇","en":"Temple of Heaven","place":"中國 北京","region":"亞洲","features":["檐下額枋與斗拱佈滿青綠為底、貼金線條的和璽彩畫，金色聚在枋心與箍頭","門洞內見圓形柱列、中央台階與供桌，殿內不設佛像，是祭天用的牌位與供器","朱紅柱身與圓形柱列同框，圓形平面靠柱列與斗拱層層出挑完成屋架過渡"],"trap":"與故宮太和殿：太和殿是方形殿、黃瓦，殿內為寶座與金柱；祈年殿是藍瓦圓殿，殿內為祭天牌位與供器，彩畫同是和璽但底色與等級不同。","fact":"祈年殿現存形制為清乾隆年間改建，光緒十五年（1889）遭雷火後按原制重建。","wrong":["故宮","頤和園","雍和宮"],"source":"03-照片/中国/华北/北京/天坛/天坛-02-殿门彩画特写.jpg","photo":"天坛-02-殿门彩画特写","nf":"天坛","yt":{"id":"QI5G7pwb8vA","t":"The Temple of Heaven「UNESCO World Heritage Sites in China」 | China Documentary","ch":"China Documentary","u":"https://www.youtube.com/watch?v=QI5G7pwb8vA"},"conf":["26_forbidden_close"],"twin":["43_tiantan"]},{"key":"45_notredame","name":"巴黎聖母院","en":"Notre-Dame de Paris","place":"法國 巴黎","region":"歐洲","features":["西立面左右兩座平頂方塔夾住中央，兩塔間沒有尖塔，立面呈完整矩形輪廓","立面正中一枚直徑約 9.6 公尺的圓形玫瑰窗，窗下一排細密石柱廊（國王廊）","下層三座深凹尖拱門並排，門楣與拱券內佈滿雕像，形成三拱並列的底層節奏"],"trap":"與聖家堂：聖家堂是有機曲面、塔群如林的加泰隆尼亞現代主義建築，暖褐石加彩瓷；巴黎聖母院是嚴格對稱的雙平頂方塔、單色石構、尖拱與玫瑰窗體系。","fact":"1163 年奠基、1345 年大體完工，歷時近兩百年；1991 年隨「巴黎塞納河畔」列入世界文化遺產。","wrong":["聖家堂","米蘭大教堂","科隆大教堂"],"source":"03-照片/世界/欧洲/法国/巴黎圣母院/巴黎圣母院-01-西立面全景.jpg","photo":"巴黎圣母院-01-西立面全景","nf":"巴黎圣母院","yt":{"id":"ljBaVIp2pJQ","t":"The Long History of Notre Dame in Paris","ch":"Ryan M Reeves","u":"https://www.youtube.com/watch?v=ljBaVIp2pJQ"},"conf":[],"twin":["46_notredame_close"]},{"key":"46_notredame_close","name":"巴黎聖母院","en":"Notre-Dame de Paris","place":"法國 巴黎","region":"歐洲","features":["三座尖拱門洞並列，門楣分層排滿雕像，中門雕刻最密（最後審判門）","門洞上方一條連續的雕像龕帶即「國王廊」，再往上是玫瑰窗","拱券為多層退進的尖拱，石材淺沙色、局部風化成灰黑"],"trap":"與米蘭大教堂、科隆大教堂：米蘭立面佈滿密集小尖塔，科隆是一對尖頂雙塔；巴黎聖母院是三座尖拱門＋國王廊＋圓窗的整齊橫向分層，塔為平頂。","fact":"2019 年 4 月大火焚毀屋頂與尖塔，經五年修復於 2024 年 12 月重新開放，西立面結構與雕像基本保留。","wrong":["聖家堂","米蘭大教堂","科隆大教堂"],"source":"03-照片/世界/欧洲/法国/巴黎圣母院/巴黎圣母院-02-三座门特写.jpg","photo":"巴黎圣母院-02-三座门特写","nf":"巴黎圣母院","yt":{"id":"ljBaVIp2pJQ","t":"The Long History of Notre Dame in Paris","ch":"Ryan M Reeves","u":"https://www.youtube.com/watch?v=ljBaVIp2pJQ"},"conf":[],"twin":["45_notredame"]},{"key":"47_hagia","name":"聖索菲亞大教堂","en":"Hagia Sophia","place":"土耳其 伊斯坦堡","region":"歐洲","features":["單一巨大中央穹頂壓住整棟建築，穹頂基部一圈密集小窗，夜間像浮在光帶上","四座細長灰白石砌宣禮塔分列四角，塔身細圓柱狀、頂端收成尖錐","方形主體加東西兩側半穹頂逐級跌落，外牆粉灰赭黃、附粗壯扶壁"],"trap":"與藍色清真寺：兩者同在伊斯坦堡、同有中央穹頂，但藍色清真寺為 17 世紀新建、六座宣禮塔；聖索菲亞是 6 世紀原構、四座宣禮塔、穹頂基部一圈窗洞。","fact":"532 年動工、537 年落成，由查士丁尼一世主持；1985 年隨「伊斯坦堡歷史區域」列入世界文化遺產。","wrong":["藍色清真寺","蘇萊曼尼耶清真寺","聖瓦西里大教堂"],"source":"03-照片/世界/西亚/土耳其/圣索菲亚大教堂/圣索菲亚大教堂-01-夜景全景.jpg","photo":"圣索菲亚大教堂-01-夜景全景","nf":"圣索菲亚大教堂","yt":{"id":"v6BAPskdJXc","t":"Why Hagia Sophia is So Important? The Whole History is Explained","ch":"Simply Explained","u":"https://www.youtube.com/watch?v=v6BAPskdJXc"},"conf":[],"twin":["48_hagia_close","79_p079","80_p080"]},{"key":"48_hagia_close","name":"聖索菲亞大教堂","en":"Hagia Sophia","place":"土耳其 伊斯坦堡","region":"歐洲","features":["半球形穹頂輪廓清晰，其下接連續拱窗與厚重扶壁，磚石交替砌成粉灰色","主穹頂東西兩側各接半穹頂，向下再以拱與廊銜接，形成階梯式跌落","右側宣禮塔的細圓柱身與尖錐頂緊貼主體，塔與圓頂同框是關鍵組合"],"trap":"與聖瓦西里大教堂：聖瓦西里是九座彩色洋蔥形穹頂加紅磚牆；聖索菲亞是單一巨型半圓穹頂、粉灰石面、配四座細長尖錐宣禮塔，沒有彩色洋蔥頂。","fact":"主穹頂直徑約 31 公尺，基部開一圈 40 個窗洞，是「穹頂懸浮」效果的來源。","wrong":["藍色清真寺","蘇萊曼尼耶清真寺","聖瓦西里大教堂"],"source":"03-照片/世界/西亚/土耳其/圣索菲亚大教堂/圣索菲亚大教堂-02-穹顶侧景.jpg","photo":"圣索菲亚大教堂-02-穹顶侧景","nf":"圣索菲亚大教堂","yt":{"id":"v6BAPskdJXc","t":"Why Hagia Sophia is So Important? The Whole History is Explained","ch":"Simply Explained","u":"https://www.youtube.com/watch?v=v6BAPskdJXc"},"conf":[],"twin":["47_hagia","79_p079","80_p080"]},{"key":"49_parthenon","name":"帕特農神廟","en":"Parthenon","place":"希臘 雅典","region":"歐洲","features":["山頂石灰岩台地上成排石柱體塊，與山下現代城市形成明顯高差","柱列之下可見三級台階基座，屋頂早已不存，只剩石構骨架與殘缺山花","白色大理石風化後呈淺灰白至淡金，柱身凹槽在光下形成豎向明暗條紋"],"trap":"與衛城山門、伊瑞克提翁神廟：三者同在山頂常被混拍；山門是帶五門洞的入口建築，伊瑞克提翁以女像柱聞名，帕特農是體量最大的周柱神廟、正面八柱。","fact":"公元前 447 年動工、前 432 年完成主體，建築師為伊克提諾斯與卡利克拉特；1987 年隨「雅典衛城」列入世界文化遺產。","wrong":["伊瑞克提翁神廟","衛城山門","羅馬萬神廟"],"source":"03-照片/世界/欧洲/希腊/帕特农神庙/帕特农神庙-01-卫城全景.jpg","photo":"帕特农神庙-01-卫城全景","nf":"帕特农神庙","yt":{"id":"YpXDB1P0TgU","t":"The Parthenon Explained: History, Art & Meaning","ch":"MoAn Inc.","u":"https://www.youtube.com/watch?v=YpXDB1P0TgU"},"conf":[],"twin":["50_parthenon_close"]},{"key":"50_parthenon_close","name":"帕特農神廟","en":"Parthenon","place":"希臘 雅典","region":"歐洲","features":["多立克柱身帶縱向凹槽，柱頭只是一個圓盤加方形托板，沒有雙螺旋渦卷","柱腳無柱礎，直接落在台階石面上，柱身粗壯、高僅約直徑的五點五倍","柱上橫梁可見三隴板與隴間壁的交替節奏，多處斷裂、屋頂缺失"],"trap":"與羅馬萬神廟：羅馬萬神廟用科林斯柱、有柱礎、柱身細長、檐部裝飾繁密並冠以圓頂；帕特農是多立克柱、無柱礎、柱身粗壯、梁柱體系無拱券。","fact":"神廟以「視覺修正」著稱：柱身中部略鼓、角柱加粗、台基與橫梁略呈弧線，以抵消透視變形。","wrong":["伊瑞克提翁神廟","衛城山門","羅馬萬神廟"],"source":"03-照片/世界/欧洲/希腊/帕特农神庙/帕特农神庙-02-柱廊特写.jpg","photo":"帕特农神庙-02-柱廊特写","nf":"帕特农神庙","yt":{"id":"YpXDB1P0TgU","t":"The Parthenon Explained: History, Art & Meaning","ch":"MoAn Inc.","u":"https://www.youtube.com/watch?v=YpXDB1P0TgU"},"conf":[],"twin":["49_parthenon"]},{"key":"51_fuji","name":"富士山","en":"Mount Fuji","place":"日本 靜岡／山梨","region":"亞洲","features":["平靜湖面佔去畫面下三分之二，水面近乎無波，只有細微的淺色波紋。","湖心偏下浮著一個倒立的等腰三角形山影，淺色雪面與深色坡紋上下交錯。","遠岸是一線低矮白色旅館與深綠樹林，山體本身被薄霧遮得只剩淡淡輪廓。"],"trap":"與馬特洪峰：馬特洪峰邊稜陡直、山面被切成四個折面，峰尖銳利偏出畫面；此圖錐體左右坡度均勻、山頂圓鈍，倒影是完整的等腰三角形。","fact":"海拔 3776 米，日本最高峰；2013 年以「信仰的對象與藝術的源泉」列入世界文化遺產（編號 1418）。","wrong":["馬特洪峰","烏尤尼鹽沼","尼加拉瀑布"],"source":"03-照片/世界/东亚/日本/富士山/富士山-01-湖面倒影.jpg","photo":"富士山-01-湖面倒影","nf":"富士山","yt":{"id":"3mlH3qEYrEk","t":"Mount Fuji: The Sacred Volcano That Changed Japanese History – Full Documentary","ch":"Fury of the Earth","u":"https://www.youtube.com/watch?v=3mlH3qEYrEk"},"conf":[],"twin":["52_fuji_close"]},{"key":"52_fuji_close","name":"富士山","en":"Mount Fuji","place":"日本 靜岡／山梨","region":"亞洲","features":["雪冠錐峰只佔畫面上方左半，山腳被市街與電線遮住，與前景不成比例。","前景是積雪的混凝土護岸水渠，由畫面下緣筆直收束到中景，兩岸壓著薄雪。","兩側是無葉積雪的落葉樹、矮房與電線桿，天空淡藍無雲，屬冬季市街景。"],"trap":"與馬特洪峰：馬特洪峰上段積雪、下段深色岩壁，雪線是參差的岩脊；此峰雪冠像白帽罩住整個錐頂，山腰是均勻淺色雪坡，前景是市街水渠。","fact":"由多期噴發堆疊而成的層狀活火山，最近一次噴發為 1707 年寶永大噴發；2013 年列入世界文化遺產。","wrong":["馬特洪峰","尼加拉瀑布","烏尤尼鹽沼"],"source":"03-照片/世界/东亚/日本/富士山/富士山-02-雪渠远眺.jpg","photo":"富士山-02-雪渠远眺","nf":"富士山","yt":{"id":"3mlH3qEYrEk","t":"Mount Fuji: The Sacred Volcano That Changed Japanese History – Full Documentary","ch":"Fury of the Earth","u":"https://www.youtube.com/watch?v=3mlH3qEYrEk"},"conf":[],"twin":["51_fuji"]},{"key":"53_matterhorn","name":"馬特洪峰","en":"Matterhorn","place":"瑞士／義大利邊界","region":"歐洲","features":["峰尖只在畫面右中偏下露出一小截，四面錐形、邊稜如刀切，遠比前景岩壁矮小。","左側一整片深色巨岩壁斜切入畫面，右側是長草的緩坡，兩者把尖峰夾在中間。","傍晚天色，藍天掛著一條被夕照染成粉紅的雲，湖面把尖峰與雲一起倒映。"],"trap":"與富士山：富士山是坡度均勻、左右對稱的單一錐體，山頂圓鈍；此峰山面被切出明顯折面、邊稜筆直，只露出一小截尖角，前景是岩壁與草坡。","fact":"海拔 4478 米，位於瑞士與義大利邊界的彭尼阿爾卑斯山脈，由冰川侵蝕削成角峰；未列入世界遺產。","wrong":["富士山","烏尤尼鹽沼","尼加拉瀑布"],"source":"03-照片/世界/欧洲/瑞士/马特洪峰/马特洪峰-01-尖峰倒影.jpg","photo":"马特洪峰-01-尖峰倒影","nf":"马特洪峰","yt":{"id":"yBijstIT1SI","t":"Climbing the Matterhorn: Risk, History, and Why the Descent Kills More Climbers","ch":"Whispering Peaks","u":"https://www.youtube.com/watch?v=yBijstIT1SI"},"conf":[],"twin":["54_matterhorn_close"]},{"key":"54_matterhorn_close","name":"馬特洪峰","en":"Matterhorn","place":"瑞士／義大利邊界","region":"歐洲","features":["山體幾乎填滿畫面中段，雪白錐面被深色岩脊縱向切成數條，峰尖略偏右上。","上部是連續雪面與冰溝，下部露出黑灰岩肋，雪與岩交錯成鋸齒狀邊界。","山腳是深綠針葉林與草坡，右側一道岩脊斜升，天頂是淡藍天空與碎雲。"],"trap":"與富士山：富士山雪冠止於山腰，下方是整片深色林坡，雪線成一圈平滑白帽；此峰雪面一路裂到山腳，被黑色岩脊切成縱向條帶。","fact":"峰高 4478 米，為多條冰川同時侵蝕山體削出的四面角峰；峰頂為雪與岩混合、常年覆薄雪，未列入世界遺產。","wrong":["富士山","吉薩金字塔群","烏尤尼鹽沼"],"source":"03-照片/世界/欧洲/瑞士/马特洪峰/马特洪峰-02-峰顶特写.jpg","photo":"马特洪峰-02-峰顶特写","nf":"马特洪峰","yt":{"id":"yBijstIT1SI","t":"Climbing the Matterhorn: Risk, History, and Why the Descent Kills More Climbers","ch":"Whispering Peaks","u":"https://www.youtube.com/watch?v=yBijstIT1SI"},"conf":[],"twin":["53_matterhorn"]},{"key":"55_niagara","name":"尼加拉瀑布","en":"Niagara Falls","place":"加拿大／美國邊界","region":"美洲","features":["畫面是極扁的長條全景，兩段水幕分踞左右，中間隔著一道長滿綠樹的平直河岸。","右段水幕呈弧形凹口，落水處升起一根粗大的白色水霧柱，直直衝到畫面上緣。","左段水幕較平直，水色青綠，落下後在深色亂石灘上炸成白沫；左端遠處有城市樓群。"],"trap":"與烏尤尼鹽沼：鹽沼是無落差的平坦鹽殼，倒影完整、看不到水霧；此圖有明確的落水線、濺起的白沫與沖天水霧柱，下方是青綠河水。","fact":"馬蹄瀑布寬約 790 米、落差約 51 米；約 1.2 萬年前冰蓋退卻、河水切出峽谷而成，未列入世界遺產。","wrong":["烏尤尼鹽沼","悉尼歌劇院","自由女神像"],"source":"03-照片/世界/美洲/加拿大/尼亚加拉瀑布/尼亚加拉瀑布-01-马蹄瀑布.jpg","photo":"尼亚加拉瀑布-01-马蹄瀑布","nf":"尼亚加拉瀑布","yt":{"id":"AWDtUFn6cno","t":"The Legendary History Behind Niagara Falls | Legendary Locations","ch":"Discovery UK","u":"https://www.youtube.com/watch?v=AWDtUFn6cno"},"conf":[],"twin":["56_niagara_close"]},{"key":"56_niagara_close","name":"尼加拉瀑布","en":"Niagara Falls","place":"加拿大／美國邊界","region":"美洲","features":["高空俯拍，河水從畫面上方分成數股，繞過中央長條綠洲後在下方跌落。","左下與右下各有一道水幕，右側那道具明顯弧線，底部堆著一團白色霧氣。","河面呈青綠松石色，兩岸是密林與步道，右下水面上有一艘船隻小點作比例尺。"],"trap":"與悉尼歌劇院：歌劇院是港邊人工殼片建築，成組立在階梯基座上，水面平靜無霧；此圖是河水繞過綠洲後跌落成兩道天然水幕，底部翻起白霧。","fact":"由馬蹄瀑布、美國瀑布與新娘面紗瀑布三部分組成；馬蹄瀑布寬約 790 米、落差約 51 米，未列入世界遺產。","wrong":["悉尼歌劇院","自由女神像","烏尤尼鹽沼"],"source":"03-照片/世界/美洲/加拿大/尼亚加拉瀑布/尼亚加拉瀑布-02-水帘特写.jpg","photo":"尼亚加拉瀑布-02-水帘特写","nf":"尼亚加拉瀑布","yt":{"id":"AWDtUFn6cno","t":"The Legendary History Behind Niagara Falls | Legendary Locations","ch":"Discovery UK","u":"https://www.youtube.com/watch?v=AWDtUFn6cno"},"conf":[],"twin":["55_niagara"]},{"key":"57_santorini","name":"聖托里尼 · 伊亞","en":"Oia, Santorini","place":"希臘 基克拉澤斯群島","region":"歐洲","features":["左半邊全是深藍海面，水平線平直，遠方只剩一道霧藍色的島影。","右側白色平頂立方體房屋順著崖邊高低錯落，屋頂全是平的，沒有紅瓦坡頂。","畫面右上一座米褐色圓頂、一堵漆紅的「MINI-MARKET」牆面與一座錐頂風車同框。"],"trap":"與聖瓦西里大教堂：聖瓦西里是彩色條紋磚砌、多個洋蔥頂聚成一簇，立在紅場鋪地上；此圖是純白平頂立方體沿崖面堆疊，只有單一素色圓頂與錐頂風車。","fact":"約公元前 1600 年米諾斯式火山大噴發塌陷成破火山口，海水灌入成海灣；崖壁高約 200—300 米，未列入世界遺產。","wrong":["聖瓦西里大教堂","佩特拉 · 卡兹尼神殿","帕特農神廟"],"source":"03-照片/世界/欧洲/希腊/圣托里尼/圣托里尼-01-崖顶白屋群.jpg","photo":"圣托里尼-01-崖顶白屋群","nf":"圣托里尼","yt":{"id":"6iaVmWmqpx4","t":"Santorini Volcano: A Day the World Would Never Forget | Full History Documentary","ch":"Fury of the Earth","u":"https://www.youtube.com/watch?v=6iaVmWmqpx4"},"conf":[],"twin":["58_santorini_close","116_p116"]},{"key":"58_santorini_close","name":"聖托里尼 · 伊亞","en":"Oia, Santorini","place":"希臘 基克拉澤斯群島","region":"歐洲","features":["一個飽和的鈷藍半球頂佔住左下，頂上立著白色小十字，牆面全刷成純白。","圓頂右側立著一座白色鐘塔，開拱洞懸鐘，塔頂與圓頂各帶一個白色十字。","前景是灰石矮牆與一道上鎖的鐵柵拱門，背後是深藍海灣、黑色火山小島與一艘白船。"],"trap":"與帕特農神廟：帕特農是象牙白大理石列柱神廟，正面有三角山牆與整排柱廊；此圖只有白牆上一個鈷藍半球頂、一座白色鐘塔，沒有柱廊。","fact":"島體是破火山口邊緣的殘片，島呈新月形；西側崖壁高約 200—300 米，塌陷火山口灌入海水成深水海灣，未列入世界遺產。","wrong":["帕特農神廟","聖瓦西里大教堂","聖索菲亞大教堂"],"source":"03-照片/世界/欧洲/希腊/圣托里尼/圣托里尼-02-蓝顶教堂特写.jpg","photo":"圣托里尼-02-蓝顶教堂特写","nf":"圣托里尼","yt":{"id":"6iaVmWmqpx4","t":"Santorini Volcano: A Day the World Would Never Forget | Full History Documentary","ch":"Fury of the Earth","u":"https://www.youtube.com/watch?v=6iaVmWmqpx4"},"conf":[],"twin":["57_santorini","116_p116"]},{"key":"59_eiffel","name":"埃菲爾鐵塔","en":"Tour Eiffel","place":"法國 巴黎","region":"歐洲","features":["四條塔腿向外張開，在底部圍成一道大拱門，塔基呈正方形。","全塔為鏤空桁架，格構線條細密，背後天空從空隙透出。","塔身自下而上平滑內收成尖頂，塗裝是偏暖的深褐色。"],"trap":"與巴黎聖母院：聖母院是石砌實體雙塔，尖拱窗與玫瑰窗，牆面不透光；此塔整體鏤空，四腿張成拱門、深褐鐵色。","fact":"1887 年動工、1889 年 3 月落成，為 1889 年巴黎世界博覽會入口標誌；1991 年隨「巴黎，塞納河畔」列入世界遺產。","wrong":["巴黎聖母院","聖家堂","自由女神像"],"source":"03-照片/世界/欧洲/法国/埃菲尔铁塔/埃菲尔铁塔-01-正面全景.jpg","photo":"埃菲尔铁塔-01-正面全景","nf":"埃菲尔铁塔","yt":{"id":"yXSHfV2OXBM","t":"The History of the Eiffel Tower documentary","ch":"Frederic Obrien","u":"https://www.youtube.com/watch?v=yXSHfV2OXBM"},"conf":[],"twin":["60_eiffel_close"]},{"key":"60_eiffel_close","name":"埃菲爾鐵塔","en":"Tour Eiffel","place":"法國 巴黎","region":"歐洲","features":["仰視塔身內部，格構角柱向中心收攏，圍出八角形中空通道。","鐵件以密集鉚釘相接，桿件交叉成三角格，鉚釘頭清楚可見。","畫面沒有牆體與窗洞，只有深褐鐵架，天空從格構縫隙透入。"],"trap":"與自由女神像：女神像外表是連續銅皮與衣褶，看不到骨架；此處鐵桿與鉚釘全裸露，天空從三角格縫透入。","fact":"1889 年落成；塔高約 330 米（含天線），由 1.8 萬餘個熟鐵構件鉚接組裝，1991 年列入世界遺產。","wrong":["自由女神像","聖家堂","巴黎聖母院"],"source":"03-照片/世界/欧洲/法国/埃菲尔铁塔/埃菲尔铁塔-02-桁架结构特写.jpg","photo":"埃菲尔铁塔-02-桁架结构特写","nf":"埃菲尔铁塔","yt":{"id":"yXSHfV2OXBM","t":"The History of the Eiffel Tower documentary","ch":"Frederic Obrien","u":"https://www.youtube.com/watch?v=yXSHfV2OXBM"},"conf":[],"twin":["59_eiffel"]},{"key":"61_sydney","name":"悉尼歌劇院","en":"Sydney Opera House","place":"澳洲 雪梨","region":"大洋洲","features":["多片白色殼頂高低錯落，從同一低平台升起，邊緣弧線向上收成尖角。","殼片之下是低平的粉褐色花崗岩平台，佔據畫面下半部。","殼片背後與右側可見高樓天際線，前景是海港水面。"],"trap":"與聖瓦西里大教堂：該教堂是多顆彩色洋蔥頂加紅磚塔，色彩濃豔；此處是一片片純白啞光殼片，落在粉褐石台上。","fact":"1959 年動工、1973 年啟用，丹麥建築師烏松設計；2007 年以編號 166 列入世界遺產。","wrong":["聖瓦西里大教堂","泰姬陵","聖家堂"],"source":"03-照片/世界/大洋洲/澳大利亚/悉尼歌剧院/悉尼歌剧院-01-海港全景.jpg","photo":"悉尼歌剧院-01-海港全景","nf":"悉尼歌剧院","yt":{"id":"b0oKW_NDFuk","t":"The Untold Story of Sydney Opera House | Architecture Documentary","ch":"Vaults & Vision","u":"https://www.youtube.com/watch?v=b0oKW_NDFuk"},"conf":[],"twin":["62_sydney_close"]},{"key":"62_sydney_close","name":"悉尼歌劇院","en":"Sydney Opera House","place":"澳洲 雪梨","region":"大洋洲","features":["殼面由一片片方形小瓷磚鋪成，磚縫排列成放射狀條紋。","殼片是薄薄的混凝土肋殼，斷面邊緣呈弧形向上收成銳角。","啞光白與米色瓷磚交錯，隨日照角度出現明暗帶。"],"trap":"與泰姬陵：泰姬陵是整塊白色大理石穹頂，表面嵌寶石花紋；此處殼面是方格瓷磚拼貼，接縫呈放射條紋。","fact":"1959 年動工、1973 年啟用；殼片自同一球體切割以標準化預製，2007 年列入世界遺產。","wrong":["泰姬陵","聖家堂","聖瓦西里大教堂"],"source":"03-照片/世界/大洋洲/澳大利亚/悉尼歌剧院/悉尼歌剧院-02-屋顶壳片特写.jpg","photo":"悉尼歌剧院-02-屋顶壳片特写","nf":"悉尼歌剧院","yt":{"id":"b0oKW_NDFuk","t":"The Untold Story of Sydney Opera House | Architecture Documentary","ch":"Vaults & Vision","u":"https://www.youtube.com/watch?v=b0oKW_NDFuk"},"conf":[],"twin":["61_sydney"]},{"key":"63_bigben","name":"大笨鐘 · 西敏宮鐘樓","en":"Big Ben","place":"英國 倫敦","region":"歐洲","features":["方形石砌塔身筆直向上，比例瘦高，細部為尖拱窗與垂直束柱。","塔身四面同一高度各嵌一面大圓鐘，白底黑字。","塔頂收成陡峭的深色四角錐，錐尖立金色頂飾，塔身為淺砂岩色。"],"trap":"與聖家堂：聖家堂是多座細長尖塔成簇，塔身布滿雕塑孔洞，沒有鐘面；此塔是單一方塔，四面嵌大圓鐘。","fact":"鐘樓 1859 年完工，屬 1840—1876 年重建的西敏宮；1987 年隨西敏宮、西敏寺列入世界遺產。","wrong":["聖家堂","巴黎聖母院","聖瓦西里大教堂"],"source":"03-照片/世界/欧洲/英国/大笨钟/大笨钟-01-钟楼立面.jpg","photo":"大笨钟-01-钟楼立面","nf":"大笨钟","yt":{"id":"REaSXb5Jcx4","t":"The Fascinating History Of Big Ben | The Nation's Most Famous Clock","ch":"Journal - History Documentaries","u":"https://www.youtube.com/watch?v=REaSXb5Jcx4"},"conf":[],"twin":["64_bigben_close"]},{"key":"64_bigben_close","name":"大笨鐘 · 西敏宮鐘樓","en":"Big Ben","place":"英國 倫敦","region":"歐洲","features":["圓形鐘面白底，黑色羅馬數字沿外圈排列，指針為金黑描邊。","鐘面嵌在方形石框內，框外是淺砂岩與垂直石雕線腳。","鐘面外緣一圈金黑描邊，與白底形成高反差細邊框。"],"trap":"與巴黎聖母院：聖母院是彩色玻璃玫瑰窗，透光而無刻度指針；此面是乳白玻璃底，黑羅馬數字配金黑指針。","fact":"主鐘「大笨鐘」重約 13.5 噸，1859 年隨鐘樓啟用；1987 年西敏宮建築群列入世界遺產。","wrong":["巴黎聖母院","聖家堂","聖索菲亞大教堂"],"source":"03-照片/世界/欧洲/英国/大笨钟/大笨钟-02-钟面特写.jpg","photo":"大笨钟-02-钟面特写","nf":"大笨钟","yt":{"id":"REaSXb5Jcx4","t":"The Fascinating History Of Big Ben | The Nation's Most Famous Clock","ch":"Journal - History Documentaries","u":"https://www.youtube.com/watch?v=REaSXb5Jcx4"},"conf":[],"twin":["63_bigben"]},{"key":"65_liberty","name":"自由女神像","en":"Statue of Liberty","place":"美國 紐約","region":"美洲","features":["銅綠色女性巨像全身，右臂筆直高舉火炬，左手抱書板。","頭戴七道尖芒冠冕，長袍下襬垂至基座，身形修長。","立於淺色多層石基座與星形堡壘上，四周是海港水面與綠樹。"],"trap":"與埃菲爾鐵塔：同為城市地標，但鐵塔是褐色鏤空鋼架、四腳著地；此像有銅綠人形輪廓、舉炬手臂與星形堡壘基座。","fact":"雕像 1875—1884 年在法國分段製造，1886 年 10 月在紐約揭幕；1984 年以編號 307 列入世界遺產。","wrong":["復活節島摩艾石像","埃菲爾鐵塔","悉尼歌劇院"],"source":"03-照片/世界/美洲/美国/自由女神像/自由女神像-01-航拍全景.jpg","photo":"自由女神像-01-航拍全景","nf":"自由女神像","yt":{"id":"bQMlx-rjAIU","t":"The Story of the Statue of Liberty | Full Documentary 4K | History & Meaning Explained","ch":"Histouris","u":"https://www.youtube.com/watch?v=bQMlx-rjAIU"},"conf":[],"twin":["66_liberty_close"]},{"key":"66_liberty_close","name":"自由女神像","en":"Statue of Liberty","place":"美國 紐約","region":"美洲","features":["畫面填滿銅綠色頭臉，仰角拍攝，五官與頸部接縫清晰。","冠冕由七道扁平長尖芒與一圈方格窗洞組成。","波浪狀卷髮垂在耳側，表面可見銅皮拼縫與風化水痕。"],"trap":"與復活節島摩艾石像：同為巨型雕像面部，但摩艾是深灰火山岩整石、無冠冕；此像為銅綠銅皮，頭頂七道尖芒與方格窗冠。","fact":"外層銅皮厚約 2.4 毫米，內部為鋼桁架；1886 年落成，1984 年以編號 307 列入世界遺產。","wrong":["復活節島摩艾石像","埃菲爾鐵塔","悉尼歌劇院"],"source":"03-照片/世界/美洲/美国/自由女神像/自由女神像-02-冠冕头像特写.jpg","photo":"自由女神像-02-冠冕头像特写","nf":"自由女神像","yt":{"id":"bQMlx-rjAIU","t":"The Story of the Statue of Liberty | Full Documentary 4K | History & Meaning Explained","ch":"Histouris","u":"https://www.youtube.com/watch?v=bQMlx-rjAIU"},"conf":[],"twin":["65_liberty"]},{"key":"67_charles","name":"查理大橋","en":"Charles Bridge","place":"捷克 布拉格","region":"歐洲","features":["低平石橋橫跨寬河，橋身連續半圓拱，橋墩粗壯。","橋面擠滿行人，兩側欄杆的聖像排成細密一列。","背景是紅瓦老城與山丘上的布拉格城堡尖塔群。"],"trap":"與趙州橋：同為石拱橋，但趙州橋是單孔敞肩拱；此橋連續多孔半圓拱，橋欄立滿聖像，背景是城堡山。","fact":"1357 年由查理四世奠基，約 1402 年基本建成；1992 年隨布拉格歷史中心（編號 616）列入世界遺產。","wrong":["趙州橋","聖家堂","巴黎聖母院"],"source":"03-照片/世界/欧洲/捷克/查理大桥/查理大桥-01-桥拱与城堡山.jpg","photo":"查理大桥-01-桥拱与城堡山","nf":"查理大桥","yt":{"id":"zMQVPr8GLV0","t":"A Brief History of Charles Bridge - Everything You Need to Know about the Most Famous Prague Bridge","ch":"Real Prague Guides","u":"https://www.youtube.com/watch?v=zMQVPr8GLV0"},"conf":[],"twin":["68_charles_close"]},{"key":"68_charles_close","name":"查理大橋","en":"Charles Bridge","place":"捷克 布拉格","region":"歐洲","features":["深色青銅聖像立於石質方基座，右手指向前方，左手扶金色十字。","人物披長袍、蓄鬚，表面呈黑褐氧化色，與金十字對比強烈。","背景為藍天、紅瓦屋頂與遠方哥德式尖塔。"],"trap":"與聖家堂：同見宗教雕像與尖塔，但聖家堂雕像嵌在棕褐石造立面；此像獨立立於橋欄石座，黑褐銅身、手扶金十字，背後是紅瓦城。","fact":"1357 年奠基，約 1402 年建成；橋長約 516 米、寬約 10 米，有十六孔石拱，1992 年列入世界遺產（編號 616）。","wrong":["趙州橋","聖家堂","巴黎聖母院"],"source":"03-照片/世界/欧洲/捷克/查理大桥/查理大桥-02-圣像特写.jpg","photo":"查理大桥-02-圣像特写","nf":"查理大桥","yt":{"id":"zMQVPr8GLV0","t":"A Brief History of Charles Bridge - Everything You Need to Know about the Most Famous Prague Bridge","ch":"Real Prague Guides","u":"https://www.youtube.com/watch?v=zMQVPr8GLV0"},"conf":[],"twin":["67_charles"]},{"key":"69_basil","name":"聖瓦西里大教堂","en":"St. Basil's Cathedral","place":"俄羅斯 莫斯科","region":"歐洲","features":["多座洋蔥形穹頂聚在一起，藍白條紋、綠白螺旋、紅綠菱格各不相同。","中央紅磚帳篷式高塔最高，牆面綴白色飾帶，塔尖頂金穹與十字。","前景為灰石鋪地廣場，左側綠樹、右側路燈與人群，遠處見克里姆林宮紅牆塔樓。"],"trap":"與聖索菲亞大教堂：同為圓頂教堂，但聖索菲亞是灰粉色單一大穹頂與四座細尖塔；此處是多座花紋各異的洋蔥頂簇擁紅磚帳篷塔。","fact":"1555 年動工、1561 年建成，紀念 1552 年喀山之戰；1990 年隨克里姆林宮與紅場（編號 545）列入世界遺產。","wrong":["聖索菲亞大教堂","巴黎聖母院","泰姬陵"],"source":"03-照片/世界/欧洲/俄罗斯/圣瓦西里大教堂/圣瓦西里大教堂-01-洋葱穹顶全景.jpg","photo":"圣瓦西里大教堂-01-洋葱穹顶全景","nf":"圣瓦西里大教堂","yt":{"id":"jkpxc9Z4EoM","t":"The Saint Basil's Cathedral History: Everything You Need To Know","ch":"Travel And Discover","u":"https://www.youtube.com/watch?v=jkpxc9Z4EoM"},"conf":[],"twin":["70_basil_close"]},{"key":"70_basil_close","name":"聖瓦西里大教堂","en":"St. Basil's Cathedral","place":"俄羅斯 莫斯科","region":"歐洲","features":["三座穹頂佔滿畫面：左為紅綠菱格，中為綠黃菱格，右為紅白波浪條紋。","穹頂坐在多邊形鼓座上，鼓座開白框小窗，下接紅磚連拱與白色飾線。","中央紅磚錐塔以白色菱形與綠色飾帶分層，塔頂立金球與十字。"],"trap":"與泰姬陵：同為大穹頂特寫，但泰姬陵是白色大理石單一洋蔥頂、表面素淨；此處多座穹頂分覆紅白條紋、綠黃菱格等彩釉，緊貼紅磚塔身。","fact":"1555—1561 年由伊凡四世下令建造，原名波克羅夫主教座堂；1990 年隨克里姆林宮與紅場（編號 545）列入世界遺產。","wrong":["聖索菲亞大教堂","巴黎聖母院","泰姬陵"],"source":"03-照片/世界/欧洲/俄罗斯/圣瓦西里大教堂/圣瓦西里大教堂-02-穹顶特写.jpg","photo":"圣瓦西里大教堂-02-穹顶特写","nf":"圣瓦西里大教堂","yt":{"id":"jkpxc9Z4EoM","t":"The Saint Basil's Cathedral History: Everything You Need To Know","ch":"Travel And Discover","u":"https://www.youtube.com/watch?v=jkpxc9Z4EoM"},"conf":[],"twin":["69_basil"]},{"key":"71_moai","name":"復活節島摩艾石像","en":"Moai, Easter Island","place":"智利 復活節島","region":"大洋洲","features":["十餘尊石像等距並排，站在一條長條石台上，連成水平一列深色剪影。","逆光下只見輪廓：頭部極大、身體短小，多數只露出頭與肩。","前景是及膝的枯黃草叢，背後天空泛白，畫面裡沒有樹木、建築或山體。"],"trap":"與馬丘比丘：馬丘比丘是整片石砌城址與梯田，嵌在雲霧山脊上，沒有一尊獨立人像；此圖是十餘尊大頭石像並排站在長條石台上。","fact":"約公元 1250—1500 年雕造；1995 年隨拉帕努伊國家公園列入世界遺產（編號 715）。","wrong":["馬丘比丘","奇琴伊察","吉薩金字塔群"],"source":"03-照片/世界/大洋洲/智利/复活节岛摩艾石像/复活节岛摩艾石像-01-石像群.jpg","photo":"复活节岛摩艾石像-01-石像群","nf":"复活节岛摩艾石像","yt":{"id":"rBNDBBgX-C4","t":"Easter Island Origins | Full Documentary | NOVA | PBS","ch":"NOVA PBS Official","u":"https://www.youtube.com/watch?v=rBNDBBgX-C4"},"conf":[],"twin":["72_moai_close"]},{"key":"72_moai_close","name":"復活節島摩艾石像","en":"Moai, Easter Island","place":"智利 復活節島","region":"大洋洲","features":["單尊石像佔畫面中央，頭大身小，長方臉、深眼窩、厚唇、下巴前突。","耳廓細長貼著臉側，頭頂沒有紅色髮髻；下半身仍埋在草坡土裡。","背後是長草的山坡與深色火山岩坡，坡上還散落數尊半埋的頭像，天上是藍天白雲。"],"trap":"與雲岡石窟：雲岡大佛是鑿進崖壁的窟龕造像，有肉髻、螺髮與通肩袈裟；此像是整塊凝灰岩雕成的長臉人像，沒有髮髻、耳廓細長。","fact":"約公元 1250—1500 年以火山凝灰岩整塊雕成；1995 年列入世界遺產（拉帕努伊國家公園，編號 715）。","wrong":["雲岡石窟","奇琴伊察","吉薩金字塔群"],"source":"03-照片/世界/大洋洲/智利/复活节岛摩艾石像/复活节岛摩艾石像-02-头像特写.jpg","photo":"复活节岛摩艾石像-02-头像特写","nf":"复活节岛摩艾石像","yt":{"id":"rBNDBBgX-C4","t":"Easter Island Origins | Full Documentary | NOVA | PBS","ch":"NOVA PBS Official","u":"https://www.youtube.com/watch?v=rBNDBBgX-C4"},"conf":[],"twin":["71_moai"]},{"key":"73_uyuni","name":"烏尤尼鹽沼","en":"Salar de Uyuni","place":"玻利維亞","region":"美洲","features":["薄水覆在鹽殼上，烏雲與藍天同時倒映，上下幾乎對稱、找不到地平線。","畫面只有灰藍、銀白兩色，天空佔上半、倒影佔下半，交界淡得幾乎看不出。","遠方右側只有一線低矮山影，其餘全無地形起伏，也沒有任何建築。"],"trap":"與聖托里尼 · 伊亞：伊亞是白色崖屋與藍頂教堂貼著海面，畫面滿是建築；此處沒有任何建築，只有鹽殼上薄水映出的天空，上下等大對稱。","fact":"面積約 10 582 平方公里、海拔約 3656 公尺，是世界最大鹽沼；未列入世界遺產名錄。","wrong":["聖托里尼 · 伊亞","馬特洪峰","尼加拉瀑布"],"source":"03-照片/世界/美洲/玻利维亚/乌尤尼盐沼/乌尤尼盐沼-01-天空之镜.jpg","photo":"乌尤尼盐沼-01-天空之镜","nf":"乌尤尼盐沼","yt":{"id":"UO6vTsS89_E","t":"Understanding the World's Biggest Mirror: The GEOLOGY of SALAR DE UYUNI Bolivia EXPLAINED","ch":"Maria Baias","u":"https://www.youtube.com/watch?v=UO6vTsS89_E"},"conf":[],"twin":["74_uyuni_close","121_p121"]},{"key":"74_uyuni_close","name":"烏尤尼鹽沼","en":"Salar de Uyuni","place":"玻利維亞","region":"美洲","features":["鹽灘上散布十幾座錐形鹽堆，堆頂尖、堆腳圍著一圈刮出的碎鹽。","每座鹽堆都在薄水面上留下清楚倒影，水面平得像鏡子。","近處鹽殼呈多邊形龜裂，遠方是一道低平山脊與淡藍天空。"],"trap":"與馬特洪峰：馬特洪峰是獨立的金字塔形岩峰，有積雪與整面山體；此處的錐體是人工刮起的小鹽堆，高不過人，倒影貼在平坦鹽面上。","fact":"鹽殼由史前古湖反覆蒸發而成，面積約 10 582 平方公里、海拔約 3656 公尺；未列入世界遺產。","wrong":["馬特洪峰","富士山","尼加拉瀑布"],"source":"03-照片/世界/美洲/玻利维亚/乌尤尼盐沼/乌尤尼盐沼-02-盐层纹理特写.jpg","photo":"乌尤尼盐沼-02-盐层纹理特写","nf":"乌尤尼盐沼","yt":{"id":"UO6vTsS89_E","t":"Understanding the World's Biggest Mirror: The GEOLOGY of SALAR DE UYUNI Bolivia EXPLAINED","ch":"Maria Baias","u":"https://www.youtube.com/watch?v=UO6vTsS89_E"},"conf":[],"twin":["73_uyuni","121_p121"]},{"key":"75_petra_siq","name":"佩特拉 · 卡兹尼神殿","en":"Petra","place":"約旦 佩特拉","region":"亞洲","features":["玫瑰紅至赭褐的砂岩壁幾乎佔滿畫面，只在上方留出一道窄縫。","岩壁密佈近水平的細層理與水蝕形成的波浪狀凹槽，表面沒有一處雕刻。","頂部岩體向外懸覆遮住天空，僅有一線亮光從岩縫間透進來。"],"trap":"與雲岡石窟：雲岡是在崖壁上鑿出的窟門、佛像與題記，處處人工雕痕；此處只有天然層理與水蝕波紋，看不到任何鑿刻。","fact":"約公元前 4 世紀納巴泰人建城，卡茲尼神殿約公元前 1 世紀鑿成；1985 年列入世界遺產（編號 326）。","wrong":["雲岡石窟","吳哥窟","馬丘比丘"],"source":"03-照片/世界/西亚/约旦/佩特拉/佩特拉-01-蛇道峡谷.jpg","photo":"佩特拉-01-蛇道峡谷","nf":"佩特拉","yt":{"id":"6xQaEZbVras","t":"Petra Documentary: Lost City Of Stone - Documentary HD","ch":"Documentary HD","u":"https://www.youtube.com/watch?v=6xQaEZbVras"},"conf":[],"twin":[]},{"key":"76_angkor_tower","name":"吳哥窟","en":"Angkor Wat","place":"柬埔寨 暹粒","region":"亞洲","features":["數座灰米色砂岩塔立於層層台基上，中央一座明顯最高。","塔身自下而上層層收分，頂部攢成蓮苞狀尖頂，塔尖細長朝天。","塔身與基座滿佈浮雕和神女立像，石面風化呈褐灰斑駁，前景有一株棕櫚。"],"trap":"與泰姬陵：泰姬陵是白色大理石、洋蔥形圓頂配四角細塔，表面鑲嵌寶石；此塔是灰米色砂岩砌成、層層收分的蓮苞形塔，塔身滿布浮雕。","fact":"12 世紀上半葉（約 1113—1150 年）由蘇利耶跋摩二世營建；1992 年以「吳哥」列入世界遺產。","wrong":["泰姬陵","聖瓦西里大教堂","聖家堂"],"source":"03-照片/世界/东南亚/柬埔寨/吴哥窟/吴哥窟-03-中央圣塔特写.jpg","photo":"吴哥窟-03-中央圣塔特写","nf":"吴哥窟","yt":{"id":"x7GQC66Jtqs","t":"Building Angkor | Cambodian History | Extra History Complete","ch":"Extra History","u":"https://www.youtube.com/watch?v=x7GQC66Jtqs"},"conf":[],"twin":["11_angkor","39_angkor_close"]},{"key":"77_sagrada_close","name":"聖家堂","en":"Sagrada Família","place":"西班牙 巴塞隆納","region":"歐洲","features":["一大兩小共三個帶兜帽的披袍人物凸出牆面，衣褶以硬直折面切出，稜角分明。","石色暖褐偏砂黃，背景為平整砌塊牆面，表面鑿痕粗疏斑駁，無彩繪或貼金。","左下角另有一隻公雞小雕像，畫面右緣露出一段拱形門洞的弧線。"],"trap":"與巴黎聖母院：聖母院是對稱雙塔、平整石牆配圓形玫瑰窗與飛扶壁；此處立面全被凸出的人物雕像佔滿，衣褶是硬直折面，石色暖褐，牆後不開窗。","fact":"1882 年動工，1883 年高迪接手主持設計；2005 年誕生立面與地下禮拜堂以「高迪作品」列入世界遺產。","wrong":["巴黎聖母院","聖瓦西里大教堂","聖索菲亞大教堂"],"source":"03-照片/世界/欧洲/西班牙/圣家堂/圣家堂-02-立面雕刻特写.jpg","photo":"圣家堂-02-立面雕刻特写","nf":"圣家堂","yt":{"id":"h1VYm1d1O_U","t":"Secrets Of The Sagrada Familia: Gaudi's Masterpiece Uncovered | Witness | Architecture Documentary","ch":"Witness","u":"https://www.youtube.com/watch?v=h1VYm1d1O_U"},"conf":[],"twin":["78_p078"]},{"key":"78_machu","name":"馬丘比丘","en":"Machu Picchu","place":"秘魯 庫斯科","region":"美洲","features":["石砌屋群與梯田沿狹窄山脊鋪開，正後方矗立一座陡峭獨立的尖峰。","山坡被切成層層平行梯田，中央是大片平整綠草地，與灰白石牆對比強烈。","谷底可見一條淺色蜿蜒河谷，右上角有草頂石屋與弧形梯田步道。"],"trap":"與吳哥窟：吳哥窟是砂岩塔廟、塔身浮雕密布，四周有護城河與熱帶叢林；此處沒有高塔與護城河，只有沿山脊排開的石屋、梯田草原與後方尖峰。","fact":"約 1450 年（印加王帕查庫特克時期）營建，1983 年以「馬丘比丘歷史保護區」列入世界遺產；遺址位於海拔約 2430 公尺的山脊。","wrong":["吳哥窟","奇琴伊察","復活節島摩艾石像"],"source":"03-照片/世界/美洲/秘鲁/马丘比丘/马丘比丘-01-遗址全景.jpg","photo":"马丘比丘-01-遗址全景","nf":"马丘比丘","yt":{"id":"HJ4v6Ear4N8","t":"History's Greatest Mysteries: ASTONISHING Secrets Behind Machu Picchu (Season 5)","ch":"HISTORY","u":"https://www.youtube.com/watch?v=HJ4v6Ear4N8"},"conf":[],"twin":["79_machu_close"]},{"key":"79_machu_close","name":"馬丘比丘","en":"Machu Picchu","place":"秘魯 庫斯科","region":"美洲","features":["前景為粗塊石壘砌的牆體與臺階，石塊大小不一、表面風化發黑。","中景整面山坡被切成密集階梯狀梯田，一層層平行往上收。","右側立著一棵無葉枯樹，天空澄藍，僅左緣有一小片白雲。"],"trap":"與奇琴伊察：奇琴伊察是叢林中的階梯金字塔與石灰岩神廟，臺階中央有蛇形浮雕；此處沒有金字塔，只有多邊形花崗岩乾砌牆與順山勢切的梯田。","fact":"1983 年列入世界遺產；遺址海拔約 2430 公尺，現存主體為印加時期原構，約 15 世紀中葉營建。","wrong":["吳哥窟","奇琴伊察","佩特拉 · 卡兹尼神殿"],"source":"03-照片/世界/美洲/秘鲁/马丘比丘/马丘比丘-02-梯田特写.jpg","photo":"马丘比丘-02-梯田特写","nf":"马丘比丘","yt":{"id":"HJ4v6Ear4N8","t":"History's Greatest Mysteries: ASTONISHING Secrets Behind Machu Picchu (Season 5)","ch":"HISTORY","u":"https://www.youtube.com/watch?v=HJ4v6Ear4N8"},"conf":[],"twin":["78_machu"]},{"key":"80_greatwall_mutianyu","name":"萬里長城 · 慕田峪","en":"Great Wall","place":"中國 北京","region":"亞洲","features":["畫面是磚砌筒形拱頂的內部，拱肋與磚縫層層向兩側收，地面鋪方形石板。","牆上開數個無玻璃的拱形窗洞，可望見外面的綠色山脊與一小段城牆。","磚色青灰偏黃、表面風化剝落，拱頂有裂縫與修補痕跡。"],"trap":"與長城八達嶺段：八達嶺甕城與城牆寬厚、山體較裸、遊客密集；此處臺內是窄長磚拱、只開拱窗，窗外緊貼密林山脊，敵臺間距更近。","fact":"明初徐達督修舊邊牆、永樂二年（1404）設關，隆慶—萬曆年間戚繼光整修並增築空心敵臺；1987 年隨「長城」列入世界遺產。","wrong":["長城八達嶺段","故宮","天壇"],"source":"03-照片/中国/华北/北京/慕田峪长城/慕田峪长城-02-敌台内部.jpg","photo":"慕田峪长城-02-敌台内部","nf":"慕田峪长城","yt":{"id":"VjlydnRqcmw","t":"National Geographic - The Great Wall of China - Documentary","ch":"ChannelM","u":"https://www.youtube.com/watch?v=VjlydnRqcmw"},"conf":[],"twin":["81_greatwall_mutianyu_close"]},{"key":"81_greatwall_mutianyu_close","name":"萬里長城 · 慕田峪","en":"Great Wall","place":"中國 北京","region":"亞洲","features":["灰白牆體貼著窄稜線大起大落，像一道鋸齒翻過每個山頭。","牆上每隔不遠就有一座方形敵臺，畫面中可見兩三座錯落分布。","兩側坡面全是濃密綠林，遠處山脈藍灰層疊，左下角牆面有成排遊客。"],"trap":"與長城八達嶺段：八達嶺城牆寬厚平緩、甕城與北八樓一帶遊客密集、兩側山體較裸；此處牆體貼窄稜線起伏、兩側皆陡坡密林，敵臺間距明顯更近。","fact":"1987 年以「長城」列入世界遺產；現存主體為隆慶—萬曆年間戚繼光整修，敵臺為磚砌空心結構。","wrong":["長城八達嶺段","故宮","布達拉宮"],"source":"03-照片/中国/华北/北京/慕田峪长城/慕田峪长城-01-山脊全景.jpg","photo":"慕田峪长城-01-山脊全景","nf":"慕田峪长城","yt":{"id":"VjlydnRqcmw","t":"National Geographic - The Great Wall of China - Documentary","ch":"ChannelM","u":"https://www.youtube.com/watch?v=VjlydnRqcmw"},"conf":[],"twin":["80_greatwall_mutianyu"]},{"key":"82_longmen","name":"龍門石窟","en":"Longmen Grottoes","place":"中國 河南 洛陽","region":"亞洲","features":["青灰色石灰岩崖壁上密密麻麻鑿滿中小型窟龕，龕洞層層疊疊如蜂巢。","窟龕沿伊河兩岸崖面橫向延展，崖間可見連通棧道與石階。","前景是蔥鬱綠植與藍天，裸露的灰白崖體與綠意形成對比。"],"trap":"與雲岡石窟：同樣是北方皇家石窟，但雲岡為暖黃砂岩、北魏大窟大像，窟前多木構樓閣；龍門是青灰石灰岩崖面，以密集小龕與唐代露天大佛著稱，崖前少見樓閣。","fact":"始鑿於北魏孝文帝遷都洛陽前後（約 493），2000 年列入世界文化遺產（編號 1003）。","wrong":["雲岡石窟","莫高窟","吳哥窟"],"source":"03-照片/中国/华中/河南/龙门石窟/龙门石窟-01-崖壁窟龛全景.jpg","photo":"龙门石窟-01-崖壁窟龛全景","nf":"龙门石窟","yt":{"id":"iNxxEjacp1c","t":"Longmen Grottoes「UNESCO World Heritage Sites in China」","ch":"China Documentary","u":"https://www.youtube.com/watch?v=iNxxEjacp1c"},"conf":[],"twin":["83_longmen_close"]},{"key":"83_longmen_close","name":"龍門石窟","en":"Longmen Grottoes","place":"中國 河南 洛陽","region":"亞洲","features":["主尊大佛螺髻低垂、額寬頤滿，面相豐腴圓潤，雙目微含笑意。","身披層疊袈裟，衣紋呈圓轉流暢的凸起線條，兩側立脅侍弟子。","佛首下方遊人如蟻，襯出這尊露天大佛的巨大體量。"],"trap":"與雲岡石窟：雲岡第 20 窟露天大佛是北魏早期造像，面相方圓、肩寬體闊、衣紋硬直如階梯；此尊面容豐腴含笑、衣紋圓轉流暢，屬唐代龍門奉先寺。","fact":"始鑿於北魏遷都洛陽前後（約 493），奉先寺盧舍那大佛成於唐高宗上元二年（675），2000 年列入世界遺產。","wrong":["雲岡石窟","莫高窟","吳哥窟"],"source":"03-照片/中国/华中/河南/龙门石窟/龙门石窟-02-卢舍那大佛特写.jpg","photo":"龙门石窟-02-卢舍那大佛特写","nf":"龙门石窟","yt":{"id":"iNxxEjacp1c","t":"Longmen Grottoes「UNESCO World Heritage Sites in China」","ch":"China Documentary","u":"https://www.youtube.com/watch?v=iNxxEjacp1c"},"conf":[],"twin":["82_longmen"]},{"key":"84_summer_palace","name":"頤和園","en":"Summer Palace","place":"中國 北京","region":"亞洲","features":["北面萬壽山、南面大片昆明湖，山湖並置，湖面開闊直抵山腳。","前山正中的佛香閣立於高台，紅牆黃琉璃瓦，凌駕層層殿宇之上。","遠處西山作襯，湖面平靜，岸線與遠山層次分明。"],"trap":"與拙政園：拙政園是江南私家園林，白牆黛瓦、建築小巧，以曲折水面與疊山取勝；頤和園是北方皇家園林，山湖尺度宏大，佛香閣黃瓦紅牆居中高踞。","fact":"清乾隆十五年（1750）建清漪園，光緒年間重建並改名頤和園，1998 年列入世界文化遺產。","wrong":["拙政園","凡爾賽宮","故宮"],"source":"03-照片/中国/华北/北京/颐和园/颐和园-01-昆明湖佛香阁全景.jpg","photo":"颐和园-01-昆明湖佛香阁全景","nf":"颐和园","yt":{"id":"EGnJeW1zJCM","t":"World Heritage in China: The Summer Palace","ch":"New China TV","u":"https://www.youtube.com/watch?v=EGnJeW1zJCM"},"conf":[],"twin":["85_summer_palace_close"]},{"key":"85_summer_palace_close","name":"頤和園","en":"Summer Palace","place":"中國 北京","region":"亞洲","features":["八角形樓閣，攢尖頂層層收分，屋面覆黃琉璃瓦，頂端為寶頂。","樓閣坐於高聳的漢白玉台基上，台前石欄、石橋與步道相接。","硃紅簷柱與牆面配彩繪斗拱，紅黃用色是清代皇家形制。"],"trap":"與拙政園：拙政園亭榭多為單層、白牆黛瓦、體量小巧，掩映於曲水假山間；佛香閣是紅牆黃瓦的八角多層樓閣，獨踞高台，皇家氣派完全不同。","fact":"清乾隆十五年（1750）建清漪園，1998 年頤和園列入世界遺產；佛香閣總高約 36 米，坐於 21 米高石台基上。","wrong":["拙政園","凡爾賽宮","天壇"],"source":"03-照片/中国/华北/北京/颐和园/颐和园-02-佛香阁特写.jpg","photo":"颐和园-02-佛香阁特写","nf":"颐和园","yt":{"id":"EGnJeW1zJCM","t":"World Heritage in China: The Summer Palace","ch":"New China TV","u":"https://www.youtube.com/watch?v=EGnJeW1zJCM"},"conf":[],"twin":["84_summer_palace"]},{"key":"86_miaoying","name":"妙應寺白塔","en":"Miaoying Temple White Stupa","place":"中國 北京","region":"亞洲","features":["通體白色的覆缽塔身渾圓，沒有任何簷層，形如倒扣的缽。","塔身下承多層方形須彌座與台基，束腰處雕有浮雕紋樣。","塔前是紅牆灰瓦的寺院門殿，白塔聳立於平地寺院中央。"],"trap":"與應縣木塔：應縣木塔是樓閣式木塔，五層六簷、層層出簷可登臨；此塔白色渾圓、無簷層，頂上直接起相輪，是元代覆缽式喇嘛塔。","fact":"元至元八年（1271）由尼泊爾匠師阿尼哥主持建造，全塔通高約 50.9 米。","wrong":["應縣木塔","泰姬陵","布達拉宮"],"source":"03-照片/中国/华北/北京/妙应寺白塔/妙应寺白塔-01-白塔全景.jpg","photo":"妙应寺白塔-01-白塔全景","nf":"妙应寺白塔","conf":[],"twin":["87_miaoying_close"]},{"key":"87_miaoying_close","name":"妙應寺白塔","en":"Miaoying Temple White Stupa","place":"中國 北京","region":"亞洲","features":["覆缽頂部向上收束，接細長十三層相輪，圓環層層相疊。","相輪之上冠圓形華蓋，華蓋邊緣垂鈴鐸，最頂為鎏金寶頂。","塔剎自下而上由粗漸細，白色塔身與金色頂飾對比清楚。"],"trap":"與應縣木塔：應縣木塔頂為攢尖屋瓦與鐵製塔剎，塔身層層木簷；此處是覆缽頂上直接立十三天相輪、華蓋與寶頂，屬喇嘛塔塔剎。","fact":"元至元八年（1271）建塔，塔剎由十三層相輪、華蓋與鎏金寶頂組成，全塔通高約 50.9 米。","wrong":["應縣木塔","泰姬陵","吳哥窟"],"source":"03-照片/中国/华北/北京/妙应寺白塔/妙应寺白塔-02-塔刹特写.jpg","photo":"妙应寺白塔-02-塔刹特写","nf":"妙应寺白塔","conf":[],"twin":["86_miaoying"]},{"key":"88_versailles","name":"凡爾賽宮","en":"Palace of Versailles","place":"法國 巴黎","region":"歐洲","features":["超長的水平對稱立面：中央主體接南北兩翼，柱式與窗列成排重複，橫向延伸望不到盡頭。","宮前是開闊的宮廷廣場與筆直林蔭道，幾何對稱的花壇與道路自宮殿向外放射。","淺色石材立面配低平的灰藍色屋頂，整座宮殿橫向展開，沒有高塔或尖頂。"],"trap":"與故宮：故宮是黃琉璃瓦頂、紅牆木構的院落式宮殿，沿中軸線層層進深；凡爾賽是淺色石材立面、成排柱式窗列，配金色鐵藝門與放射狀幾何園林，宮前是開闊廣場。","fact":"1623—1624 年路易十三建狩獵行宮，1661 年起路易十四大規模擴建；1979 年以「凡爾賽宮及園林」列入世界遺產（編號 83）。","wrong":["故宮","頤和園","布達拉宮"],"source":"03-照片/世界/欧洲/法国/凡尔赛宫/凡尔赛宫-01-宫殿正面全景.jpg","photo":"凡尔赛宫-01-宫殿正面全景","nf":"凡尔赛宫","yt":{"id":"m8fF7nlUZWI","t":"Louis XIV’s Obsession With the Palace of Versailles I SLICE HISTORY | FULL DOCUMENTARY","ch":"SLICE History","u":"https://www.youtube.com/watch?v=m8fF7nlUZWI"},"conf":[],"twin":["89_versailles_close"]},{"key":"89_versailles_close","name":"凡爾賽宮","en":"Palace of Versailles","place":"法國 巴黎","region":"歐洲","features":["金色鐵藝大門：柵欄與門楣通體鎏金，中央飾太陽神與王室紋章浮雕。","門後是淺色石材立面，成排壁柱、拱窗與平整線腳，與金色鐵藝形成明暗對比。","石砌門柱與圍牆同為淺灰石材，接縫平整、裝飾為西式浮雕而非彩畫。"],"trap":"與巴黎聖母院：聖母院是哥德式尖拱、飛扶壁與雙塔，石材呈灰黃且布滿雕像；凡爾賽是平整的古典主義石立面配鎏金鐵藝大門，線條橫平豎直。","fact":"正立面長逾 600 公尺；1623 年始建行宮、1661 年起擴建，1979 年列入世界遺產（編號 83）。","wrong":["巴黎聖母院","故宮","泰姬陵"],"source":"03-照片/世界/欧洲/法国/凡尔赛宫/凡尔赛宫-02-金门立面特写.jpg","photo":"凡尔赛宫-02-金门立面特写","nf":"凡尔赛宫","yt":{"id":"m8fF7nlUZWI","t":"Louis XIV’s Obsession With the Palace of Versailles I SLICE HISTORY | FULL DOCUMENTARY","ch":"SLICE History","u":"https://www.youtube.com/watch?v=m8fF7nlUZWI"},"conf":[],"twin":["88_versailles"]},{"key":"90_chichen","name":"奇琴伊察","en":"Chichén Itzá","place":"墨西哥 尤卡坦","region":"美洲","features":["方形棱台狀階梯金字塔，塔身逐級收分，四面各有一道寬階梯自塔基直上塔頂。","塔頂是單層方形小神廟，開有門洞，不是收成一點的尖頂。","四周是灰白石灰岩鋪面廣場與大片草地，地勢平坦，無高大山體作背景。"],"trap":"與吉薩金字塔群：吉薩金字塔立在沙漠，四邊是光滑斜面、塔頂收成尖點；庫庫爾坎是逐級收分的棱台，四面各一道寬階梯，塔頂有方形神廟，周圍是石灰岩廣場。","fact":"約 6 世紀瑪雅人在此建城，主體多為 9—12 世紀托爾特克—瑪雅時期；1988 年列入世界遺產（編號 483）。","wrong":["吉薩金字塔群","馬丘比丘","吳哥窟"],"source":"03-照片/世界/美洲/墨西哥/奇琴伊察/奇琴伊察-01-库库尔坎金字塔全景.jpg","photo":"奇琴伊察-01-库库尔坎金字塔全景","nf":"奇琴伊察","yt":{"id":"mGrU5sXMFCE","t":"Chichen Itza: City Of Warriors | Full Documentary","ch":"Grapevine Documentaries","u":"https://www.youtube.com/watch?v=mGrU5sXMFCE"},"conf":[],"twin":["91_chichen_close"]},{"key":"91_chichen_close","name":"奇琴伊察","en":"Chichén Itzá","place":"墨西哥 尤卡坦","region":"美洲","features":["一道寬大的中央階梯貫穿塔身，梯級密集均勻，兩側是層層收分的石砌斜面。","階梯最底部立有羽蛇神蛇頭石雕，石塊灰白、風化痕跡明顯。","自下仰望，階梯直抵塔頂神廟的門洞，梯道無扶手、無拱頂。"],"trap":"與吉薩金字塔群：吉薩塔身是光滑斜面、塔頂收成尖點，表面沒有可攀登的階梯；庫庫爾坎正面是一道貫穿塔身的寬階梯，直通頂上方形神廟，塔底還有蛇頭石雕。","fact":"庫庫爾坎金字塔四面各 91 級階梯，加頂部平台合為 365 級，對應瑪雅曆法一年；1988 年列入世界遺產（編號 483）。","wrong":["吉薩金字塔群","馬丘比丘","吳哥窟"],"source":"03-照片/世界/美洲/墨西哥/奇琴伊察/奇琴伊察-02-金字塔正面阶梯.jpg","photo":"奇琴伊察-02-金字塔正面阶梯","nf":"奇琴伊察","yt":{"id":"mGrU5sXMFCE","t":"Chichen Itza: City Of Warriors | Full Documentary","ch":"Grapevine Documentaries","u":"https://www.youtube.com/watch?v=mGrU5sXMFCE"},"conf":[],"twin":["90_chichen"]},{"key":"77_p077","name":"泰姬陵","en":"Taj Mahal","place":"印度 阿格拉","region":"亞洲","features":["白色大理石主陵居中，兩側各一座紅砂岩建築對稱分列，白與紅一眼分開","主陵前一道筆直水面把整組建築完整倒映，穹頂與尖塔的倒影比實景更清楚","四根細長尖塔自立陵四角升起，兩側樹列夾住水道，構圖左右完全對稱"],"trap":"與胡馬雍陵：同屬蒙兀兒陵墓、同樣中軸加花園，但胡馬雍陵主體是紅砂岩配白色穹頂，也沒有四根通體白色的尖塔；此處整座陵體是純白大理石。","fact":"陵前水道是四分花園（charbagh）的中軸，設計上把陵墓當成花園中的王座；1632 年動工，1983 年列入世界遺產。","wrong":["胡馬雍陵","阿格拉堡","賈瑪清真寺"],"source":"03-照片/世界/南亚/印度/泰姬陵/泰姬陵-03-倒影.jpg","photo":"泰姬陵-03-倒影","nf":"泰姬陵","yt":{"id":"xVmD8eKRTDQ","t":"Taj Mahal: The Untold History of India's Eternal Monument | Full Historical Documentary","ch":"Histouris","u":"https://www.youtube.com/watch?v=xVmD8eKRTDQ"},"conf":[],"twin":["02_taj","37_taj_close"]},{"key":"78_p078","name":"聖家堂","en":"Sagrada Família","place":"西班牙 巴塞隆納","region":"歐洲","features":["一整组尖塔自密集的方格街块中拔起，塔尖带十字与球状顶饰，四周楼高明显低它一截","塔身暖褐偏砂黄，与周围米白、赭红的平顶民房形成色差，塔身侧面还架着施工吊臂","建筑平面是不规则的星形，外围被街道与绿地环抱，街块转角一律切成八角形斜角"],"trap":"与米兰大教堂：米兰是白色大理石、立面平整、塔尖为密集小尖柱；这里是暖砂岩色、塔身带螺旋叶脉纹理，且仍在施工、塔尖造型有机。","fact":"1882 年动工、1883 年高迪接手，至今仍在续建；2005 年诞生立面与地下礼拜堂以「高迪作品」列入世界遗产。","wrong":["巴黎聖母院","米蘭大教堂","科隆大教堂"],"source":"03-照片/世界/欧洲/西班牙/圣家堂/圣家堂-01-城市远景.jpg","photo":"圣家堂-01-城市远景","nf":"圣家堂","yt":{"id":"h1VYm1d1O_U","t":"Secrets Of The Sagrada Familia: Gaudi's Masterpiece Uncovered | Witness | Architecture Documentary","ch":"Witness","u":"https://www.youtube.com/watch?v=h1VYm1d1O_U"},"conf":[],"twin":["77_sagrada_close"]},{"key":"79_p079","name":"聖索菲亞大教堂","en":"Hagia Sophia","place":"土耳其 伊斯坦堡","region":"歐洲","features":["單一大穹頂在夜裡被燈打成暖金色，兩側半穹頂逐級跌落，整組體量壓得很低","細長宣禮塔在暗天空下只剩剪影，塔身極細、頂端收成尖錐，與穹頂同框","前景是鋪裝廣場與低矮附屬建築，暖光只打在石面上，夜空幾乎全黑"],"trap":"與藍色清真寺：兩者同在伊斯坦堡、夜間同樣打燈，但藍色清真寺有六座宣禮塔、層疊半穹頂更規則；此處四座宣禮塔、穹頂基部一圈窗洞，體量更厚重。","fact":"532 年動工、537 年落成，由查士丁尼一世主持；四座宣禮塔為 15—16 世紀奧斯曼時期加建。","wrong":["藍色清真寺","蘇萊曼尼耶清真寺","聖瓦西里大教堂"],"source":"03-照片/世界/西亚/土耳其/圣索菲亚大教堂/圣索菲亚大教堂-03-夜景与宣礼塔.jpg","photo":"圣索菲亚大教堂-03-夜景与宣礼塔","nf":"圣索菲亚大教堂","yt":{"id":"v6BAPskdJXc","t":"Why Hagia Sophia is So Important? The Whole History is Explained","ch":"Simply Explained","u":"https://www.youtube.com/watch?v=v6BAPskdJXc"},"conf":[],"twin":["47_hagia","48_hagia_close","80_p080"]},{"key":"80_p080","name":"聖索菲亞大教堂","en":"Hagia Sophia","place":"土耳其 伊斯坦堡","region":"歐洲","features":["仰視中央穹頂，基部一圈密集拱窗透光，帆拱與拱廊層層承托","巨大圓形黑底金字阿拉伯書法圓牌懸在柱間，是室內最搶眼的一處","拱頂與牆面滿鋪金色底彩繪，光線自高窗斜落，空間顯得懸浮"],"trap":"與藍色清真寺室內：藍色清真寺以藍彩瓷磚貼滿牆面、圖案細密；此處是金底彩繪加巨型書法圓牌，牆面偏暗金而不是藍。","fact":"主穹頂直徑約 31 公尺，基部開一圈 40 個窗洞，正是「穹頂看似懸浮」的來源。","wrong":["藍色清真寺","蘇萊曼尼耶清真寺","聖瓦西里大教堂"],"source":"03-照片/世界/西亚/土耳其/圣索菲亚大教堂/圣索菲亚大教堂-04-内部穹顶.jpg","photo":"圣索菲亚大教堂-04-内部穹顶","nf":"圣索菲亚大教堂","yt":{"id":"v6BAPskdJXc","t":"Why Hagia Sophia is So Important? The Whole History is Explained","ch":"Simply Explained","u":"https://www.youtube.com/watch?v=v6BAPskdJXc"},"conf":[],"twin":["47_hagia","48_hagia_close","79_p079"]},{"key":"81_p081","name":"少林寺塔林","en":"Pagoda Forest of Shaolin Temple","place":"中國 河南 登封","region":"亞洲","features":["同一片林間草地上擠著上百座磚石墓塔，前後重疊，像一片塔的聚落","塔的層數由一層到七層不等，方形、六角形、圓形塔身交錯，塔頂高低參差","通體灰磚本色、不施彩畫，檐下用磚雕做出斗拱與假門假窗"],"trap":"與嵩岳寺塔：同在登封、同為磚塔，但嵩岳寺塔是一座孤立的十二邊形密檐塔；這裡是二百四十餘座墓塔組成的群。一個是一座，一個是一群。","fact":"現存最早一座為唐貞元七年（791）所建，此後唐至清歷代持續增建；2010 年隨「天地之中」歷史建築群列入世界遺產。","wrong":["嵩岳寺塔","應縣木塔","妙應寺白塔"],"source":"03-照片/中国/华中/河南/少林寺塔林/少林寺塔林-01-塔林全景.jpg","photo":"少林寺塔林-01-塔林全景","nf":"少林寺塔林","conf":[],"twin":["82_p082"]},{"key":"82_p082","name":"少林寺塔林","en":"Pagoda Forest of Shaolin Temple","place":"中國 河南 登封","region":"亞洲","features":["單座磚塔自方形基座層層疊澀出檐，檐下用磚砌出仿木構斗拱","塔身正面開一道小券門或假門，塔身向上明顯收分，頂部收成瓶形或尖錐塔剎","通體灰磚本色，磚縫與風化痕跡清楚，沒有彩畫、沒有白灰罩面"],"trap":"與應縣木塔：應縣木塔是通體木構、可登臨的樓閣式塔；這裡是磚砌墓塔，檐下斗拱只是磚雕仿作，塔身不可登。","fact":"塔林現存磚石墓塔二百四十餘座，是歷代少林寺高僧的墓塔，形制隨時代演變，被稱為「中國古塔藝術博物館」。","wrong":["應縣木塔","嵩岳寺塔","大理千尋塔"],"source":"03-照片/中国/华中/河南/少林寺塔林/少林寺塔林-02-单塔特写.jpg","photo":"少林寺塔林-02-单塔特写","nf":"少林寺塔林","conf":[],"twin":["81_p081"]},{"key":"83_p083","name":"嵩岳寺塔","en":"Songyue Temple Pagoda","place":"中國 河南 登封","region":"亞洲","features":["塔身平面呈十二邊形，轉角多而勻，遠看輪廓近似圓形","上部十五層密檐越往上越密、越窄，整座塔收成挺拔的錐狀","通體土黃磚面、磚縫清晰，沒有彩畫，也不是白色的覆缽式塔"],"trap":"與應縣木塔：應縣木塔是樓閣式木塔，每層有真窗、有平坐斗拱、可以登臨；嵩岳寺塔是密檐磚塔，檐間只做假門窗、上不去。能數出樓層、能上去的是樓閣式，只能數檐的是密檐式。","fact":"北魏正光四年（523）建，是中國現存最古老的磚塔之一；2010 年隨「天地之中」歷史建築群列入世界遺產。","wrong":["應縣木塔","少林寺塔林","妙應寺白塔"],"source":"03-照片/中国/华中/河南/嵩岳寺塔/嵩岳寺塔-01-塔身全景.jpg","photo":"嵩岳寺塔-01-塔身全景","nf":"嵩岳寺塔","conf":[],"twin":["84_p084"]},{"key":"84_p084","name":"嵩岳寺塔","en":"Songyue Temple Pagoda","place":"中國 河南 登封","region":"亞洲","features":["從塔下仰拍，底層塔身最高大，其上密檐一層壓一層、間距越往上越小","每層檐都由磚層層疊澀挑出，檐下陰影一層深過一層，呈豎向條紋感","塔身自下而上明顯收分，整體成錐形，頂端收在磚砌塔剎上"],"trap":"與大理千尋塔：千尋塔是方形平面、十六層密檐；嵩岳寺塔是十二邊形、十五層密檐，遠看輪廓更接近圓形。數塔角即可分開。","fact":"全塔檐間共砌出約 492 處磚製假門假窗，只有底層四面各開一道真券門。","wrong":["大理千尋塔","少林寺塔林","妙應寺白塔"],"source":"03-照片/中国/华中/河南/嵩岳寺塔/嵩岳寺塔-02-密檐仰视.jpg","photo":"嵩岳寺塔-02-密檐仰视","nf":"嵩岳寺塔","conf":[],"twin":["83_p083"]},{"key":"85_p085","name":"白马寺","en":"White Horse Temple","place":"中國 河南 洛陽","region":"亞洲","features":["一座方形十三層密檐磚塔獨立立於院落之中，塔身細高、層層收分","塔下是磚石須彌座與漢白玉欄杆，塔前有一座小殿與台階","通體灰磚本色，密檐用疊澀挑出，不施彩畫"],"trap":"與嵩岳寺塔：嵩岳寺塔是十二邊形、十五層；這裡是方形、十三層，塔身更高挑。與少林寺塔林：那邊是成片的墓塔群，這裡是一座寺院主塔。","fact":"齊雲塔是金代遺構（1175 年重建），是白馬寺最醒目的塔類建築，與寺內明清重建的殿宇形成年代對比。","wrong":["嵩岳寺塔","少林寺塔林","大理千尋塔"],"source":"03-照片/中国/华中/河南/白马寺/白马寺-01-齐云塔全景.jpg","photo":"白马寺-01-齐云塔全景","nf":"白马寺","conf":[],"twin":["86_p086","106_p106"]},{"key":"86_p086","name":"白马寺","en":"White Horse Temple","place":"中國 河南 洛陽","region":"亞洲","features":["近看密檐，每層檐都是磚塊逐層向外疊澀挑出，沒有一根木料","檐與檐之間的塔壁上砌出小型假門假窗，磚面風化痕跡清晰","塔身逐層收分，越往上塔壁越窄，整段輪廓像一段收緊的方錐"],"trap":"與嵩岳寺塔：兩者都是磚砌密檐、疊澀出檐，差別在平面——齊雲塔是方形，嵩岳寺塔是十二邊形。","fact":"齊雲塔為方形十三層密檐磚塔，金代大定十五年（1175）重建，是洛陽一帶現存最早的密檐式磚塔之一。","wrong":["嵩岳寺塔","少林寺塔林","大理千尋塔"],"source":"03-照片/中国/华中/河南/白马寺/白马寺-02-齐云塔密檐特写.jpg","photo":"白马寺-02-齐云塔密檐特写","nf":"白马寺","conf":[],"twin":["85_p085","106_p106"]},{"key":"87_p087","name":"真觉寺金刚宝座塔","en":"Vajra Throne Pagoda of Zhenjue Temple","place":"中國 北京","region":"亞洲","features":["下方是一座方形石砌金刚宝座，座身横向分成多层、每层都排满小佛龛浮雕","座上并立五座密檐小塔，中央一座最高，各塔之间夹着一座绿琉璃罩亭","通体灰白与土黄石色，正中开一座木门拱洞，座前有石狮与石供台"],"trap":"与嵩岳寺塔、大理千寻塔等普通密檐塔：那些是一座塔直接落地、层层出檐；这里是「一座方形宝座＋座上五座小塔」，先有台再立塔，形制完全不同。","fact":"明成化九年（1473）建成，是国内现存最早、雕刻最完整的金刚宝座式塔；所在寺院俗称五塔寺，今为北京石刻艺术博物馆。","wrong":["嵩岳寺塔","應縣木塔","大理千尋塔"],"source":"03-照片/中国/华北/北京/真觉寺金刚宝座塔/真觉寺金刚宝座塔-01-塔座全景.jpg","photo":"真觉寺金刚宝座塔-01-塔座全景","nf":"真觉寺金刚宝座塔","conf":[],"twin":["88_p088"]},{"key":"88_p088","name":"真觉寺金刚宝座塔","en":"Vajra Throne Pagoda of Zhenjue Temple","place":"中國 北京","region":"亞洲","features":["大鹏金翅鸟展翅浮雕：头戴宝冠、颈胸挂串珠璎珞，双翅用细密平行刻线表示羽毛","石材土黄、表面砂粒与风化坑清晰，浮雕只在石面浅浮起、不做镂空","画面下缘露出一段拱券弧线，说明这处浮雕正在门拱上方的券脸位置"],"trap":"与琉璃饰件：承德外八庙等处的团花是琉璃烧制成型、颜色鲜艳；这里是整石浅浮雕，图案直接刻在灰黄土色石面上。","fact":"金刚宝座座身遍刻佛龛与法器纹样，五塔塔身另有佛像浮雕，是明代石刻的代表作；塔所在即今北京石刻艺术博物馆。","wrong":["承德外八庙","龍門石窟","雲岡石窟"],"source":"03-照片/中国/华北/北京/真觉寺金刚宝座塔/真觉寺金刚宝座塔-02-拱门雕刻特写.jpg","photo":"真觉寺金刚宝座塔-02-拱门雕刻特写","nf":"真觉寺金刚宝座塔","conf":[],"twin":["87_p087"]},{"key":"89_p089","name":"山海关","en":"Shanhai Pass","place":"中國 河北 秦皇島","region":"亞洲","features":["高大厚重的青磚城牆上開一道拱形門洞，牆頂設垛口，牆體尺度遠大於一般城門","門洞上方騎牆立起一座兩層城樓，重檐歇山頂、面闊數間，是全畫面最高點","城牆兩側延伸出很長一段牆身，城下是鋪裝廣場與綠樹"],"trap":"與嘉峪關：嘉峪關在甘肅、為明長城西端，關城獨立於戈壁荒漠之中；山海關在河北、為東端，城樓緊接城鎮與綠樹。口訣：東看海、西看沙。","fact":"明洪武十四年（1381）建關設衛，是明長城東端的重要關隘；1987 年隨長城列入世界遺產。","wrong":["嘉峪關","慕田峪長城","居庸關"],"source":"03-照片/中国/华北/河北/山海关/山海关-01-城楼全景.jpg","photo":"山海关-01-城楼全景","nf":"山海关","conf":[],"twin":["90_p090"]},{"key":"90_p090","name":"山海关","en":"Shanhai Pass","place":"中國 河北 秦皇島","region":"亞洲","features":["關前立一座四柱三間的巨型石牌坊，石面淺刻紋樣，正中有題額","牌坊後方接著城樓與城牆，牌坊—門洞—城樓構成縱向的入口序列","地面是寬闊的石鋪廣場，牌坊下有行人往來，可作尺度參照"],"trap":"與一般城門牌坊：普通城門前少見如此尺度、四柱三間的石坊；這裡的牌坊與城樓、甕城組成完整的「關」的防禦與禮儀序列。","fact":"山海關城樓稱鎮東樓，城樓上懸「天下第一關」巨匾，關前石坊是同名題額的入口標誌。","wrong":["嘉峪關","慕田峪長城","趙州橋"],"source":"03-照片/中国/华北/河北/山海关/山海关-02-天下第一关牌坊.jpg","photo":"山海关-02-天下第一关牌坊","nf":"山海关","conf":[],"twin":["89_p089"]},{"key":"91_p091","name":"承德外八庙","en":"The Outlying Temples of Chengde","place":"中國 河北 承德","region":"亞洲","features":["白牆上排著一列上窄下寬的梯形紅色盲窗，牆面幾乎不開真窗，牆體自下略向內收","平頂女兒牆的牆頭立著一排鎏金寶幢與法輪，晴天金光刺眼，與漢式坡頂完全不同","台體下開三座拱門，門前有石獅與鋪地院落，兩側是高松翠柏"],"trap":"與布達拉宮：布達拉宮沿紅山拔起、體量巨大，畫面主體是山體加白宮紅宮；這類台體小得多，常與漢式琉璃殿身同框（本庫另有琉璃門樓一圖可對照）。","fact":"承德外八廟是清康熙五十二年（1713）至乾隆四十五年（1780）陸續建成的皇家寺廟群，1994 年與避暑山莊一同列入世界遺產。","wrong":["布達拉宮","大昭寺","白馬寺"],"source":"03-照片/中国/华北/河北/承德外八庙/承德外八庙-01-大红台全景.jpg","photo":"承德外八庙-01-大红台全景","nf":"承德外八庙","conf":[],"twin":["92_p092"]},{"key":"92_p092","name":"承德外八庙","en":"The Outlying Temples of Chengde","place":"中國 河北 承德","region":"亞洲","features":["紅牆身配黃綠琉璃瓦歇山頂，檐下一層層斗拱，是標準的清官式做法","紅牆面上嵌一對圓形琉璃飾件，顏色與屋頂呼應，位置左右對稱","門前有石雕香爐與松柏，屋頂正脊、垂脊兩端起翹，尺度厚重"],"trap":"與大昭寺：大昭寺屋頂是鎏金銅瓦的平頂金頂群，沒有黃綠琉璃坡頂與斗拱；這裡是清官式琉璃歇山頂配紅牆斗拱。","fact":"這類琉璃門樓常與藏式台體同處一寺，一漢一藏並置，正是承德外八廟「漢藏合璧」最直觀的證據。","wrong":["大昭寺","布達拉宮","白馬寺"],"source":"03-照片/中国/华北/河北/承德外八庙/承德外八庙-02-琉璃门楼特写.jpg","photo":"承德外八庙-02-琉璃门楼特写","nf":"承德外八庙","conf":[],"twin":["91_p091"]},{"key":"93_p093","name":"承德避暑山庄","en":"Chengde Mountain Resort","place":"中國 河北 承德","region":"亞洲","features":["開闊湖面佔去畫面大半，岸線曲折，洲島與堤岸把水面分隔成數片","湖畔林木茂密、綠意連片，建築只露出少量屋頂與亭榭，藏在樹間","遠處是一道低緩青山作背景，山脊上隱約有一座小亭或塔"],"trap":"與頤和園：頤和園以萬壽山與昆明湖為中心，山上佛香閣貼山臨湖、金碧彩畫極為顯眼；此處建築低調藏於林木、以大片水面與遠山為界。","fact":"清康熙四十二年（1703）始建，乾隆五十五年（1790）基本建成；1994 年列入世界遺產。","wrong":["頤和園","拙政園","北海公園"],"source":"03-照片/中国/华北/河北/承德避暑山庄/承德避暑山庄-01-湖区全景.jpg","photo":"承德避暑山庄-01-湖区全景","nf":"承德避暑山庄","conf":[],"twin":["94_p094"]},{"key":"94_p094","name":"承德避暑山庄","en":"Chengde Mountain Resort","place":"中國 河北 承德","region":"亞洲","features":["臨水的重檐亭榭，上層檐攢尖收頂、下層檐四面出廈，屋面鋪灰瓦","紅柱配檐下青綠彩畫，台基直接壓在水岸石面上，右側是成片荷葉","亭內外有人歇坐穿行，說明它是供遊憩停留的園林建築，而非禮制殿宇"],"trap":"與頤和園長廊與佛香閣：頤和園以金碧彩畫的長廊與山上的佛香閣為標誌；此處是湖岸邊獨立的重檐亭榭，尺度小、貼水而建。","fact":"避暑山莊的湖區多仿江南景致，堤、橋、洲、島把水面切成層次，亭榭隨岸線布置，形成「以水成景」的格局。","wrong":["頤和園","拙政園","承德外八廟"],"source":"03-照片/中国/华北/河北/承德避暑山庄/承德避暑山庄-02-湖区亭台特写.jpg","photo":"承德避暑山庄-02-湖区亭台特写","nf":"承德避暑山庄","conf":[],"twin":["93_p093"]},{"key":"95_p095","name":"莫高窟","en":"Mogao Caves","place":"中國 甘肅 敦煌","region":"亞洲","features":["一座多層木構窟檐貼著土黃色崖壁向上疊起，通體赭紅、層層出檐","樓閣正面每層設欄杆與簷口，屋脊線水平重複，是崖面上唯一的豎向高層","樓閣兩側仍是裸露的崖體與零星小窟，右下方有低矮殿宇與鋪地"],"trap":"與雲岡、龍門：雲岡、龍門是堅硬岩體上露天鑿出的大佛與大龕；這裡的木樓是「包住」一尊大像的窟檐，造像在樓內，從外面看不到石胎大佛。","fact":"九層樓即第 96 窟，樓內是 35.5 公尺高的彌勒大佛，是莫高窟最大的塑像；木構窟檐同時起遮護作用。","wrong":["雲岡石窟","麥積山石窟","龍門石窟"],"source":"03-照片/中国/西北/甘肃/莫高窟/莫高窟-03-九层楼.jpg","photo":"莫高窟-03-九层楼","nf":"莫高窟","yt":{"id":"UObK-A28RV8","t":"Mogao Caves「UNESCO World Heritage Sites in China」 | China Documentary","ch":"China Documentary","u":"https://www.youtube.com/watch?v=UObK-A28RV8"},"conf":[],"twin":["33_mogao","34_mogao2"]},{"key":"96_p096","name":"麦积山石窟","en":"Maijishan Grottoes","place":"中國 甘肅 天水","region":"亞洲","features":["一座赭紅色孤峰單獨拔起，崖面近乎垂直，不像連綿山體的一道坡","崖面中段窟龕與木構窟檐上下疊成數層，洞口密密麻麻，整面崖壁像被蜂蛀過","峰頂圓緩、長滿植被，周圍沒有同高度山脊相接"],"trap":"與莫高窟：莫高窟是一道橫向綿延千餘米的斷崖，窟龕沿崖面橫向鋪開；麥積山是一座孤立陡峰，能鑿的崖面局促，窟龕只能向上疊成數層。","fact":"十六國後秦（約 4 世紀末—5 世紀初）始鑿，北魏至明續有營建；2014 年隨絲綢之路項目列入世界遺產。","wrong":["莫高窟","雲岡石窟","龍門石窟"],"source":"03-照片/中国/西北/甘肃/麦积山石窟/麦积山石窟-01-崖壁窟龛全景.jpg","photo":"麦积山石窟-01-崖壁窟龛全景","nf":"麦积山石窟","conf":[],"twin":["97_p097"]},{"key":"97_p097","name":"麦积山石窟","en":"Maijishan Grottoes","place":"中國 甘肅 天水","region":"亞洲","features":["木構棧道貼著粗糙岩壁曲折延伸，外側是紅色木欄杆，欄外直接臨空","棧道淨寬僅容一兩人通行，一側是洞口，另一側是數十公尺落差","遠處是淡藍山巒與天空，崖壁顆粒粗、顏色暗褐"],"trap":"與雲岡石窟：雲岡第 20 窟露天大佛前接地面樓閣，人站在地面仰視；麥積山沒有可雕的石灰岩，窟龕被棧道架在半空，動線本身就貼在崖面上。","fact":"棧道分層盤繞，把分散在不同高度的窟龕連成一條通道——這種「貼壁凌空」的動線是麥積山最直觀的分野特徵。","wrong":["雲岡石窟","莫高窟","龍門石窟"],"source":"03-照片/中国/西北/甘肃/麦积山石窟/麦积山石窟-02-栈道与窟龛特写.jpg","photo":"麦积山石窟-02-栈道与窟龛特写","nf":"麦积山石窟","conf":[],"twin":["96_p096"]},{"key":"98_p098","name":"大理千寻塔","en":"Qianxun Pagoda","place":"中國 雲南 大理","region":"亞洲","features":["三座塔立在同一條東西軸線上，中間一座最高大，左右兩座略矮、形制相同","三塔都是方形密檐磚塔，塔身向上收分，密檐層層疊壓，塔頂收成錐狀塔剎","通體磚石原色、無彩畫，塔前是低矮灌木與鋪地廣場，背後是蒼山山脈"],"trap":"與西安小雁塔：小雁塔也是唐代密檐式磚塔、也呈方錐收分，但只此單塔、十五層；這裡是「三塔並立、居中最高」。口訣：看是否成組。","fact":"千尋塔建於南詔勸豐祐時期（約 824—840 年），與左右兩座副塔合稱崇聖寺三塔，是雲南現存最古老的建築之一。","wrong":["西安小雁塔","嵩岳寺塔","妙應寺白塔"],"source":"03-照片/中国/西南/云南/大理千寻塔/大理千寻塔-01-三塔全景.jpg","photo":"大理千寻塔-01-三塔全景","nf":"大理千寻塔","conf":[],"twin":["99_p099"]},{"key":"99_p099","name":"大理千寻塔","en":"Qianxun Pagoda","place":"中國 雲南 大理","region":"亞洲","features":["近前仰拍，方形塔身自下而上層層收分，密檐一層壓一層、間距越往上越小","塔面磚石呈淺灰帶風化痕，無彩畫、無白灰罩面，簷口用磚疊澀挑出","畫面左側露出一座同形但明顯矮小的副塔，說明主塔是成組關係中的一座"],"trap":"與嵩岳寺塔：嵩岳寺塔是十二邊形，輪廓近圓；千尋塔是方形，輪廓方正。數塔角即可分。","fact":"千尋塔為方形十六層密檐空心磚塔，是崇聖寺三塔中的主塔，約建於 824—840 年。","wrong":["嵩岳寺塔","西安小雁塔","應縣木塔"],"source":"03-照片/中国/西南/云南/大理千寻塔/大理千寻塔-02-千寻塔近景.jpg","photo":"大理千寻塔-02-千寻塔近景","nf":"大理千寻塔","conf":[],"twin":["98_p098"]},{"key":"100_p100","name":"大昭寺","en":"Jokhang Temple","place":"中國 西藏 拉薩","region":"亞洲","features":["屋頂是數座獨立的鎏金銅瓦歇山頂前後錯落，在高原光線下呈飽和金黃","正脊中央立金色法輪、兩側伏著金鹿，脊上另有寶瓶與幢幡，剪影極清楚","金頂之下橫著一道深紅褐色邊瑪牆，再下是刷白的收分石牆與黑框梯形窗"],"trap":"與布達拉宮：布達拉宮是宮堡，白宮紅宮沿山體層疊而上，金頂只集中在紅宮頂部；這裡在平地老城之內，主體是石木碉房加多座金頂。","fact":"7 世紀中葉吐蕃松贊干布時期始建，現存主體為 17 世紀以後歷代擴建；2000 年隨布達拉宮歷史建築群擴展項目列入世界遺產。","wrong":["布達拉宮","承德外八廟","白馬寺"],"source":"03-照片/中国/西南/西藏/大昭寺/大昭寺-01-金顶全景.jpg","photo":"大昭寺-01-金顶全景","nf":"大昭寺","conf":[],"twin":["101_p101","113_p113"]},{"key":"101_p101","name":"大昭寺","en":"Jokhang Temple","place":"中國 西藏 拉薩","region":"亞洲","features":["中央一輪帶輻條的鎏金法輪，外圈飾卷草紋，左右各一隻前腿跪伏的金鹿","雙鹿頭部一致朝向法輪，全部貼金，背景是純藍天空與深紅褐色屋面","法輪與雙鹿體量小、位置正對屋脊中線，是屋頂上最突出的一組貼金飾件"],"trap":"與布達拉宮：布達拉宮金頂以寶瓶、幢幡為主，沒有這組「法輪＋雙鹿」；這個組合是藏傳寺院屋頂的固定題材，指向佛陀在鹿野苑初轉法輪。","fact":"法輪雙鹿是藏傳佛教寺院金頂的標準配置，象徵釋迦牟尼在鹿野苑初轉法輪；大昭寺屋頂這一組全部貼金。","wrong":["布達拉宮","承德外八廟","白馬寺"],"source":"03-照片/中国/西南/西藏/大昭寺/大昭寺-02-法轮双鹿特写.jpg","photo":"大昭寺-02-法轮双鹿特写","nf":"大昭寺","conf":[],"twin":["100_p100","113_p113"]},{"key":"102_p102","name":"洛阳桥","en":"Luoyang Bridge","place":"中國 福建 泉州","region":"亞洲","features":["长条石板平铺成桥面，下面是一排排石砌桥墩，桥身几乎与水面齐平、沒有高拱","桥墩迎水面砌成尖角分水尖，墩上层层叠石，是「筏形基础＋种蛎固基」的梁式石桥","桥面两侧立石栏板与望柱，桥头直接连着市镇房屋，桥下是滩涂与浅水"],"trap":"与赵州桥：赵州桥是单孔敞肩石拱桥、一大拱两侧附小拱，桥身拱起；洛阳桥是多孔梁式石桥，桥面平直、全靠密集桥墩承托，没有拱。","fact":"北宋皇祐五年（1053）始建、嘉祐四年（1059）建成，由蔡襄主持，是中国现存最早的跨海梁式石桥。","wrong":["赵州桥","卢沟桥","泸定桥"],"source":"03-照片/中国/华东/福建/洛阳桥/洛阳桥-01-梁桥全景.jpg","photo":"洛阳桥-01-梁桥全景","nf":"洛阳桥","conf":[],"twin":["103_p103"]},{"key":"103_p103","name":"洛阳桥","en":"Luoyang Bridge","place":"中國 福建 泉州","region":"亞洲","features":["桥面是整条石板铺就的平直通道，两侧立石栏板，全程沒有台階起伏","桥面中段跨着石构亭台（桥亭），行人从亭下穿行，亭柱与栏板同色","远处是当代城市高楼与河滩，桥身贴着水面拉成一条长直线"],"trap":"与卢沟桥：卢沟桥是 11 孔联拱，桥面随每一孔拱起伏、望柱上蹲满石狮；洛阳桥是梁式平桥，桥面平直、中段设桥亭。","fact":"洛阳桥桥面用长石板梁架在石墩上，中段原建亭供行人歇脚；全桥长约 730 米，跨洛阳江入海口。","wrong":["卢沟桥","赵州桥","泸定桥"],"source":"03-照片/中国/华东/福建/洛阳桥/洛阳桥-02-桥面石亭.jpg","photo":"洛阳桥-02-桥面石亭","nf":"洛阳桥","conf":[],"twin":["102_p102"]},{"key":"104_p104","name":"福建土楼","en":"Fujian Tulou","place":"中國 福建","region":"亞洲","features":["四座圆楼与一座方楼成组聚在山腰台地上，排成「四菜一汤」的布局","外墙是夯土黄褐色高墙、上覆灰瓦大出檐，墙顶一圈瓦檐压得很低","楼群四面是层层茶田与阔叶林，土楼各自独立成堡、不与邻近民居相连"],"trap":"与一般圆形围屋：土楼是「一楼一姓、聚族而居」的夯土高楼，直径数十米、墙厚逾一米，一门到底；不是白墙黑瓦的院落民居。","fact":"田螺坑土楼群由 1 座方楼、3 座圆楼和 1 座椭圆楼组成；福建土楼 2008 年列入世界遗产。","wrong":["开平碉楼","徽州民居","平遥古城"],"source":"03-照片/中国/华东/福建/福建土楼/福建土楼-01-田螺坑群全景.jpg","photo":"福建土楼-01-田螺坑群全景","nf":"福建土楼","conf":[],"twin":["105_p105"]},{"key":"105_p105","name":"福建土楼","en":"Fujian Tulou","place":"中國 福建","region":"亞洲","features":["圆形夯土外墙一圈到底、上下几乎同宽，墙面上只开两三层小方窗","正门上方嵌石匾题「承启楼」，门洞做成石框、上有小瓦檐","墙顶覆灰瓦、出檐很深，楼前是石铺场地与参观人群，墙脚可见碑座"],"trap":"与方形土楼：方楼转角清楚、四面等宽；承启楼是圆形，外墙一圈连续弧面，绕墙走一周找不到转角。","fact":"承启楼是福建土楼中体量最大的圆楼，直径约 73 米；明崇祯年间始建，清康熙四十八年（1709）建成。","wrong":["开平碉楼","徽州民居","平遥古城"],"source":"03-照片/中国/华东/福建/福建土楼/福建土楼-02-承启楼立面.jpg","photo":"福建土楼-02-承启楼立面","nf":"福建土楼","conf":[],"twin":["104_p104"]},{"key":"106_p106","name":"白马寺","en":"White Horse Temple","place":"中國 河南 洛陽","region":"亞洲","features":["殿内正面一尊披甲按剑的护法天将立像，铠甲甲片与束带都用彩塑做出","像前设木栏与供台，两侧垂挂黄地经幡，上方是层层雕饰的帐幔与梁枋","造像、梁枋、幡帐都是彩绘木构与彩塑，殿内光线偏暖、以金红为主色"],"trap":"与一般佛殿主尊：佛殿正中多供佛、菩萨坐像；这里殿内主位是一尊披甲立姿的护法天将，甲胄与手中兵器是最明显的差别。","fact":"白马寺是佛教传入中国后由官方营造的第一座寺院，东汉永平十一年（68）建；现存殿宇多为明清重建。","wrong":["少林寺塔林","大昭寺","承德外八庙"],"source":"03-照片/中国/华中/河南/白马寺/白马寺-03-大雄殿天将造像.jpg","photo":"白马寺-03-大雄殿天将造像","nf":"白马寺","conf":[],"twin":["85_p085","86_p086"]},{"key":"107_p107","name":"卢沟桥","en":"Marco Polo Bridge","place":"中國 北京","region":"亞洲","features":["一长排连续半圆石拱横跨河床，拱与拱之间是厚实的石砌桥墩","桥面平缓、两侧只有低矮石栏板，没有廊亭、也没有高起的桥楼","桥下河床大片长草、水量不大，桥身灰白、石块与灰缝清晰"],"trap":"与赵州桥：赵州桥是单孔大拱加两侧敞肩小拱，一跨过河；卢沟桥是十余孔等跨联拱长桥，靠成排桥墩连续跨越。","fact":"卢沟桥建于金大定二十九年（1189）至明昌三年（1192），为 11 孔联拱石桥，全长约 266 米。","wrong":["赵州桥","洛阳桥","泸定桥"],"source":"03-照片/中国/华北/北京/卢沟桥/卢沟桥-01-桥身全景.jpg","photo":"卢沟桥-01-桥身全景","nf":"卢沟桥","conf":[],"twin":["108_p108"]},{"key":"108_p108","name":"卢沟桥","en":"Marco Polo Bridge","place":"中國 北京","region":"亞洲","features":["桥两侧石望柱一根接一根，柱头各蹲一只石狮，狮身朝向不一、姿态各异","望柱之间嵌石栏板，板面浅刻纹样，柱头狮座雕莲瓣或云纹","石色灰黑、风化明显，背景是开阔水面与对岸树线，栏板顺着桥身一路排开"],"trap":"与洛阳桥：洛阳桥的望柱多是简单方形柱头，桥面中段设桥亭；卢沟桥的望柱柱头一律是石狮，且石狮历代补刻、风格不一。","fact":"卢沟桥石狮素有「数不清」之说：历代补刻不断，大狮身上还雕着小狮，风格跨越金、元、明、清四代。","wrong":["洛阳桥","赵州桥","泸定桥"],"source":"03-照片/中国/华北/北京/卢沟桥/卢沟桥-02-望柱石狮.jpg","photo":"卢沟桥-02-望柱石狮","nf":"卢沟桥","conf":[],"twin":["107_p107"]},{"key":"109_p109","name":"平遥古城","en":"Ancient City of Pingyao","place":"中國 山西 平遙","region":"亞洲","features":["一道连续不断的青灰砖城墙横贯画面，墙顶排列整齐的垛口，墙身外侧近乎垂直","墙身上每隔一段隆起一座方形砖砌墩台，轮廓方正、没有木构屋顶","墙外是环城绿地与铺装场地，现代路灯与停车位紧贴墙根——城被当代城市包围"],"trap":"与西安城墙：西安城墙更宽更高、墙顶可并行车马，城门是券台加三重檐城楼；平遥城墙体量小一圈，墙顶垛口密集、墩台是素砖方台。","fact":"平遥城墙明洪武三年（1370）在旧土城基础上包砖改筑，周长约 6.2 公里，现存 6 座城门与 72 座敌楼。","wrong":["西安城墙","丽江古城","福建土楼"],"source":"03-照片/中国/华北/山西/平遥古城/平遥古城-01-城墙全景.jpg","photo":"平遥古城-01-城墙全景","nf":"平遥古城","conf":[],"twin":["110_p110"]},{"key":"110_p110","name":"平遥古城","en":"Ancient City of Pingyao","place":"中國 山西 平遙","region":"亞洲","features":["砖砌城台之上立起多层重檐的木构城楼，屋面铺灰瓦、层层出檐","城台正中开一道门洞，台顶还留着整圈垛口与女墙","城楼面阔数间、檐下密排斗拱，轮廓上大下小、四角起翘，楼下行人往来"],"trap":"与山海关城楼：山海关城楼是两层重檐、悬「天下第一关」巨匾、城墙极厚重；平遥城楼为多层重檐、尺度略小，城台的垛口与马道保存完整。","fact":"平遥六座城门各有城楼，北门称拱极门；城楼为明清木构、重檐歇山顶，是城墙上的制高点。","wrong":["山海关","嘉峪关","西安城墙"],"source":"03-照片/中国/华北/山西/平遥古城/平遥古城-02-北门城楼.jpg","photo":"平遥古城-02-北门城楼","nf":"平遥古城","conf":[],"twin":["109_p109"]},{"key":"111_p111","name":"嘉峪关","en":"Jiayuguan Pass","place":"中國 甘肅 嘉峪關","region":"亞洲","features":["夯土包砖的城墙配砖砌城台，台上起三层重檐歇山城楼，楼身瘦高、层层收分","城台正中开拱形门洞，楼前广场空阔，几乎没有树木遮挡","墙身呈土黄色、与灰瓦屋顶形成明显黄灰对比，四野是戈壁平野"],"trap":"与山海关：山海关城楼紧贴巨匾与市镇，关城周边是绿树与城区；嘉峪关城楼更瘦高、墙体土黄，关城独立在戈壁滩上，远处可见雪山。","fact":"嘉峪关始建于明洪武五年（1372），是明长城西端起点，关城由内城、外城、城壕组成，1987 年随长城列入世界遗产。","wrong":["山海关","平遥古城","慕田峪长城"],"source":"03-照片/中国/西北/甘肃/嘉峪关/嘉峪关-01-光化门城楼全景.jpg","photo":"嘉峪关-01-光化门城楼全景","nf":"嘉峪关","conf":[],"twin":["112_p112"]},{"key":"112_p112","name":"嘉峪关","en":"Jiayuguan Pass","place":"中國 甘肅 嘉峪關","region":"亞洲","features":["木构门楼正面满施青绿彩画，梁枋、斗拱、檩条都画满旋子类图案","屋面为灰瓦歇山顶、四角起翘，檐下斗拱密集、出檐很深","门楼立在砖石台基上，两侧接厚重的夯土包砖墙体，门洞上方悬匾"],"trap":"与承德外八庙的琉璃门楼：外八庙门楼用黄绿琉璃瓦配红墙；这里是灰瓦、土黄墙体，彩画全部画在木构梁枋上，不用琉璃。","fact":"嘉峪关关城内光化楼、柔远楼、嘉峪关楼三座城楼一线排列，木构均施彩画，是明代官式做法的西北实例。","wrong":["山海关","承德外八庙","平遥古城"],"source":"03-照片/中国/西北/甘肃/嘉峪关/嘉峪关-02-城楼木构彩画.jpg","photo":"嘉峪关-02-城楼木构彩画","nf":"嘉峪关","conf":[],"twin":["111_p111"]},{"key":"113_p113","name":"大昭寺","en":"Jokhang Temple","place":"中國 西藏 拉薩","region":"亞洲","features":["夜间暖金灯光打在寺面上，屋顶正脊立着法轮与双鹿的剪影，是最硬的身份标志","檐下横着一道深红褐色边玛墙，再往下是刷白或石色的收分墙体","墙外垂挂黑底白纹的大幅幢幡，殿前石板地上坐满朝拜与歇息的人群"],"trap":"与布达拉宫：布达拉宫是沿山体拔起的宫堡，夜景以大片白墙红墙与山体轮廓为主；这里是平地老城内的寺院，屋顶是金顶加法轮双鹿，殿前是石板广场。","fact":"大昭寺始建于 7 世纪中叶吐蕃松赞干布时期，寺前即八廓街；2000 年随布达拉宫历史建筑群扩展项目列入世界遗产。","wrong":["布达拉宫","承德外八庙","白马寺"],"source":"03-照片/中国/西南/西藏/大昭寺/大昭寺-03-夜景外观.jpg","photo":"大昭寺-03-夜景外观","nf":"大昭寺","conf":[],"twin":["100_p100","101_p101"]},{"key":"114_p114","name":"滴血救世主教堂","en":"Church of the Savior on Spilled Blood","place":"俄羅斯 聖彼得堡","region":"歐洲","features":["一組五彩洋蔥頭穹頂聚在屋頂：中央金頂最高，其餘為藍、綠、紅等釉彩，穹頂表面帶螺旋紋","紅磚牆面配白色石雕線腳，窗洞與拱券用彩色釉面磚鑲邊，整棟像鑲嵌出來的","教堂緊貼運河石岸，水面映出穹頂與牆身，前景是鐵欄杆與沿河步道"],"trap":"與聖瓦西里大教堂：聖瓦西里在莫斯科紅場、16 世紀原真古羅斯建築，洋蔥頂是糖果條紋、簇擁在中央帳篷頂四周；這裡在聖彼得堡運河畔、19 世紀末復古式，牆面是大面積馬賽克而非條紋。","fact":"1883 年動工、1907 年建成，為紀念 1881 年沙皇亞歷山大二世遇刺而建，因此得名「滴血」。","wrong":["聖瓦西里大教堂","聖索菲亞大教堂","米蘭大教堂"],"source":"03-照片/世界/欧洲/俄罗斯/滴血救世主教堂/滴血救世主教堂-01-教堂全景.jpg","photo":"滴血救世主教堂-01-教堂全景","nf":"滴血救世主教堂","conf":[],"twin":["115_p115"]},{"key":"115_p115","name":"滴血救世主教堂","en":"Church of the Savior on Spilled Blood","place":"俄羅斯 聖彼得堡","region":"歐洲","features":["拱形壁龕裡一幅金色底馬賽克：中央是十字架上的基督，兩側與上方為聖像與天使","馬賽克由細小方形玻璃磚拼成，遠看像油畫、近看是一格格色塊","壁龕外框是白石雕花與紅色釉面磚，與上方灰色石砌牆面形成材質對比"],"trap":"與米蘭大教堂的銅門浮雕：米蘭是青銅鑄造、深色浮雕板；這裡是玻璃馬賽克鑲嵌、金底彩色，外框為石雕與釉磚。","fact":"外牆佈滿馬賽克鑲嵌畫，面積達數千平方公尺，題材涵蓋基督生平與俄羅斯聖人。","wrong":["米蘭大教堂","聖家堂","聖索菲亞大教堂"],"source":"03-照片/世界/欧洲/俄罗斯/滴血救世主教堂/滴血救世主教堂-02-马赛克特写.jpg","photo":"滴血救世主教堂-02-马赛克特写","nf":"滴血救世主教堂","conf":[],"twin":["114_p114"]},{"key":"116_p116","name":"聖托里尼 · 伊亞","en":"Oia, Santorini","place":"希臘 基克拉澤斯群島","region":"歐洲","features":["兩座鈷藍色圓頂並排，頂上立白色十字，旁邊是白色鐘塔","房屋是白色平頂立方體，沿火山口崖壁層層堆疊，沒有整齊街巷","背景是深藍海灣與暗紅、灰黑的火山崖壁，崖頂一條白色村落"],"trap":"與米克諾斯島：米克諾斯同為藍白配色，但地形平坦、以迷宮白巷與風車著稱，沒有高崖與火山口海灣；伊亞是垂直貼在崖壁上的村落。","fact":"聖托里尼是約公元前 1600 年米諾斯式火山大噴發形成的破火山口，伊亞（Oia）建在火山口北端的崖頂。","wrong":["米克諾斯島","阿瑪菲海岸","五漁村"],"source":"03-照片/世界/欧洲/希腊/圣托里尼/圣托里尼-03-伊亚蓝顶教堂.jpg","photo":"圣托里尼-03-伊亚蓝顶教堂","nf":"圣托里尼","yt":{"id":"6iaVmWmqpx4","t":"Santorini Volcano: A Day the World Would Never Forget | Full History Documentary","ch":"Fury of the Earth","u":"https://www.youtube.com/watch?v=6iaVmWmqpx4"},"conf":[],"twin":["57_santorini","58_santorini_close"]},{"key":"117_p117","name":"科隆大教堂","en":"Cologne Cathedral","place":"德國 科隆","region":"歐洲","features":["西端兩座幾乎等高的尖塔並肩拔起，塔身滿是尖拱與鏤空石雕，是整條天際線的最高點","整座教堂是深灰近黑的砂岩，風化痕跡明顯，與岸邊彩色老屋形成反差","教堂緊鄰河岸，前景是萊茵河與遊船，河對岸可見橋樑與市區"],"trap":"與巴黎聖母院：巴黎聖母院是兩座平頂方塔、輪廓整齊、淺黃石；科隆的雙塔是尖頂、高約 157 公尺、通體深灰砂岩。","fact":"1248 年奠基、1880 年才完工，前後跨越六百餘年；雙塔高約 157 公尺，1996 年列入世界遺產。","wrong":["巴黎聖母院","米蘭大教堂","聖家堂"],"source":"03-照片/世界/欧洲/德国/科隆大教堂/科隆大教堂-01-莱茵河畔全景.jpg","photo":"科隆大教堂-01-莱茵河畔全景","nf":"科隆大教堂","conf":[],"twin":["118_p118"]},{"key":"118_p118","name":"科隆大教堂","en":"Cologne Cathedral","place":"德國 科隆","region":"歐洲","features":["夜間泛光燈由下往上打，把整面砂岩立面照成暖黃，尖塔與飛扶壁的輪廓更清楚","教堂前廣場擠滿人，樹木與路燈在暖光裡成剪影，地面反著光","體量在夜色中顯得更陡更高，塔尖隱入暗天空"],"trap":"與米蘭大教堂夜景：米蘭是白色大理石，打燈後通體泛白、屋頂滿是小尖塔；這裡是深灰砂岩，泛光成暖黃，只有兩座巨塔。","fact":"科隆大教堂在二戰中遭多次空襲，塔身受損但主體未倒，戰後修復持續數十年。","wrong":["米蘭大教堂","巴黎聖母院","滴血救世主教堂"],"source":"03-照片/世界/欧洲/德国/科隆大教堂/科隆大教堂-02-夜景.jpg","photo":"科隆大教堂-02-夜景","nf":"科隆大教堂","conf":[],"twin":["117_p117"]},{"key":"119_p119","name":"米兰大教堂","en":"Milan Cathedral","place":"義大利 米蘭","region":"歐洲","features":["整面白色大理石立面，佈滿向上收的尖塔與尖拱，屋頂像一片立滿尖刺的石林","立面分成多層：底層門洞、中層雕像龕與細長尖拱窗、上層密集小尖塔，每座塔頂立雕像","石面泛淺灰白，與周圍米黃、赭紅的街屋形成明顯色差"],"trap":"與科隆大教堂：科隆是深灰砂岩、只有兩座高約 157 公尺的巨塔；米蘭是白色大理石、屋頂滿佈上百座小尖塔（塔群矮而密）。","fact":"1386 年奠基，建造延續近六個世紀；屋頂約有 135 座小尖塔，最高處立鍍金聖母像（Madonnina）。","wrong":["科隆大教堂","巴黎聖母院","聖家堂"],"source":"03-照片/世界/欧洲/意大利/米兰大教堂/米兰大教堂-01-正立面.jpg","photo":"米兰大教堂-01-正立面","nf":"米兰大教堂","conf":[],"twin":["120_p120"]},{"key":"120_p120","name":"米兰大教堂","en":"Milan Cathedral","place":"義大利 米蘭","region":"歐洲","features":["一對厚重青銅門，門扇分成多格浮雕，題材是聖經故事與米蘭史事","門外框是白色大理石雕出的多層線腳、卷草與人物浮雕，拱肩上有天使與聖徒","石面亮白、銅面暗綠，材質對比強烈，浮雕凹處積著歲月污痕"],"trap":"與滴血救世主教堂的馬賽克：那邊是金底玻璃鑲嵌畫、貼在牆面；這裡是青銅鑄造的門扇浮雕，外框為白色大理石。","fact":"米蘭大教堂立面底層並排五扇青銅門，中門最大；門上浮雕由多位 20 世紀雕塑家完成。","wrong":["科隆大教堂","巴黎聖母院","滴血救世主教堂"],"source":"03-照片/世界/欧洲/意大利/米兰大教堂/米兰大教堂-02-大门特写.jpg","photo":"米兰大教堂-02-大门特写","nf":"米兰大教堂","conf":[],"twin":["119_p119"]},{"key":"121_p121","name":"烏尤尼鹽沼","en":"Salar de Uyuni","place":"玻利維亞","region":"美洲","features":["地面是一層薄水，水面靜得沒有一絲波紋，遠處一座赭紅岩丘與天空各自投下完整倒影","上下兩半幾乎完全對稱，地平線只剩一條細細的分界","畫面幾乎只有藍、白、赭三色，天空由橙黃漸層過渡到淡藍"],"trap":"與青海茶卡鹽湖：茶卡規模小得多，四周有山體、棧道與鹽雕等人工設施；這裡是沒有任何遮擋的大平原，倒影裡看不到邊界。","fact":"烏尤尼鹽沼面積約 10,582 平方公里，是世界最大鹽沼；雨季（約 12 月至次年 3 月）薄水覆蓋鹽殼才形成鏡面。","wrong":["青海茶卡鹽湖","死海","聖托里尼"],"source":"03-照片/世界/美洲/玻利维亚/乌尤尼盐沼/乌尤尼盐沼-03-天空之镜盐层.jpg","photo":"乌尤尼盐沼-03-天空之镜盐层","nf":"乌尤尼盐沼","yt":{"id":"UO6vTsS89_E","t":"Understanding the World's Biggest Mirror: The GEOLOGY of SALAR DE UYUNI Bolivia EXPLAINED","ch":"Maria Baias","u":"https://www.youtube.com/watch?v=UO6vTsS89_E"},"conf":[],"twin":["73_uyuni","74_uyuni_close"]},{"key":"122_p122","name":"阿布辛贝神殿","en":"Abu Simbel","place":"埃及 亞斯文","region":"非洲","features":["整面砂岩崖壁鑿成神廟立面，正中開一道門洞，兩側各兩尊約 20 公尺高的坐像","巨像戴雙王冠、雙手平放膝上，左側一尊上半身早已崩缺，是辨認這座神廟的細節","門洞正上方是一排小龕與鷹首神浮雕，崖頂天際線平直，周圍全是沙漠"],"trap":"與佩特拉：佩特拉是納巴泰人在玫瑰色岩壁上鑿出的柱廊立面（如卡茲尼），有柱式與山花；阿布辛貝是古埃及神廟，立面是四尊坐像夾一門洞。","fact":"由拉美西斯二世約於公元前 13 世紀開鑿；1960 年代因亞斯文高壩水位上升，整座神廟被切割編號、向上遷移重建。","wrong":["佩特拉","吉薩金字塔群","吳哥窟"],"source":"03-照片/世界/非洲/埃及/阿布辛贝神殿/阿布辛贝神殿-01-外观巨像.jpg","photo":"阿布辛贝神殿-01-外观巨像","nf":"阿布辛贝神殿","conf":[],"twin":["123_p123"]},{"key":"123_p123","name":"阿布辛贝神殿","en":"Abu Simbel","place":"埃及 亞斯文","region":"非洲","features":["鑿進山體的長方形殿堂，兩側是方柱，柱面與牆面滿刻凹浮雕與象形文字","盡頭聖壇並列四尊坐像，三尊被光打到、最右一尊長年在陰影裡","室內只靠門口與側室透光，岩壁呈暖赭色，地面鋪木板供人行走"],"trap":"與卡納克、盧克索等地面神廟：那些是石砌多柱廳、在平地上建造；阿布辛貝整座鑿入山體，牆與柱都是原岩刻成。","fact":"每年 2 月 22 日與 10 月 22 日（「太陽節」）晨光直射內殿，依次照亮三尊神像，唯冥神普塔長年在陰影中。","wrong":["佩特拉","卡納克神廟","吳哥窟"],"source":"03-照片/世界/非洲/埃及/阿布辛贝神殿/阿布辛贝神殿-02-内部殿堂.jpg","photo":"阿布辛贝神殿-02-内部殿堂","nf":"阿布辛贝神殿","conf":[],"twin":["122_p122"]},{"key":"124_p124","name":"少林寺常住院","en":"Shaolin Temple","place":"中國 河南 登封","region":"亞洲","features":["面闊七間的紅牆大殿，單簷歇山頂鋪綠色琉璃瓦，正脊與垂脊上有脊獸","簷下一層層斗拱，額枋與拱眼壁施青綠彩畫，明間開隔扇門","殿前是白石台基與月台，遊人站在階下，可見殿身尺度"],"trap":"與少林寺塔林：塔林在常住院西側約三百公尺的叢林裡，是一片磚石墓塔；常住院是香火殿堂的中軸建築群，看到紅牆綠瓦大殿就是常住院。","fact":"少林寺建於北魏太和十九年（495），常住院沿中軸線七進院落，大雄寶殿是全寺正殿。","wrong":["少林寺塔林","白馬寺","大昭寺"],"source":"03-照片/中国/华中/河南/少林寺常住院/少林寺常住院-01-大雄宝殿.jpg","photo":"少林寺常住院-01-大雄宝殿","nf":"少林寺常住院","conf":[],"twin":["125_p125"]},{"key":"125_p125","name":"少林寺常住院","en":"Shaolin Temple","place":"中國 河南 登封","region":"亞洲","features":["重簷樓閣式鐘樓立在磚石高臺上，下層砌磚、上層木構，屋頂鋪灰瓦","樓閣四周被高大古銀杏環抱，秋日滿樹金黃，與紅牆灰瓦形成強烈對比","屋脊與翼角起翹，簷下斗拱彩畫清楚，鐘樓與兩側配殿連成院落"],"trap":"與白馬寺：白馬寺在洛陽、以齊雲塔為標誌；少林寺在登封嵩山，標誌是中軸七進院落與兩側鐘鼓樓，秋日古銀杏是最常入鏡的景象。","fact":"鐘樓與鼓樓分立山門內東西兩側，是漢地寺院「伽藍七堂」的固定配置；少林寺建於北魏太和十九年（495）。","wrong":["少林寺塔林","白馬寺","嵩岳寺塔"],"source":"03-照片/中国/华中/河南/少林寺常住院/少林寺常住院-02-钟楼银杏.jpg","photo":"少林寺常住院-02-钟楼银杏","nf":"少林寺常住院","conf":[],"twin":["124_p124"]}];
+
+var PHOTOS = window.PHOTO_SRC || {};
+var NOTES = window.NOTE_DATA || {};
+var YTTHUMB = window.YT_THUMB || {};
+
+var STORE = "dzj_record_v1";
+var S = {mode:"timed", order:[], idx:0, score:0, phase:"photo", opts:[], sel:-1, log:[], timer:null, left:0, startedAt:0};
+
+var $ = function(id){ return document.getElementById(id); };
+function showView(name){
+  ["cover","quiz","result","deck"].forEach(function(v){
+    $("view-" + v).hidden = (v !== name);
+  });
+  window.scrollTo({top:0, behavior:"auto"});
+}
+function shuffled(a){
+  var b = a.slice();
+  for (var i = b.length - 1; i > 0; i--){
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = b[i]; b[i] = b[j]; b[j] = t;
+  }
+  return b;
+}
+function pad2(n){ return (n < 10 ? "0" : "") + n; }
+function fmtTime(ms){
+  var s = Math.round(ms / 1000);
+  var m = Math.floor(s / 60);
+  var r = s % 60;
+  return (m > 0 ? m + " 分 " : "") + r + " 秒";
+}
+
+/* ---------- 封面 ---------- */
+var pendingMode = "timed";
+Array.prototype.forEach.call(document.querySelectorAll(".mode"), function(b){
+  b.addEventListener("click", function(){
+    pendingMode = b.getAttribute("data-mode");
+    Array.prototype.forEach.call(document.querySelectorAll(".mode"), function(x){
+      x.setAttribute("aria-pressed", x === b ? "true" : "false");
+    });
+  });
+});
+
+/* ---------- 錯題紀錄（存本機，跨局累積） ---------- */
+function loadRec(){
+  try { return JSON.parse(localStorage.getItem(STORE) || "{}") || {}; } catch(e){ return {}; }
+}
+function saveRec(r){
+  try { localStorage.setItem(STORE, JSON.stringify(r)); } catch(e){}
+}
+var REC = loadRec();
+
+/* 打錯一次就進優先隊列；連對兩次才移出（代表真的記住了） */
+function markAnswer(key, ok){
+  var r = REC[key] || {w:0, c:0};
+  if (ok){
+    r.c = (r.c || 0) + 1;
+    if (r.c >= 2) r.w = 0;
+  } else {
+    r.w = (r.w || 0) + 1;
+    r.c = 0;
+  }
+  REC[key] = r;
+  saveRec(REC);
+  refreshReview();
+}
+function dueCount(){
+  var n = 0;
+  CASES.forEach(function(c){ if (REC[c.key] && REC[c.key].w > 0) n++; });
+  return n;
+}
+function refreshReview(){
+  var b = $("btn-review");
+  if (!b) return;
+  var n = dueCount();
+  b.hidden = n === 0;
+  b.innerHTML = "先練做錯過的　<b>" + n + "</b> 張";
+}
+
+/* ---------- 出題順序：隨機，做錯過的排在最前 ---------- */
+function buildOrder(onlyKeys){
+  var i, idxOf = {};
+  CASES.forEach(function(c, k){ idxOf[c.key] = k; });
+  if (onlyKeys && onlyKeys.length){
+    var picked = [];
+    onlyKeys.forEach(function(k){ if (idxOf[k] !== undefined) picked.push(idxOf[k]); });
+    return shuffled(picked);
+  }
+  var due = [], rest = [];
+  CASES.forEach(function(c, k){
+    var r = REC[c.key];
+    (r && r.w > 0 ? due : rest).push(k);
+  });
+  return shuffled(due).concat(shuffled(rest));
+}
+
+/* ---------- 問答 ---------- */
+document.querySelectorAll("[data-cover]").forEach(function(img){
+  img.src = PHOTOS[img.getAttribute("data-cover")] || "";
+});
+
+$("btn-start").addEventListener("click", function(){ startGame(pendingMode, null); });
+$("btn-review").addEventListener("click", function(){
+  var keys = CASES.filter(function(c){ return REC[c.key] && REC[c.key].w > 0; })
+                  .map(function(c){ return c.key; });
+  if (keys.length) startGame("practice", keys);
+});
+
+/* ---------- 遊戲 ---------- */
+function startGame(mode, onlyKeys){
+  S.mode = mode;
+  S.order = buildOrder(onlyKeys);
+  S.idx = 0; S.score = 0; S.log = []; S.phase = "photo"; S.sel = -1;
+  S.startedAt = Date.now();
+  stopTimer();
+  showView("quiz");
+  $("q-total").textContent = S.order.length;
+  $("q-mode-label").textContent = (mode === "timed" ? "計時賽 · 每題 20 秒" : "練習場 · 不限時");
+  renderQuiz();
+}
+
+function currentCase(){ return CASES[S.order[S.idx]]; }
+
+/* ---------- 易混淆景點：從任一題直接跳去那一題 ---------- */
+function caseIndexByKey(key){
+  for (var i = 0; i < CASES.length; i++){ if (CASES[i].key === key) return i; }
+  return -1;
+}
+function confuseRow(c, title){
+  if (!c || !c.conf || !c.conf.length) return null;
+  return keyRow(c.conf, title || "容易混淆 · 直接跳去做這幾題");
+}
+function twinRow(c){
+  if (!c || !c.twin || !c.twin.length) return null;
+  return keyRow(c.twin, "同一處的另一張 · 換個角度再認一次");
+}
+function keyRow(keys, title){
+  var wrap = document.createElement("div");
+  wrap.className = "nxwrap";
+  var h = document.createElement("p");
+  h.className = "nxh";
+  h.textContent = title;
+  wrap.appendChild(h);
+  var list = document.createElement("div");
+  list.className = "nxlist";
+  keys.forEach(function(key){
+    var i = caseIndexByKey(key);
+    if (i < 0) return;
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "nxbtn";
+    b.textContent = CASES[i].name;
+    var a = document.createElement("span");
+    a.className = "arw";
+    a.textContent = "→";
+    b.appendChild(a);
+    b.addEventListener("click", function(){ jumpToCase(key); });
+    list.appendChild(b);
+  });
+  if (!list.children.length) return null;
+  wrap.appendChild(list);
+  return wrap;
+}
+function jumpToCase(key){
+  var t = caseIndexByKey(key);
+  if (t < 0) return;
+  closeNote();
+  var inRun = !$("view-quiz").hidden && S.order.length > 0;
+  if (inRun){
+    /* 已在局中：插在當前題之後，立刻切過去；原來的下一題順延 */
+    for (var i = S.order.length - 1; i > S.idx; i--){
+      if (S.order[i] === t) S.order.splice(i, 1);
+    }
+    S.order.splice(S.idx + 1, 0, t);
+    S.idx = S.idx + 1;
+    S.phase = "photo"; S.sel = -1;
+    $("q-total").textContent = S.order.length;
+    if (S.mode === "timed") stopTimer();
+    renderQuiz();
+  } else {
+    stopTimer();
+    S.order = [t]; S.idx = 0; S.score = 0; S.log = [];
+    S.phase = "photo"; S.sel = -1; S.startedAt = Date.now();
+    showView("quiz");
+    $("q-total").textContent = 1;
+    $("q-mode-label").textContent = (S.mode === "timed" ? "計時賽 · 每題 20 秒" : "練習場 · 不限時");
+    renderQuiz();
+  }
+  toast("已跳到「" + CASES[t].name + "」");
+}
+
+/* ---------- 筆記浮層：點照片看對應筆記 ---------- */
+var veil = $("noteveil"), noteBox = $("notebox"), lastFocus = null;
+var toastEl = $("toast"), toastTimer = null;
+function toast(msg){
+  toastEl.textContent = msg;
+  toastEl.classList.add("on");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ toastEl.classList.remove("on"); }, 2200);
+}
+function noteOf(c){ return (c && c.nf && NOTES[c.nf]) ? NOTES[c.nf] : null; }
+
+/* 地圖鏈接：座標來自筆記 frontmatter 的 coords（WGS84） */
+function mapLinksFor(c){
+  var m = META[c.key] || {};
+  var co = m.c;
+  if (!co || co.length < 2) return null;
+  var lat = co[0], lon = co[1];
+  var nm = encodeURIComponent(c.name);
+  var rows = [
+    ["Google Maps", "https://www.google.com/maps/search/?api=1&query=" + lat + "," + lon],
+    ["高德地圖", "https://uri.amap.com/marker?position=" + lon + "," + lat +
+                 "&name=" + nm + "&coordinate=wgs84&callnative=1"],
+    ["OpenStreetMap", "https://www.openstreetmap.org/?mlat=" + lat + "&mlon=" + lon +
+                      "#map=15/" + lat + "/" + lon]
+  ];
+  var wrap = document.createElement("p");
+  wrap.className = "nmap";
+  var lab = document.createElement("span");
+  lab.className = "nmap-lab";
+  lab.textContent = "在地圖上看";
+  wrap.appendChild(lab);
+  rows.forEach(function(r){
+    var a = document.createElement("a");
+    a.href = r[1];
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    a.textContent = r[0];
+    wrap.appendChild(a);
+  });
+  var pos = document.createElement("span");
+  pos.className = "nmap-pos";
+  pos.textContent = lat + ", " + lon;
+  wrap.appendChild(pos);
+  return wrap;
+}
+
+function openNote(c){
+  var n = noteOf(c);
+  if (!n){ toast("這一張還沒有對應筆記"); return; }
+  noteBox.innerHTML = "";
+
+  var close = document.createElement("button");
+  close.type = "button";
+  close.className = "note-close";
+  close.setAttribute("aria-label", "關閉筆記");
+  close.textContent = "×";
+  close.addEventListener("click", closeNote);
+  noteBox.appendChild(close);
+
+  var pic = document.createElement("div");
+  pic.className = "noteimg";
+  var im = document.createElement("img");
+  im.src = PHOTOS[c.key] || "";
+  im.alt = n.t + " 實景";
+  pic.appendChild(im);
+  noteBox.appendChild(pic);
+
+  var body = document.createElement("div");
+  body.className = "notebody";
+
+  var kick = document.createElement("p");
+  kick.className = "kicker2";
+  kick.textContent = "筆記 · 原文簡體 · " + c.place;
+  body.appendChild(kick);
+
+  var h = document.createElement("h2");
+  h.id = "note-title";
+  h.textContent = c.name;
+  body.appendChild(h);
+
+  var p = document.createElement("p");
+  p.className = "np";
+  p.textContent = n.p;
+  body.appendChild(p);
+
+  if (n.l){
+    var lead = document.createElement("p");
+    lead.className = "nl";
+    lead.textContent = n.l;
+    body.appendChild(lead);
+  }
+
+  var maps = mapLinksFor(c);
+  if (maps) body.appendChild(maps);
+  [["識別要點", n.k], ["易混淆", n.m], ["辨認提示", n.y]].forEach(function(pair){
+    if (!pair[1] || !pair[1].length) return;
+    var kh = document.createElement("p");
+    kh.className = "nk";
+    kh.textContent = pair[0];
+    body.appendChild(kh);
+    var ul = document.createElement("ul");
+    pair[1].forEach(function(t){
+      var li = document.createElement("li");
+      var sp = document.createElement("span");
+      sp.textContent = t;
+      li.appendChild(sp);
+      ul.appendChild(li);
+    });
+    body.appendChild(ul);
+  });
+
+  var nx = confuseRow(c, "容易混淆 · 點一下跳去做那一題");
+  if (nx) body.appendChild(nx);
+  var tw = twinRow(c);
+  if (tw) body.appendChild(tw);
+
+  var foot = document.createElement("div");
+  foot.className = "nfoot";
+  var b = document.createElement("button");
+  b.type = "button";
+  b.className = "nbtn";
+  b.textContent = "回去作答";
+  b.addEventListener("click", closeNote);
+  foot.appendChild(b);
+  body.appendChild(foot);
+
+  noteBox.appendChild(body);
+
+  lastFocus = document.activeElement;
+  veil.hidden = false;
+  document.body.style.overflow = "hidden";
+  close.focus();
+}
+function closeNote(){
+  veil.hidden = true;
+  document.body.style.overflow = "";
+  if (lastFocus && lastFocus.focus) lastFocus.focus();
+}
+veil.addEventListener("click", function(e){ if (e.target === veil) closeNote(); });
+
+/* 答題頁的圖：計時賽要作答完才准看，練習場隨時可看 */
+$("q-img").addEventListener("click", function(){
+  var c = currentCase();
+  if (!c) return;
+  if (S.mode === "timed" && S.phase !== "card"){
+    toast("計時賽先作答，答完再打開筆記");
+    return;
+  }
+  openNote(c);
+});
+
+
+function renderQuiz(){
+  var c = currentCase();
+  $("q-idx").textContent = S.idx + 1;
+  $("q-score").textContent = S.score;
+  $("q-img").src = PHOTOS[c.key] || "";
+  $("q-img").alt = "第 " + (S.idx + 1) + " 張待辨識的地標照片";
+  $("q-no").textContent = "NO. " + pad2(S.order[S.idx] + 1);
+  $("hint-slot").hidden = true;
+  $("hint-text").textContent = "";
+  $("btn-hint").textContent = "看提示";
+  renderDots();
+  renderPanel();
+}
+
+function renderDots(){
+  var wrap = $("q-dots");
+  wrap.innerHTML = "";
+  for (var i = 0; i < S.order.length; i++){
+    var d = document.createElement("span");
+    d.className = "dot";
+    var rec = null;
+    for (var k = 0; k < S.log.length; k++){ if (S.log[k].slot === i) rec = S.log[k]; }
+    if (rec) d.className = "dot " + (rec.ok ? "good" : "bad");
+    else if (i === S.idx) d.className = "dot now";
+    wrap.appendChild(d);
+  }
+}
+
+function renderPanel(){
+  var c = currentCase();
+  var panel = $("panel");
+  panel.innerHTML = "";
+
+  if (S.phase === "photo"){
+    var box = document.createElement("div");
+    box.className = "reveal-bar";
+    var p = document.createElement("p");
+    p.textContent = "先只看照片。判斷好之後，再讓四個候選地名出現。";
+    var btn = document.createElement("button");
+    btn.className = "btn";
+    btn.type = "button";
+    btn.textContent = "揭開選項";
+    btn.addEventListener("click", revealOptions);
+    box.appendChild(p); box.appendChild(btn);
+    panel.appendChild(box);
+    return;
+  }
+
+  /* 提示與計時 */
+  if (S.phase === "options" && S.mode === "timed"){
+    var tw = document.createElement("div");
+    tw.className = "timerwrap";
+    var bar = document.createElement("span");
+    bar.id = "timer-bar";
+    tw.appendChild(bar);
+    panel.appendChild(tw);
+    var tn = document.createElement("div");
+    tn.className = "timer-num";
+    tn.id = "timer-num";
+    tn.textContent = "剩餘 " + S.left.toFixed(1) + " 秒";
+    panel.appendChild(tn);
+  }
+
+  var prompt = document.createElement("p");
+  prompt.className = "prompt";
+  prompt.innerHTML = "這是哪一處地標？　<strong>選一個</strong>";
+  panel.appendChild(prompt);
+
+  var grid = document.createElement("div");
+  grid.className = "options";
+  var answered = S.phase === "card";
+
+  S.opts.forEach(function(name, i){
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "opt";
+    b.style.animationDelay = (i * 55) + "ms";
+    var key = document.createElement("span");
+    key.className = "key";
+    key.textContent = "ABCD".charAt(i);
+    var nm = document.createElement("span");
+    nm.className = "name";
+    nm.textContent = name;
+    b.appendChild(key); b.appendChild(nm);
+    if (answered){
+      b.disabled = true;
+      if (name === c.name) b.classList.add("correct");
+      else if (i === S.sel) b.classList.add("wrong");
+      else b.classList.add("faded");
+    } else {
+      b.addEventListener("click", function(){ answer(i); });
+    }
+    grid.appendChild(b);
+  });
+  panel.appendChild(grid);
+
+  if (S.phase === "card") panel.appendChild(buildCard(c));
+}
+
+function ytBlockEl(c){
+  if (!c || !c.yt) return null;
+  var wrap = document.createElement("div");
+  wrap.className = "ytvid";
+
+  var a = document.createElement("a");
+  a.href = c.yt.u;
+  a.target = "_blank";
+  a.rel = "noopener noreferrer";
+  a.title = "在 YouTube 上播放：" + (c.yt.t || c.name) + "（英文講解）";
+
+  var img = document.createElement("img");
+  img.src = YTTHUMB[c.yt.id] || "";
+  img.alt = "英文影片縮圖：" + (c.yt.t || c.name);
+  img.loading = "lazy";
+  a.appendChild(img);
+
+  var cap = document.createElement("p");
+  cap.className = "ytcap";
+  var badge = document.createElement("span");
+  badge.className = "ytbadge";
+  badge.textContent = "▶ 英文影片";
+  var tx = document.createElement("span");
+  tx.textContent = (c.yt.t || "影片") + (c.yt.ch ? " · " + c.yt.ch : "");
+  cap.appendChild(badge);
+  cap.appendChild(tx);
+
+  wrap.appendChild(a);
+  wrap.appendChild(cap);
+  return wrap;
+}
+
+function buildCard(c){
+  var hit = S.opts[S.sel] === c.name;
+  var card = document.createElement("article");
+  card.className = "idcard";
+
+  var stamp = document.createElement("div");
+  stamp.className = "stamp " + (hit ? "hit" : "miss");
+  stamp.textContent = hit ? "正解" : "誤判";
+  card.appendChild(stamp);
+
+  var h = document.createElement("h2");
+  h.textContent = c.name;
+  card.appendChild(h);
+
+  var sub = document.createElement("p");
+  sub.className = "sub";
+  sub.textContent = c.en + " · " + c.place;
+  card.appendChild(sub);
+
+  var ul = document.createElement("ul");
+  ul.className = "feat";
+  c.features.forEach(function(f){
+    var li = document.createElement("li");
+    var t = document.createElement("span");
+    t.textContent = f;
+    li.appendChild(t);
+    ul.appendChild(li);
+  });
+  card.appendChild(ul);
+
+  var ytv = ytBlockEl(c);
+  if (ytv) card.appendChild(ytv);
+
+  var foot = document.createElement("div");
+  foot.className = "foot";
+  [["易混淆", c.trap], ["冷知識", c.fact]].forEach(function(pair){
+    var p = document.createElement("p");
+    var k = document.createElement("span");
+    k.className = "k";
+    k.textContent = pair[0];
+    var t = document.createElement("span");
+    t.textContent = pair[1];
+    p.appendChild(k); p.appendChild(t);
+    foot.appendChild(p);
+  });
+  card.appendChild(foot);
+
+  var nxc = confuseRow(c, "容易混淆 · 直接跳去做這幾題");
+  if (nxc) card.appendChild(nxc);
+  var nxt = twinRow(c);
+  if (nxt) card.appendChild(nxt);
+
+  var next = document.createElement("button");
+  next.type = "button";
+  next.className = "next";
+  next.textContent = (S.idx + 1 >= S.order.length) ? "看成績" : "下一張";
+  next.addEventListener("click", nextCase);
+  card.appendChild(next);
+
+  if (noteOf(c)){
+    var nb = document.createElement("button");
+    nb.type = "button";
+    nb.className = "next";
+    nb.style.marginTop = "8px";
+    nb.style.background = "transparent";
+    nb.style.color = "#171310";
+    nb.style.borderColor = "rgba(23,19,16,.5)";
+    nb.textContent = "看這張的筆記";
+    nb.addEventListener("click", function(){ openNote(c); });
+    card.appendChild(nb);
+  }
+  return card;
+}
+
+function revealOptions(){
+  if (S.phase !== "photo") return;
+  var c = currentCase();
+  S.opts = shuffled(shuffled([c.name].concat(c.wrong)));
+  S.phase = "options";
+  S.sel = -1;
+  renderPanel();
+  if (S.mode === "timed") startTimer();
+}
+
+function answer(idx){
+  if (S.phase !== "options") return;
+  stopTimer();
+  var c = currentCase();
+  S.sel = idx;
+  var picked = S.opts[idx];
+  var ok = picked === c.name;
+  if (ok) S.score += 1;
+  S.log.push({slot:S.idx, key:c.key, ok:ok, picked:picked, answer:c.name, ms:Date.now() - (S.qStart || Date.now())});
+  markAnswer(c.key, ok);
+  S.phase = "card";
+  renderDots();
+  $("q-score").textContent = S.score;
+  renderPanel();
+  var card = $("panel").querySelector(".idcard");
+  if (card && window.innerWidth < 1000) card.scrollIntoView({behavior:"smooth", block:"nearest"});
+}
+
+function nextCase(){
+  if (S.idx + 1 >= S.order.length){ finish(); return; }
+  S.idx += 1;
+  S.phase = "photo"; S.sel = -1;
+  renderQuiz();
+}
+
+/* ---------- 計時 ---------- */
+function startTimer(){
+  S.left = 20.0;
+  S.qStart = Date.now();
+  stopTimer();
+  S.timer = setInterval(function(){
+    S.left -= 0.1;
+    var bar = $("timer-bar"), num = $("timer-num");
+    if (!bar) { stopTimer(); return; }
+    var pct = Math.max(0, S.left / 20) * 100;
+    bar.style.width = pct + "%";
+    if (S.left <= 6) bar.parentElement.classList.add("warn");
+    num.textContent = "剩餘 " + Math.max(0, S.left).toFixed(1) + " 秒";
+    if (S.left <= 0){
+      stopTimer();
+      S.sel = -1;
+      var c = currentCase();
+      S.log.push({slot:S.idx, key:c.key, ok:false, picked:"逾時未答", answer:c.name, ms:20000});
+      S.phase = "card";
+      renderDots();
+      renderPanel();
+    }
+  }, 100);
+}
+function stopTimer(){ if (S.timer){ clearInterval(S.timer); S.timer = null; } }
+
+/* ---------- 成績 ---------- */
+function finish(){
+  stopTimer();
+  var total = S.order.length;
+  var right = S.log.filter(function(r){ return r.ok; }).length;
+  var used = Date.now() - S.startedAt;
+  var body = $("result-body");
+  body.innerHTML = "";
+
+  var kicker = document.createElement("p");
+  kicker.className = "kicker";
+  kicker.textContent = "鑑定完畢";
+  body.appendChild(kicker);
+
+  var h1 = document.createElement("h1");
+  var pct = Math.round(right / total * 100);
+  h1.textContent = (pct >= 90 ? "幾乎每一張都認得。" :
+                    pct >= 70 ? "眼力不錯，只剩幾處細節。" :
+                    pct >= 50 ? "認得一半，山的形狀還要再記。" :
+                    "這批片子，值得再看一輪。");
+  body.appendChild(h1);
+
+  var line = document.createElement("div");
+  line.className = "scoreline";
+  var big = document.createElement("span");
+  big.className = "big";
+  big.textContent = right;
+  var of = document.createElement("span");
+  of.className = "of";
+  of.textContent = "/ " + total + " 張命中";
+  line.appendChild(big); line.appendChild(of);
+  body.appendChild(line);
+
+  var stats = document.createElement("div");
+  stats.className = "stats";
+  [["準確率", pct + "%"], ["總用時", fmtTime(used)],
+   ["平均每題", fmtTime(used / total)], ["賽制", S.mode === "timed" ? "計時賽" : "練習場"]].forEach(function(p){
+    var s = document.createElement("div");
+    s.className = "stat";
+    var k = document.createElement("p"); k.className = "k"; k.textContent = p[0];
+    var v = document.createElement("p"); v.className = "v"; v.textContent = p[1];
+    s.appendChild(k); s.appendChild(v);
+    stats.appendChild(s);
+  });
+  body.appendChild(stats);
+
+  var misses = S.log.filter(function(r){ return !r.ok; });
+  if (misses.length){
+    var mh = document.createElement("h3");
+    mh.textContent = "沒認出來的 " + misses.length + " 張";
+    body.appendChild(mh);
+    var list = document.createElement("div");
+    list.className = "misses";
+    misses.forEach(function(r){
+      var idx = CASES.findIndex(function(c){ return c.key === r.key; });
+      var c = CASES[idx];
+      var row = document.createElement("div");
+      row.className = "miss-row";
+      var img = document.createElement("img");
+      img.src = PHOTOS[c.key] || "";
+      img.alt = c.name;
+      img.addEventListener("click", function(){ openNote(c); });
+      var nm = document.createElement("div");
+      nm.className = "nm";
+      nm.textContent = c.name;
+      var sm = document.createElement("small");
+      sm.textContent = c.en + " · " + c.place;
+      nm.appendChild(sm);
+      var mine = document.createElement("div");
+      mine.className = "mine";
+      mine.textContent = "你選了 " + r.picked;
+      row.appendChild(img); row.appendChild(nm); row.appendChild(mine);
+      list.appendChild(row);
+    });
+    list.insertBefore(mh, list.firstChild);
+    body.appendChild(list);
+  }
+
+  var acts = document.createElement("div");
+  acts.className = "result-actions";
+  var a1 = document.createElement("button");
+  a1.type = "button"; a1.className = "btn"; a1.textContent = "再來一輪";
+  a1.addEventListener("click", function(){ startGame(S.mode, null); });
+  var wrongIdx = misses.map(function(r){ return CASES.findIndex(function(c){ return c.key === r.key; }); });
+  var a2 = document.createElement("button");
+  a2.type = "button"; a2.className = "btn ghost"; a2.textContent = "只練錯的 " + wrongIdx.length + " 張";
+  a2.disabled = wrongIdx.length === 0;
+  a2.addEventListener("click", function(){ if (wrongIdx.length) startGame("practice", wrongIdx); });
+  var a3 = document.createElement("button");
+  a3.type = "button"; a3.className = "btn ghost"; a3.textContent = "打開卡冊";
+  a3.addEventListener("click", function(){ renderDeck(); showView("deck"); });
+  acts.appendChild(a1); acts.appendChild(a2); acts.appendChild(a3);
+  if (dueCount() > 0){
+    var a4 = document.createElement("button");
+    a4.type = "button"; a4.className = "btn ghost";
+    a4.textContent = "清空錯題紀錄";
+    a4.addEventListener("click", function(){
+      if (!window.confirm("清空本機記錄的 " + dueCount() + " 張錯題？清空後下一局不再優先出它們。")) return;
+      REC = {};
+      saveRec(REC);
+      refreshReview();
+      a4.remove();
+      toast("錯題紀錄已清空");
+    });
+    acts.appendChild(a4);
+  }
+  body.appendChild(acts);
+
+  showView("result");
+}
+
+/* ---------- 卡冊 ---------- */
+var META = window.CASE_META || {};
+var deckState = { q: "", r: "", t: "", d: "", mode: "cards" };
+
+function metaOf(c){ return META[c.key] || {}; }
+
+function deckFiltered(){
+  var q = deckState.q.trim().toLowerCase();
+  return CASES.map(function(c, i){ return { c: c, i: i }; }).filter(function(e){
+    var m = metaOf(e.c);
+    if (deckState.r && m.r !== deckState.r) return false;
+    if (deckState.t && m.t !== deckState.t) return false;
+    if (deckState.d && m.d !== deckState.d) return false;
+    if (!q) return true;
+    return (e.c.name + " " + (e.c.en || "") + " " + (e.c.place || "")).toLowerCase().indexOf(q) >= 0;
+  });
+}
+
+function buildFilters(){
+  var host = $("deck-filters");
+  if (host.childElementCount) return;
+  function countsOf(pick){
+    var m = {};
+    CASES.forEach(function(c){ var v = pick(metaOf(c)); if (v) m[v] = (m[v] || 0) + 1; });
+    return m;
+  }
+  var groups = [
+    { key: "r", label: "地區", m: countsOf(function(x){ return x.r; }) },
+    { key: "t", label: "形制", m: countsOf(function(x){ return x.t; }) },
+    { key: "d", label: "朝代", m: countsOf(function(x){ return x.d; }) }
+  ];
+  groups.forEach(function(g){
+    var names = Object.keys(g.m).sort(function(a, b){ return a.localeCompare(b, "zh-Hant"); });
+    if (!names.length) return;
+    var wrap = document.createElement("div");
+    wrap.className = "fgroup";
+    var lab = document.createElement("span");
+    lab.className = "flabel";
+    lab.textContent = g.label;
+    wrap.appendChild(lab);
+    function mkChip(val, text, num){
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "chip";
+      b.dataset.g = g.key;
+      b.dataset.v = val;
+      b.setAttribute("aria-pressed", deckState[g.key] === val ? "true" : "false");
+      b.appendChild(document.createTextNode(text));
+      if (num != null){
+        var s = document.createElement("span");
+        s.className = "n";
+        s.textContent = num;
+        b.appendChild(s);
+      }
+      wrap.appendChild(b);
+    }
+    mkChip("", "全部");
+    names.forEach(function(n){ mkChip(n, n, g.m[n]); });
+    host.appendChild(wrap);
+  });
+  host.addEventListener("click", function(ev){
+    var b = ev.target.closest ? ev.target.closest(".chip") : null;
+    if (!b) return;
+    deckState[b.dataset.g] = b.dataset.v;
+    [].forEach.call(host.querySelectorAll('.chip[data-g="' + b.dataset.g + '"]'), function(x){
+      x.setAttribute("aria-pressed", x === b ? "true" : "false");
+    });
+    renderDeck();
+  });
+}
+
+function paintFilterBtn(){
+  var n = (deckState.r ? 1 : 0) + (deckState.t ? 1 : 0) + (deckState.d ? 1 : 0);
+  var b = $("deck-filter-btn");
+  b.textContent = n ? "篩選 · " + n : "篩選";
+  b.setAttribute("aria-pressed", n ? "true" : "false");
+}
+
+function closePop(){
+  var pop = $("deck-pop");
+  if (!pop) return;
+  pop.hidden = true;
+  $("deck-filter-btn").setAttribute("aria-expanded", "false");
+}
+
+function paintDeckCount(){
+  var n = $("deck-grid").childElementCount;
+  var host = $("deck-count");
+  host.textContent = "";
+  host.appendChild(document.createTextNode("顯示 "));
+  var b = document.createElement("b");
+  b.textContent = n;
+  host.appendChild(b);
+  host.appendChild(document.createTextNode(" / " + CASES.length + " 張"));
+  $("deck-empty").hidden = n > 0;
+}
+
+function setDeckMode(m){
+  deckState.mode = m;
+  $("deck-mode-grid").setAttribute("aria-pressed", m === "grid" ? "true" : "false");
+  $("deck-mode-cards").setAttribute("aria-pressed", m === "cards" ? "true" : "false");
+  renderDeck();
+}
+
+function renderDeck(){
+  var grid = $("deck-grid");
+  buildFilters();
+  grid.textContent = "";
+  grid.className = "deck" + (deckState.mode === "grid" ? " grid-mode" : "");
+  var list = deckFiltered();
+  list.forEach(function(entry){
+    var c = entry.c, i = entry.i;
+    var card = document.createElement("article");
+    card.className = "deck-card";
+    var pic = document.createElement("div");
+    pic.className = "pic";
+    var img = document.createElement("img");
+    img.src = PHOTOS[c.key] || "";
+    img.alt = c.name + " 實景";
+    if (noteOf(c)) img.addEventListener("click", function(){ openNote(c); });
+    pic.appendChild(img);
+    var body = document.createElement("div");
+    body.className = "body";
+    var no = document.createElement("p");
+    no.className = "no";
+    no.textContent = "NO. " + pad2(i + 1);
+    var h = document.createElement("h3");
+    h.textContent = c.name;
+    var where = document.createElement("p");
+    where.className = "where";
+    where.textContent = c.en + " · " + c.place;
+    var ul = document.createElement("ul");
+    c.features.forEach(function(f){
+      var li = document.createElement("li");
+      var t = document.createElement("span");
+      t.textContent = f;
+      li.appendChild(t);
+      ul.appendChild(li);
+    });
+    var trap = document.createElement("p");
+    trap.className = "trap";
+    var lab = document.createElement("span");
+    lab.textContent = "易混淆 ";
+    var tx = document.createElement("span");
+    tx.style.color = "inherit";
+    tx.textContent = c.trap;
+    trap.appendChild(lab); trap.appendChild(tx);
+
+    var fact = document.createElement("p");
+    fact.className = "fact";
+    var flab = document.createElement("span");
+    flab.textContent = "冷知識 ";
+    var ftx = document.createElement("span");
+    ftx.style.color = "inherit";
+    ftx.textContent = c.fact;
+    fact.appendChild(flab); fact.appendChild(ftx);
+
+    body.appendChild(no); body.appendChild(h); body.appendChild(where);
+    body.appendChild(ul);
+    var meta = metaOf(c);
+    if (meta.t || meta.d){
+      var tags = document.createElement("p");
+      tags.className = "tags";
+      [meta.t, meta.d].forEach(function(v){
+        if (!v) return;
+        var s = document.createElement("span");
+        s.textContent = v;
+        tags.appendChild(s);
+      });
+      body.appendChild(tags);
+    }
+    var ytv = ytBlockEl(c);
+    if (ytv) body.appendChild(ytv);
+    body.appendChild(trap); body.appendChild(fact);
+    var more = document.createElement("p");
+    more.className = "deck-more";
+    more.textContent = "點圖看筆記 →";
+    body.appendChild(more);
+    card.appendChild(pic); card.appendChild(body);
+    grid.appendChild(card);
+  });
+  paintDeckCount();
+  paintFilterBtn();
+}
+
+$("deck-q").addEventListener("input", function(){
+  deckState.q = this.value;
+  renderDeck();
+});
+$("deck-reset").addEventListener("click", function(){
+  deckState.q = ""; deckState.r = ""; deckState.t = ""; deckState.d = "";
+  $("deck-q").value = "";
+  $("deck-filters").textContent = "";
+  buildFilters();
+  renderDeck();
+});
+$("deck-mode-grid").addEventListener("click", function(){ setDeckMode("grid"); });
+$("deck-mode-cards").addEventListener("click", function(){ setDeckMode("cards"); });
+
+/* 授權清單連結：只有目录包（build.py --assets）才有 licenses.html */
+if (window.LIC_URL){
+  var licRow = $("lic-row");
+  if (licRow){ licRow.hidden = false; $("lic-link").href = window.LIC_URL; }
+}
+
+/* 篩選彈出 */
+$("deck-filter-btn").addEventListener("click", function(ev){
+  ev.stopPropagation();
+  var pop = $("deck-pop");
+  var willOpen = pop.hidden;
+  pop.hidden = !willOpen;
+  this.setAttribute("aria-expanded", willOpen ? "true" : "false");
+});
+document.addEventListener("click", function(ev){
+  var pop = $("deck-pop");
+  if (!pop || pop.hidden) return;
+  if (pop.contains(ev.target) || ev.target === $("deck-filter-btn")) return;
+  closePop();
+});
+document.addEventListener("keydown", function(ev){
+  if (ev.key === "Escape") closePop();
+});
+
+/* 讓卡冊工具列貼在頂欄下方：頂欄高度隨視窗換行會變，用實測值校準 */
+function syncTopbarVar(){
+  var tb = document.querySelector(".topbar");
+  if (tb) document.documentElement.style.setProperty("--topbar-h", tb.offsetHeight + "px");
+}
+syncTopbarVar();
+window.addEventListener("resize", syncTopbarVar);
+window.addEventListener("load", syncTopbarVar);
+
+/* ---------- 導覽 ---------- */
+$("nav-deck").addEventListener("click", function(){ renderDeck(); showView("deck"); });
+$("nav-home").addEventListener("click", function(){ stopTimer(); showView("cover"); });
+$("btn-print").addEventListener("click", function(){ window.print(); });
+$("btn-hint").addEventListener("click", function(){
+  var c = currentCase();
+  var slot = $("hint-slot");
+  if (slot.hidden){
+    $("hint-text").textContent = "提示：這張片子拍的是 " + c.region + " 的地標。";
+    slot.hidden = false;
+    $("btn-hint").textContent = "收起提示";
+  } else {
+    slot.hidden = true;
+    $("btn-hint").textContent = "看提示";
+  }
+});
+
+/* ---------- 鍵盤 ---------- */
+document.addEventListener("keydown", function(e){
+  if (e.key === "Escape" && !veil.hidden){ closeNote(); return; }
+  if ($("view-quiz").hidden) return;
+  if (S.phase === "photo" && (e.key === "Enter" || e.key === " ")){
+    e.preventDefault(); revealOptions(); return;
+  }
+  if (S.phase === "options"){
+    var n = parseInt(e.key, 10);
+    if (n >= 1 && n <= 4){ answer(n - 1); }
+  }
+  if (S.phase === "card" && e.key === "Enter"){ nextCase(); }
+});
+
+refreshReview();
+
+})();
+</script>
+</body>
+</html>

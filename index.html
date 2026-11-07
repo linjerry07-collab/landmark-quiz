@@ -127,6 +127,8 @@ ul{padding:0;list-style:none}
 .btn.stamp:hover{background:var(--seal);color:#f4e9d4}
 
 .cover-note{margin-top:16px;font-size:12.5px;color:var(--mute)}
+#cover-progress{margin-top:14px;font-size:12.5px;letter-spacing:.04em;color:#b9ae9b}
+#cover-progress b{color:var(--brass);font-weight:600}
 
 /* ===== 答題 ===== */
 .quiz-head{
@@ -541,8 +543,11 @@ ul{padding:0;list-style:none}
         </div>
 
         <button class="btn" id="btn-start" type="button">開始鑑定　125 張</button>
-        <button class="review" id="btn-review" type="button" hidden>先練做錯過的　<b>0</b> 張</button>
-        <p class="cover-note">照片皆為實景；125 題每局重新隨機排列，<b>做錯的下一局優先再出</b>。答完點照片可翻對應的筆記。</p>
+        <button class="review" id="btn-start-all" type="button" hidden>一次做全部</button>
+        <button class="review" id="btn-review" type="button" hidden>今日複習　<b>0</b> 張（已到期）</button>
+        <p class="cover-note" id="cover-progress"></p>
+        <p class="cover-note">照片皆為實景；125 題按<b>遺忘曲線</b>排程出題——答對升一級、答錯退一級，到期才再出現（首次答對 30 分 → 12 時 → 1 天 → 3 天 → 7 天 → 15 天 → 30 天 → 60 天）。每局默認 <b>20 題</b>，也可一次做全部。</p>
+        <p class="cover-note">進度只存在<b>這台裝置的瀏覽器</b>裡（不同電腦、不同瀏覽器各自獨立；清除瀏覽資料會一併清掉）。答完點照片可翻對應的筆記。</p>
       </div>
     </div>
   </section>
@@ -827,6 +832,7 @@ var YTTHUMB = window.YT_THUMB || {};
 
 var STORE = "dzj_record_v1";
 var S = {mode:"timed", order:[], idx:0, score:0, phase:"photo", opts:[], sel:-1, log:[], timer:null, left:0, startedAt:0};
+var SESSION_CAP = 20;   /* 每局默认题数；0 或负值 = 不限 */
 
 var $ = function(id){ return document.getElementById(id); };
 function showView(name){
@@ -862,7 +868,13 @@ Array.prototype.forEach.call(document.querySelectorAll(".mode"), function(b){
   });
 });
 
-/* ---------- 錯題紀錄（存本機，跨局累積） ---------- */
+/* ---------- 學習記錄＋遺忘曲線排程（存本機，跨局累積） ---------- */
+var MIN = 60000;
+/* 間隔階梯（分鐘）：首次答對只排 30 分，連對兩次才進 12 時；
+   之後 1 天 → 3 → 7 → 15 → 30 → 60 天。答對升一級、答錯退一級。 */
+var LADDER = [30, 30, 720, 1440, 4320, 10080, 21600, 43200, 86400];
+var MAX_LV = LADDER.length - 1;
+
 function loadRec(){
   try { return JSON.parse(localStorage.getItem(STORE) || "{}") || {}; } catch(e){ return {}; }
 }
@@ -871,48 +883,101 @@ function saveRec(r){
 }
 var REC = loadRec();
 
-/* 打錯一次就進優先隊列；連對兩次才移出（代表真的記住了） */
+function nowMs(){ return Date.now(); }
+function intervalOf(lv){ return LADDER[Math.max(0, Math.min(MAX_LV, lv))] * MIN; }
+/* 旧记录（只有 w/c）自动升级成 lv=0、立即到期 */
+function recOf(key){
+  var r = REC[key];
+  if (!r) return null;
+  if (typeof r.lv !== "number") r.lv = 0;
+  if (typeof r.due !== "number") r.due = 0;
+  return r;
+}
+
 function markAnswer(key, ok){
-  var r = REC[key] || {w:0, c:0};
+  var r = REC[key] || {w:0, c:0, lv:0, due:0, n:0};
+  var lv = (typeof r.lv === "number" ? r.lv : 0);
   if (ok){
     r.c = (r.c || 0) + 1;
-    if (r.c >= 2) r.w = 0;
+    lv = Math.min(MAX_LV, lv + 1);
+    r.lv = lv;
+    r.due = nowMs() + intervalOf(lv);
   } else {
     r.w = (r.w || 0) + 1;
     r.c = 0;
+    lv = Math.max(0, lv - 1);
+    r.lv = lv;
+    r.due = nowMs() + 10 * MIN;      /* 10 分钟后重来 */
   }
+  r.n = (r.n || 0) + 1;
+  r.last = nowMs();
   REC[key] = r;
   saveRec(REC);
   refreshReview();
 }
-function dueCount(){
-  var n = 0;
-  CASES.forEach(function(c){ if (REC[c.key] && REC[c.key].w > 0) n++; });
-  return n;
-}
-function refreshReview(){
-  var b = $("btn-review");
-  if (!b) return;
-  var n = dueCount();
-  b.hidden = n === 0;
-  b.innerHTML = "先練做錯過的　<b>" + n + "</b> 張";
+
+/* 已到期的複習題（舊答錯記錄也算） */
+function reviewKeys(){
+  var t = nowMs(), out = [];
+  CASES.forEach(function(c){
+    var r = recOf(c.key);
+    if (r && r.due <= t) out.push(c.key);
+  });
+  return out;
 }
 
-/* ---------- 出題順序：隨機，做錯過的排在最前 ---------- */
+function srsStats(){
+  var t = nowMs(), mastered = 0, review = 0, learning = 0, unseen = 0;
+  CASES.forEach(function(c){
+    var r = recOf(c.key);
+    if (!r){ unseen++; return; }
+    if (r.due <= t) review++;
+    if (r.lv >= MAX_LV) mastered++; else learning++;
+  });
+  return {mastered:mastered, review:review, learning:learning, unseen:unseen, total:CASES.length};
+}
+
+function refreshReview(){
+  var st = srsStats();
+  var b = $("btn-review");
+  if (b){
+    b.hidden = st.review === 0;
+    b.innerHTML = "今日複習　<b>" + st.review + "</b> 張（已到期）";
+  }
+  var main = $("btn-start"), all = $("btn-start-all");
+  if (main){
+    main.innerHTML = "開始鑑定　" + Math.min(SESSION_CAP, CASES.length) + " 張";
+  }
+  if (all){
+    all.hidden = CASES.length <= SESSION_CAP;
+    all.textContent = "一次做全部　" + CASES.length + " 張";
+  }
+  var bar = $("cover-progress");
+  if (bar){
+    bar.innerHTML = "已掌握 <b>" + st.mastered + "</b> · 待複習 <b>" + st.review +
+      "</b> · 學習中 " + st.learning + " · 未學 " + st.unseen +
+      "（共 " + st.total + " 題）";
+  }
+}
+
+/* ---------- 出題順序：到期複習 → 未學 → 未到期（按到期時間排） ---------- */
 function buildOrder(onlyKeys){
-  var i, idxOf = {};
+  var idxOf = {};
   CASES.forEach(function(c, k){ idxOf[c.key] = k; });
   if (onlyKeys && onlyKeys.length){
     var picked = [];
     onlyKeys.forEach(function(k){ if (idxOf[k] !== undefined) picked.push(idxOf[k]); });
     return shuffled(picked);
   }
-  var due = [], rest = [];
+  var t = nowMs(), due = [], fresh = [], later = [];
   CASES.forEach(function(c, k){
-    var r = REC[c.key];
-    (r && r.w > 0 ? due : rest).push(k);
+    var r = recOf(c.key);
+    if (!r) fresh.push(k);
+    else if (r.due <= t) due.push(k);
+    else later.push({k:k, due:r.due});
   });
-  return shuffled(due).concat(shuffled(rest));
+  later.sort(function(a, b){ return a.due - b.due; });
+  return shuffled(due).concat(shuffled(fresh), later.map(function(x){ return x.k; }));
 }
 
 /* ---------- 問答 ---------- */
@@ -920,17 +985,20 @@ document.querySelectorAll("[data-cover]").forEach(function(img){
   img.src = PHOTOS[img.getAttribute("data-cover")] || "";
 });
 
-$("btn-start").addEventListener("click", function(){ startGame(pendingMode, null); });
+$("btn-start").addEventListener("click", function(){ startGame(pendingMode, null, SESSION_CAP); });
+$("btn-start-all").addEventListener("click", function(){ startGame(pendingMode, null, 0); });
 $("btn-review").addEventListener("click", function(){
-  var keys = CASES.filter(function(c){ return REC[c.key] && REC[c.key].w > 0; })
-                  .map(function(c){ return c.key; });
+  var keys = reviewKeys();
   if (keys.length) startGame("practice", keys);
 });
 
 /* ---------- 遊戲 ---------- */
-function startGame(mode, onlyKeys){
+function startGame(mode, onlyKeys, limit){
   S.mode = mode;
-  S.order = buildOrder(onlyKeys);
+  S.limit = (limit === undefined ? SESSION_CAP : limit);
+  var order = buildOrder(onlyKeys);
+  if (S.limit > 0 && order.length > S.limit) order = order.slice(0, S.limit);
+  S.order = order;
   S.idx = 0; S.score = 0; S.log = []; S.phase = "photo"; S.sel = -1;
   S.startedAt = Date.now();
   stopTimer();
@@ -1510,7 +1578,7 @@ function finish(){
   acts.className = "result-actions";
   var a1 = document.createElement("button");
   a1.type = "button"; a1.className = "btn"; a1.textContent = "再來一輪";
-  a1.addEventListener("click", function(){ startGame(S.mode, null); });
+  a1.addEventListener("click", function(){ startGame(S.mode, null, SESSION_CAP); });
   var wrongIdx = misses.map(function(r){ return CASES.findIndex(function(c){ return c.key === r.key; }); });
   var a2 = document.createElement("button");
   a2.type = "button"; a2.className = "btn ghost"; a2.textContent = "只練錯的 " + wrongIdx.length + " 張";
@@ -1520,12 +1588,12 @@ function finish(){
   a3.type = "button"; a3.className = "btn ghost"; a3.textContent = "打開卡冊";
   a3.addEventListener("click", function(){ renderDeck(); showView("deck"); });
   acts.appendChild(a1); acts.appendChild(a2); acts.appendChild(a3);
-  if (dueCount() > 0){
+  if (srsStats().review > 0 || Object.keys(REC).length > 0){
     var a4 = document.createElement("button");
     a4.type = "button"; a4.className = "btn ghost";
-    a4.textContent = "清空錯題紀錄";
+    a4.textContent = "清空學習記錄";
     a4.addEventListener("click", function(){
-      if (!window.confirm("清空本機記錄的 " + dueCount() + " 張錯題？清空後下一局不再優先出它們。")) return;
+      if (!window.confirm("清空本機的 " + Object.keys(REC).length + " 條學習記錄？清空後所有題目都會回到「未學」，複習排程也會重來。")) return;
       REC = {};
       saveRec(REC);
       refreshReview();

@@ -197,11 +197,12 @@ ul{padding:0;list-style:none}
   .qnav-mode{margin-left:0;width:100%;text-align:right}
 }
 
-.panel{min-width:0}
-.prompt{font-size:15px;color:#cfc3ae;margin-bottom:16px;letter-spacing:.04em}
+.panel{min-width:0;width:100%}
+.stage-extra{max-width:780px;margin:14px auto 0;width:100%}
+.prompt{font-size:15px;color:#cfc3ae;margin-bottom:14px;letter-spacing:.04em}
 .prompt strong{color:var(--paper);font-weight:500}
 
-.reveal-bar{display:flex;flex-direction:column;gap:14px;align-items:flex-start;padding:22px 18px;border:1px dashed var(--line)}
+.reveal-bar{display:flex;flex-direction:column;gap:14px;align-items:flex-start;padding:22px 18px;border:1px dashed var(--line);max-width:780px;margin:0 auto;width:100%}
 .reveal-bar p{font-size:13.5px;color:var(--mute);max-width:30em;line-height:1.7}
 .reveal-bar .btn{padding:12px 22px;font-size:15px}
 
@@ -491,9 +492,16 @@ ul{padding:0;list-style:none}
   .cover{grid-template-columns:1.05fr .95fr;gap:48px;align-items:center;min-height:calc(100vh - 190px)}
   .cover-art{order:2}
   .cover-copy{order:1}
-  .quiz-body{grid-template-columns:minmax(0,1.12fr) minmax(0,.88fr);gap:40px}
+  /* 固定两栏：左栏＝图＋选项，右栏＝鑑定卡（作答前留空） */
+  .quiz-body{grid-template-columns:minmax(0,1.16fr) minmax(0,.84fr);gap:32px;align-items:start}
   .stage{position:sticky;top:86px;align-self:start}
-  .stage .slide{max-width:none}
+  .stage .slide{max-width:none;padding:10px 10px 20px}
+  .stage .slide .frame{max-height:calc(100vh - 390px)}
+  .stage .slide .frame img{height:100%}
+  .stage-extra{max-width:none;margin-top:12px}
+  .stage-extra .options{gap:9px}
+  .stage-extra .opt{padding:11px 13px}
+  .stage-extra .prompt{margin-bottom:10px}
   .deck{grid-template-columns:repeat(3,1fr)}
   .result .stats{grid-template-columns:repeat(4,1fr)}
 }
@@ -617,6 +625,8 @@ ul{padding:0;list-style:none}
           <button class="qbtn ghost" id="btn-note" type="button">看這張筆記</button>
           <span class="qnav-mode" id="q-mode-label">計時賽</span>
         </div>
+        <!-- 選項與倒數計時放在圖下方（左欄）；鑑定卡放右欄 -->
+        <div class="stage-extra" id="stage-extra"></div>
       </div>
       <div class="panel" id="panel"></div>
     </div>
@@ -1366,52 +1376,18 @@ function renderDots(){
   }
 }
 
-function renderPanel(){
+function optionsBlock(answered){
   var c = currentCase();
-  var panel = $("panel");
-  panel.innerHTML = "";
-
-  if (S.phase === "photo"){
-    var box = document.createElement("div");
-    box.className = "reveal-bar";
-    var p = document.createElement("p");
-    p.textContent = "先只看照片。判斷好之後，再讓四個候選地名出現。";
-    var btn = document.createElement("button");
-    btn.className = "btn";
-    btn.type = "button";
-    btn.textContent = "揭開選項";
-    btn.addEventListener("click", revealOptions);
-    box.appendChild(p); box.appendChild(btn);
-    panel.appendChild(box);
-    return;
-  }
-
-  /* 提示與計時 */
-  if (S.phase === "options" && S.mode === "timed"){
-    var tw = document.createElement("div");
-    tw.className = "timerwrap";
-    var bar = document.createElement("span");
-    bar.id = "timer-bar";
-    tw.appendChild(bar);
-    panel.appendChild(tw);
-    var tn = document.createElement("div");
-    tn.className = "timer-num";
-    tn.id = "timer-num";
-    tn.textContent = "剩餘 " + S.left.toFixed(1) + " 秒";
-    panel.appendChild(tn);
-  }
-
+  var frag = document.createDocumentFragment();
   var prompt = document.createElement("p");
   prompt.className = "prompt";
   prompt.innerHTML = (S.qmode === "type")
     ? "這張照片是哪一種形制？　<strong>選一個</strong>"
     : "這是哪一處地標？　<strong>選一個</strong>";
-  panel.appendChild(prompt);
+  frag.appendChild(prompt);
 
   var grid = document.createElement("div");
   grid.className = "options";
-  var answered = S.phase === "card";
-
   S.opts.forEach(function(name, i){
     var b = document.createElement("button");
     b.type = "button";
@@ -1434,8 +1410,49 @@ function renderPanel(){
     }
     grid.appendChild(b);
   });
-  panel.appendChild(grid);
+  frag.appendChild(grid);
+  return frag;
+}
 
+function renderPanel(){
+  var c = currentCase();
+  var panel = $("panel");
+  var extra = $("stage-extra");
+  panel.innerHTML = "";
+  if (extra) extra.innerHTML = "";
+
+  if (S.phase === "photo"){
+    var box = document.createElement("div");
+    box.className = "reveal-bar";
+    var p = document.createElement("p");
+    p.textContent = "先只看照片。判斷好之後，再讓四個候選地名出現。";
+    var btn = document.createElement("button");
+    btn.className = "btn";
+    btn.type = "button";
+    btn.textContent = "揭開選項";
+    btn.addEventListener("click", revealOptions);
+    box.appendChild(p); box.appendChild(btn);
+    (extra || panel).appendChild(box);
+    return;
+  }
+
+  /* 計時條：選項階段顯示在圖下方（左欄） */
+  if (S.phase === "options" && S.mode === "timed"){
+    var tw = document.createElement("div");
+    tw.className = "timerwrap";
+    var bar = document.createElement("span");
+    bar.id = "timer-bar";
+    tw.appendChild(bar);
+    (extra || panel).appendChild(tw);
+    var tn = document.createElement("div");
+    tn.className = "timer-num";
+    tn.id = "timer-num";
+    tn.textContent = "剩餘 " + S.left.toFixed(1) + " 秒";
+    (extra || panel).appendChild(tn);
+  }
+
+  /* 選項永遠在圖下方；鑑定卡（作答後）進右欄 */
+  (extra || panel).appendChild(optionsBlock(S.phase === "card"));
   if (S.phase === "card") panel.appendChild(buildCard(c));
 }
 
